@@ -54,6 +54,15 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
   C 4,3%, G 911 °C, P 0,025%, A 1536 °C), az eljárások hőmérsékletei az A/01 kidolgozásaiból valók.
   Színei a tételtár CSS-változói (`--surface`, `--ink`, `--acc` …), így követi a tételtár világos/sötét témáját.
 
+## Tételtár tartalmi javításai
+- A Gépész záróvizsga tételtár (`docs/QtEMzHsA3gHsg8AHwR6rGC/`) adatai a `data-a.js` / `data-b.js` fájlokban vannak
+  (`window.AV_B=[{id,g,n,t,sub,q,one,sum,body,…}]`; csak a `"` van escape-elve, nyers UTF-8).
+- Tartalmi javítást a claude.ai-os eredetin **és** a repóbeli másolaton is el kell végezni (Artifact publish `url` +
+  `files: {"data-b.js": …}`), különben a következő szinkron felülírja. Eszközök: `tools\tetel-dump.ps1 -Id B3 -Field body`
+  (kiírja a mező HTML-jét), `tools\tetel-patch.ps1 -Patch <fájl> [-DryRun]` (egyedi találatú keresés–csere, JSON-ellenőrzéssel).
+- 2026-09-23: B/01–B/08 átnézve Dudás Illés *Gyártási folyamatok és rendszerek* jegyzete alapján (claude.ai Version 6).
+- A gyökérben lévő `zarovizsga-teteltar.html` a felhasználó saját fájlja, nem része az appnak — ne commitold.
+
 ## Kiadás
 - Verzió: `APP_VERSION` a `js/app.js`-ben és `CACHE` a `sw.js`-ben — együtt emeld.
 - Ikonok/indítóképek: PowerShell + System.Drawing szkripttel készültek; a könyv-ikon SVG változata `icons/favicon.svg`.
