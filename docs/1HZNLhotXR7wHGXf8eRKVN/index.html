@@ -1,0 +1,1235 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>Lay Land</title>
+<style>
+:root{
+  --void:#0B0D12; --sea:#0E131C; --panel:#141A24; --panel2:#1B2230;
+  --line:#2A3341; --ember:#E8873B; --hot:#F5C264; --parch:#E6DCC6;
+  --muted:#8D95A4; --moss:#7FA063; --blood:#C05650;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:var(--void);color:var(--parch);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:14px;line-height:1.4;overflow:hidden;
+  user-select:none;-webkit-user-select:none;
+}
+#app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;position:relative}
+
+/* ---------- fejlec ---------- */
+#head{display:flex;align-items:stretch;gap:1px;background:var(--line);border-bottom:1px solid var(--line);flex:none}
+.hcell{background:var(--panel);padding:6px 8px;flex:1;min-width:0}
+.hlab{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.hval{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.hsub{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hsub.bad{color:var(--blood)}
+#hTide .hval{font-size:13px;color:var(--hot)}
+#hTide.near .hval{color:var(--blood)}
+
+/* ---------- olvasosav ---------- */
+#read{flex:none;background:var(--void);padding:5px 8px;min-height:34px;display:flex;align-items:center;
+  border-bottom:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+#read b{color:var(--parch);font-weight:600}
+#read.warn{color:var(--hot)}
+
+/* ---------- terkep ---------- */
+#mapWrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;
+  background:var(--sea);overflow:hidden;min-height:0}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;display:block}
+
+/* lebego elonezet */
+#pill{position:absolute;left:6px;right:6px;background:rgba(11,13,18,.94);border:1px solid var(--line);
+  padding:6px 8px;display:none;pointer-events:none;z-index:5}
+#pill.on{display:block}
+#pill.dockTop{top:6px} #pill.dockBot{bottom:6px}
+#pillHead{font-size:10px;color:var(--muted);letter-spacing:.06em;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pillRow{display:flex;gap:6px}
+.pc{flex:1;text-align:center}
+.pcl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pcv{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.pc.per .pcv{color:var(--blood)} .pc.lit .pcv{color:var(--ember)} .pc.yld .pcv{color:var(--moss)}
+.pc.per.good .pcv{color:var(--moss)}
+#pillWarn{font-size:10.5px;color:var(--blood);margin-top:3px;min-height:13px}
+
+/* ---------- merleg ---------- */
+#bal{flex:none;display:flex;gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.bchip{background:var(--panel);flex:1;padding:4px 2px;text-align:center;min-width:0}
+.bl{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bv{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ---------- fulek ---------- */
+#tabs{flex:none;display:flex;gap:1px;background:var(--line)}
+.tab{flex:1;background:var(--panel);border:none;color:var(--muted);padding:8px 2px;
+  font-size:11px;font-weight:600;letter-spacing:.06em;font-family:inherit;cursor:pointer}
+.tab.on{background:var(--panel2);color:var(--hot);box-shadow:inset 0 -2px 0 var(--ember)}
+
+/* ---------- also sav ---------- */
+#bottom{flex:none;background:var(--panel);border-top:1px solid var(--line);padding:7px 8px 9px;
+  min-height:118px;display:flex;flex-direction:column;gap:7px}
+#slots{display:flex;gap:7px;align-items:center}
+.slot{width:60px;height:60px;background:var(--panel2);border:1px solid var(--line);
+  position:relative;flex:none;display:flex;align-items:center;justify-content:center}
+.slot.active{border-color:var(--ember)}
+.slot.small{width:42px;height:42px;opacity:.6}
+.slot canvas{width:100%;height:100%;object-fit:contain}
+.slotCost{position:absolute;bottom:1px;right:2px;font-size:9px;color:var(--hot);
+  font-variant-numeric:tabular-nums;background:rgba(11,13,18,.8);padding:0 2px}
+#slotHint{font-size:10px;color:var(--muted);flex:1;line-height:1.3}
+
+#builds{display:flex;gap:6px}
+.bbtn{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--parch);
+  padding:6px 3px;font-size:10.5px;font-family:inherit;cursor:pointer;line-height:1.25}
+.bbtn .bn{font-weight:700;display:block;font-size:11px}
+.bbtn .bc{color:var(--muted);font-size:9.5px;font-variant-numeric:tabular-nums}
+.bbtn.on{border-color:var(--ember);background:#241d16;color:var(--hot)}
+.bbtn:disabled{opacity:.35;cursor:default}
+
+#duskRow{display:flex;gap:7px;align-items:stretch}
+#dusk{flex:1;background:#2a1f14;border:1px solid var(--ember);color:var(--hot);
+  padding:11px 8px;font-size:13px;font-weight:700;letter-spacing:.08em;
+  font-family:inherit;cursor:pointer}
+#dusk:active{background:#3a2a18}
+#undo{width:52px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+  font-size:16px;font-family:inherit;cursor:pointer}
+#undo:disabled{opacity:.3}
+
+/* nep lista */
+#people{display:none;flex-direction:column;gap:4px;max-height:150px;overflow-y:auto}
+#people.on{display:flex}
+.prow{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);padding:4px 6px}
+.pname{flex:1;font-size:11.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pname small{color:var(--muted);font-size:10px}
+.pmode{display:flex;gap:0}
+.pm{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+  font-size:9.5px;padding:3px 5px;font-family:inherit;cursor:pointer}
+.pm.on{background:var(--ember);color:#12100c;border-color:var(--ember);font-weight:700}
+
+/* ---------- modal ---------- */
+#modal{position:absolute;inset:0;background:rgba(8,9,13,.93);z-index:20;
+  display:none;flex-direction:column;padding:22px 18px;overflow-y:auto}
+#modal.on{display:flex}
+#modal h2{font-size:20px;margin:0 0 8px;color:var(--hot);font-weight:800}
+#modal p{margin:0 0 10px;font-size:13px;color:var(--parch)}
+#modal .dim{color:var(--muted);font-size:12px}
+#modal ul{margin:0 0 12px;padding-left:16px;font-size:12.5px;color:var(--parch)}
+#modal li{margin-bottom:5px}
+#modal li::marker{color:var(--ember)}
+#modal button{background:#2a1f14;border:1px solid var(--ember);color:var(--hot);
+  padding:11px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:6px}
+#chron{font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+#chron b{color:var(--parch)}
+.statRow{display:flex;gap:10px;margin-bottom:12px}
+.statBox{flex:1;background:var(--panel);border:1px solid var(--line);padding:8px;text-align:center}
+.statBox .sv{font-size:22px;font-weight:800;color:var(--hot);font-variant-numeric:tabular-nums}
+.statBox .sl{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+</style>
+
+<div id="app">
+  <div id="head">
+    <div class="hcell" style="flex:0 0 62px">
+      <div class="hlab">Nap</div><div class="hval" id="hDay">1</div>
+    </div>
+    <div class="hcell">
+      <div class="hlab">Parázs</div>
+      <div class="hval" id="hEmber">0</div>
+      <div class="hsub" id="hNight">éjjel −0</div>
+    </div>
+    <div class="hcell" id="hTide" style="flex:0 0 108px">
+      <div class="hlab">Fekete Dagály</div>
+      <div class="hval" id="hTideV">—</div>
+      <div class="hsub" id="hTideS"></div>
+    </div>
+  </div>
+
+  <div id="read">A Máglya ég. Húzz le egy csempét a szigetre.</div>
+
+  <div id="mapWrap">
+    <canvas id="map"></canvas>
+    <div id="pill" class="dockTop">
+      <div id="pillHead"></div>
+      <div id="pillRow">
+        <div class="pc per"><div class="pcl">Perem</div><div class="pcv" id="pvPer">0</div></div>
+        <div class="pc lit"><div class="pcl">Fény</div><div class="pcv" id="pvLit">0</div></div>
+        <div class="pc yld"><div class="pcl">Hozam</div><div class="pcv" id="pvYld">0</div></div>
+      </div>
+      <div id="pillWarn"></div>
+    </div>
+  </div>
+
+  <div id="bal">
+    <div class="bchip"><div class="bl">Lerakva</div><div class="bv" id="bPlaced">0/60</div></div>
+    <div class="bchip"><div class="bl">Világos</div><div class="bv" id="bLit">0</div></div>
+    <div class="bchip"><div class="bl">Perem</div><div class="bv" id="bPer">0</div></div>
+    <div class="bchip"><div class="bl">Fa · Étel</div><div class="bv" id="bRes">0·0</div></div>
+  </div>
+
+  <div id="tabs">
+    <button class="tab on" data-mode="fold">FÖLD</button>
+    <button class="tab" data-mode="epit">ÉPÍT</button>
+    <button class="tab" data-mode="feny">FÉNY</button>
+    <button class="tab" data-mode="nep">NÉP</button>
+  </div>
+
+  <div id="bottom">
+    <div id="slots">
+      <div class="slot active" id="slot0"><canvas width="40" height="40"></canvas><div class="slotCost" id="cost0"></div></div>
+      <div class="slot small" id="slot1"><canvas width="40" height="40"></canvas></div>
+      <div class="slot small" id="slot2"><canvas width="40" height="40"></canvas></div>
+      <div id="slotHint">Húzd a nagy csempét a szigetre. Koppints rá: forog.</div>
+    </div>
+
+    <div id="builds">
+      <button class="bbtn" data-b="KUNYHO"><span class="bn">Kunyhó</span><span class="bc">6 fa · +2 lakó</span></button>
+      <button class="bbtn" data-b="VETES"><span class="bn">Vetés</span><span class="bc">4 fa · étel</span></button>
+      <button class="bbtn" data-b="FAVAGO"><span class="bn">Favágó</span><span class="bc">4 fa · fa</span></button>
+      <button class="bbtn" id="maglyaBtn"><span class="bn">Máglya</span><span class="bc" id="maglyaCost">—</span></button>
+    </div>
+
+    <div id="people"></div>
+
+    <div id="duskRow">
+      <button id="dusk">ALKONYAT</button>
+      <button id="undo" title="Visszavonás">↶</button>
+    </div>
+  </div>
+
+  <div id="modal"></div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   LAY LAND — vertical slice
+   8x8 racs, 2x2 Maglya kozepen, harom gyuru (12/20/28) = 60 cella.
+   Kor-alapu, vegtelen. A jatek addig tart, amig ki nem alszik a Maglya.
+   ============================================================ */
+
+/* ---------- geometria ---------- */
+const N = 8, TW = 20, TH = 10, THICK = 5;   // csempe alap-pixelben
+const PAD = 6;
+const BW = N * TW + PAD * 2;                 // 172
+const BH = (N - 1) * TH + TH + THICK + PAD * 2; // 96
+const ORIGIN_X = BW / 2, ORIGIN_Y = PAD + 2;
+
+const cx = (c, r) => ORIGIN_X + (c - r) * (TW / 2);
+const cy = (c, r) => ORIGIN_Y + (c + r) * (TH / 2);
+
+/* Chebyshev-gyuru a 2x2-es Maglyatol: 0 = Maglya, 1/2/3 = 12/20/28 cella */
+function ring(c, r) {
+  const dc = c < 3 ? 3 - c : (c > 4 ? c - 4 : 0);
+  const dr = r < 3 ? 3 - r : (r > 4 ? r - 4 : 0);
+  return Math.max(dc, dr);
+}
+const isMaglya = (c, r) => ring(c, r) === 0;
+const inGrid = (c, r) => c >= 0 && c < N && r >= 0 && r < N;
+
+/* ---------- csempetipusok ----------
+   elek sorrendje: [E(K), S(D), W(NY), N(E)] a racs szerint, forgatas jobbra lepteti */
+const T = {
+  SZANTO:   { nev:"Szántó",      el:["PART","PART","PART","PART"],    term:"etel", top:"#8a7d3a", dark:"#2b2d31", spr:"crop" },
+  RENGETEG: { nev:"Rengeteg",    el:["SZIKLA","PART","SZIKLA","PART"],term:"fa",   top:"#3d6b3f", dark:"#232a28", spr:"tree", keszlet:30 },
+  KOGERINC: { nev:"Kőgerinc",    el:["SZIKLA","SZIKLA","SZIKLA","SZIKLA"], term:null, top:"#6b6a63", dark:"#2a2b2e", spr:"rock" },
+  FOLYOAG:  { nev:"Folyóág",     el:["VIZ","PART","VIZ","PART"],      term:null,   top:"#3a6a8a", dark:"#232a33", spr:null },
+  HAMVADT:  { nev:"Hamvadt föld",el:["PART","PART","PART","PART"],    term:null,   top:"#5a4a3e", dark:"#2a2523", spr:null, olcso:true },
+  SIRHALOM: { nev:"Sírhalom",    el:["PART","PART","PART","PART"],    term:"parazs",top:"#5a4560",dark:"#292430", spr:"barrow" },
+  HAMU:     { nev:"Hamu",        el:["PART","PART","PART","PART"],    term:null,   top:"#4a4a48", dark:"#26262a", spr:null, olcso:true },
+};
+
+const EDGE_COL = { PART:"#c9a86a", VIZ:"#4a8fc0", SZIKLA:"#8d8d86" };
+
+/* forgatott elek — a forgatas jobbra lepteti az eltombot */
+function edgesOf(cell) {
+  const base = T[cell.t].el, o = cell.rot & 3, out = [];
+  for (let i = 0; i < 4; i++) out.push(base[((i - o) % 4 + 4) % 4]);
+  return out;
+}
+/* iranyok: 0=K(+c) 1=D(+r) 2=NY(-c) 3=E(-r) */
+const DIRS = [[1,0],[0,1],[-1,0],[0,-1]];
+
+/* ---------- allapot ---------- */
+let S = null;
+
+const NEVEK = ["Bede","Csenge","Hedvig","Márk","Ilka","Bertalan","Vajk","Zsófi","Örs","Anna",
+  "Gellért","Réka","Bodor","Tekla","Zalán","Dorka","Iván","Sára","Ders","Emese",
+  "Kende","Villő","Botond","Hanga","Levente","Gyöngyi","Zsombor","Piroska","Csanád","Rozál"];
+const VONAS = ["éber","makacs","fázós","gyors kezű","babonás","hallgatag","türelmes","sebhelyes"];
+
+/* determinisztikus PRNG — a mentes/visszatoltes reprodukalhato legyen */
+let seed = 1;
+function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+const pick = a => a[Math.floor(rnd() * a.length)];
+
+function ujKeszlet(era) {
+  /* a keszlet sotetedik: egyre tobb Hamvadt / Sirhalom */
+  const mix = era <= 0 ? { SZANTO:7, RENGETEG:7, KOGERINC:4, FOLYOAG:3, HAMVADT:2, SIRHALOM:1 }
+            : era === 1 ? { SZANTO:5, RENGETEG:5, KOGERINC:4, FOLYOAG:2, HAMVADT:4, SIRHALOM:4 }
+            :             { SZANTO:3, RENGETEG:3, KOGERINC:3, FOLYOAG:1, HAMVADT:6, SIRHALOM:8 };
+  const d = [];
+  for (const k in mix) for (let i = 0; i < mix[k]; i++) d.push(k);
+  for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+  return d;
+}
+
+function ujJatek() {
+  seed = 12345;
+  S = {
+    nap: 1, parazs: 14, fa: 16, etel: 10,
+    grid: Array.from({ length: N }, () => Array(N).fill(null)),
+    lakok: [], keszlet: [], slots: [], era: 0, huzasok: 0,
+    maglyaSzint: 1, lang: 5, ehseg: 0,
+    dagalyok: 0, kovDagaly: 10, dagalyIrany: "ÉK",
+    naplo: [], kronika: [], vege: false,
+    hamuVar: 0, elsoVetes: [], sullyesztettMa: false, tettMa: false,
+    undo: null, nevIdx: 0,
+  };
+  /* kezdosziget: Maglya + 8 csempe az 1. gyuruben */
+  const start = [[3,2,"SZANTO"],[4,2,"RENGETEG"],[5,3,"RENGETEG"],[5,4,"KOGERINC"],
+                 [4,5,"SZANTO"],[3,5,"RENGETEG"],[2,4,"SZANTO"],[2,3,"KOGERINC"]];
+  for (const [c, r, t] of start) S.grid[r][c] = ujCella(t, 0, true);
+  for (let i = 0; i < 5; i++) ujLako();
+  /* Jaro motorral indulunk: ket vetes es ket favago, negy lakoval rajtuk.
+     Nulla epulettel a jatekosnak a semmibol kellene bootstrapelnie, mikozben
+     a Maglya mar eszi a fat — az elso tiz kor igy nem dontes, hanem kapaszkodas. */
+  const kezdoEp = [[3,2,"VETES"],[4,5,"VETES"],[4,2,"FAVAGO"],[5,3,"FAVAGO"]];
+  kezdoEp.forEach(([c, r, ep], i) => {
+    S.grid[r][c].ep = ep;
+    if (S.lakok[i]) { S.lakok[i].cell = [c, r]; S.grid[r][c].lako = i; }
+  });
+  S.keszlet = ujKeszlet(0);
+  for (let i = 0; i < 3; i++) S.slots.push(huz());
+  naplo("A Máglya ég. Nyolc csempéd van, és tizennyolc napod az első Dagályig.");
+}
+
+function ujCella(t, rot, lit) {
+  return { t, rot: rot | 0, lit: !!lit, ep: null, lako: null, korom: 0,
+           keszlet: T[t].keszlet || 0, vetesJar: false };
+}
+function ujLako() {
+  if (S.lakok.length >= 12) return null;
+  const nev = NEVEK[S.nevIdx % NEVEK.length]; S.nevIdx++;
+  const l = { nev, vonas: pick(VONAS), mod: "termel", cell: null };
+  S.lakok.push(l); return l;
+}
+function huz() {
+  if (!S.keszlet.length) { S.era++; S.keszlet = ujKeszlet(S.era); }
+  S.huzasok++;
+  if (S.hamuVar > 0 && S.huzasok % 3 === 0) { S.hamuVar--; return { t:"HAMU", rot:0 }; }
+  return { t: S.keszlet.shift(), rot: 0 };
+}
+
+/* ---------- szabalyok ---------- */
+const at = (c, r) => (inGrid(c, r) ? S.grid[r][c] : null);
+const foglalt = (c, r) => isMaglya(c, r) || !!at(c, r);
+
+function lerakhato(c, r) {
+  if (!inGrid(c, r) || foglalt(c, r)) return false;
+  for (const [dc, dr] of DIRS) if (foglalt(c + dc, r + dr)) return true;
+  return false;
+}
+const lerakAr = (c, r, t) => {
+  const g = ring(c, r);
+  return T[t].olcso ? [0, 3, 4, 5][g] : [0, 5, 7, 9][g];
+};
+const fenyDij = (c, r) => ring(c, r);           // 1 / 2 / 3 parazs / ej
+const elsoVetesErtek = g => [0, 7, 10, 13][g];
+
+/* perem: a sziget hatarara eso PART el = ellenseges belepo-lane */
+function peremLanek(grid) {
+  let n = 0;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const cell = grid[r][c]; if (!cell) continue;
+    const e = edgesOf(cell);
+    for (let d = 0; d < 4; d++) {
+      const nc = c + DIRS[d][0], nr = r + DIRS[d][1];
+      const szomszed = isMaglya(nc, nr) || (inGrid(nc, nr) && grid[nr][nc]);
+      if (!szomszed && e[d] === "PART") n++;
+    }
+  }
+  return n;
+}
+
+/* fenylanc: a Maglyatol ortogonalisan osszefuggo, vilagos csempek */
+function fenyLancFrissit() {
+  const lit = S.grid.map(row => row.map(x => x && x.lit));
+  const ok = Array.from({ length: N }, () => Array(N).fill(false));
+  const q = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (isMaglya(c, r)) q.push([c, r]);
+  while (q.length) {
+    const [c, r] = q.pop();
+    for (const [dc, dr] of DIRS) {
+      const nc = c + dc, nr = r + dr;
+      if (!inGrid(nc, nr) || ok[nr][nc]) continue;
+      if (lit[nr] && lit[nr][nc]) { ok[nr][nc] = true; q.push([nc, nr]); }
+    }
+  }
+  let valt = 0;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const cell = S.grid[r][c];
+    if (cell && cell.lit && !ok[r][c]) { cell.lit = false; valt++; }
+  }
+  return valt;
+}
+function gyujthato(c, r) {
+  for (const [dc, dr] of DIRS) {
+    const nc = c + dc, nr = r + dr;
+    if (isMaglya(nc, nr)) return true;
+    const s = at(nc, nr); if (s && s.lit) return true;
+  }
+  return false;
+}
+
+function osszes() {
+  let placed = 0, lit = 0, fenyszamla = 0, hozamFa = 0, hozamEtel = 0, hozamPar = 0, sotet = 0;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const cell = S.grid[r][c]; if (!cell) continue;
+    placed++;
+    if (cell.lit) { lit++; fenyszamla += fenyDij(c, r); } else sotet++;
+    const p = termel(cell, c, r);
+    hozamFa += p.fa; hozamEtel += p.etel; hozamPar += p.parazs;
+  }
+  return { placed, lit, sotet, fenyszamla, hozamFa, hozamEtel, hozamPar,
+           perem: peremLanek(S.grid) };
+}
+
+/* egy csempe termelese: kell fény + lako "termel" modban + (a tipushoz illo epulet) */
+function termel(cell, c, r) {
+  const z = { fa: 0, etel: 0, parazs: 0 };
+  if (!cell.lit || cell.korom >= 3) return z;
+  const lako = cell.lako !== null ? S.lakok[cell.lako] : null;
+  if (!lako || lako.mod !== "termel") return z;
+  const g = ring(c, r);
+  const t = T[cell.t];
+  /* alap + gyuru: a hozam kifele no, de a belso gyuru is eltart egy embert.
+     (Tiszta gyuru-aranyos hozammal az 1. gyuru netto nulla: a rajta dolgozo
+      lakó pont annyit eszik, amennyit termel — a gazdasag el sem indul.) */
+  if (t.term === "fa" && cell.ep === "FAVAGO" && cell.keszlet > 0) z.fa = 2 + g;
+  else if (t.term === "etel" && cell.ep === "VETES") z.etel = 2 + g;
+  else if (t.term === "parazs") z.parazs = 2;
+  return z;
+}
+
+/* Kanon: alap 8/14/20/26/32, 1 Fa = 3 Parazs, fa-plafon 4/6/8/10/12.
+   Maximalis bevetel szintenkent 20/32/44/56/68 — a teljes tabla fenye 136. */
+const maglyaAlap = () => [0, 8, 14, 20, 26, 32][S.maglyaSzint];
+const faPlafon  = () => [0, 4, 6, 8, 10, 12][S.maglyaSzint];
+const MAGLYA_AR = [0, 0, 20, 40, 70, 110];
+const maglyaAra = () => (S.maglyaSzint >= 5 ? null : MAGLYA_AR[S.maglyaSzint + 1]);
+
+function maglyaFejleszt() {
+  const ar = maglyaAra();
+  if (ar === null) { olvas("A Máglya a legmagasabb szinten ég."); return; }
+  if (S.fa < ar) { olvas("A Máglya fejlesztése " + ar + " fa (most " + S.fa + ").", true); return; }
+  kerdez("Máglya " + (S.maglyaSzint + 1) + ". szint", [
+    "!Ár: " + ar + " fa",
+    "Éjszakai alaptermelés " + maglyaAlap() + " → " + [0,8,14,20,26,32][S.maglyaSzint+1] + " ✦.",
+    "Elégethető fa " + faPlafon() + " → " + [0,4,6,8,10,12][S.maglyaSzint+1] + " / kör.",
+  ], () => {
+    mentUndo();
+    S.fa -= ar; S.maglyaSzint++;
+    olvas("A Máglya magasabbra csap. " + S.maglyaSzint + ". szint.");
+    kronika("A Máglya " + S.maglyaSzint + ". szintre nőtt.");
+    ui();
+  }, "FEJLESZT");
+}
+const parazsPlafon = () => Math.min(140, 20 + 2 * osszes().lit);
+
+function dagalyEro() {
+  const o = osszes();
+  /* Harom forras: a lezajlott Dagalyok, a lerakott fold, es a soteten hagyott csempek.
+     A sotet tag felezve — teljes sullyal az elso hullam mar tanitas helyett buntetne. */
+  return 6 + 3 * S.dagalyok + Math.floor(o.placed / 4) + Math.floor(o.sotet / 2);
+}
+function dagalySav() {
+  const e = dagalyEro(), v = orokSzama() * 3;
+  if (v >= e) return "megtartható";
+  if (v >= e * 0.6) return "szűkös";
+  return "nem bírod el";
+}
+const orokSzama = () => S.lakok.filter(l => l.mod === "orkodik").length;
+
+function naplo(s) { S.naplo.push(s); if (S.naplo.length > 4) S.naplo.shift(); }
+function kronika(s) { S.kronika.push("Nap " + S.nap + " — " + s); }
+
+/* ---------- pixel-rajz ---------- */
+const SPR = {
+  tree:  { p:{ "1":"#2a1c10", "2":"#2f5a34", "3":"#417a46" },
+           d:["..3..",".232.","23332",".232.","..1..","..1.."] },
+  crop:  { p:{ "1":"#7a6a2a", "2":"#c9b04e" },
+           d:[".2.2.","12121","12121",".1.1."] },
+  rock:  { p:{ "1":"#4a4a45", "2":"#7d7d74", "3":"#9a9a90" },
+           d:["..3..",".232.","12221","11211"] },
+  barrow:{ p:{ "1":"#3a2f42", "2":"#6a5a78", "3":"#a892c0" },
+           d:["..3..",".212.","12221","11111"] },
+  hut:   { p:{ "1":"#3a2417", "2":"#6b4a2c", "3":"#8a6238", "4":"#c9a86a" },
+           d:["..3..",".333.","33333",".121.",".141.",".111."] },
+};
+
+let mapCv, mapCtx, off, octx, scale = 2;
+
+function initCanvas() {
+  mapCv = document.getElementById("map");
+  mapCtx = mapCv.getContext("2d");
+  off = document.createElement("canvas"); off.width = BW; off.height = BH;
+  octx = off.getContext("2d");
+  resize();
+  addEventListener("resize", resize);
+}
+function resize() {
+  const wrap = document.getElementById("mapWrap");
+  const aw = wrap.clientWidth - 8, ah = wrap.clientHeight - 8;
+  scale = Math.max(1, Math.floor(Math.min(aw / BW, ah / BH)));
+  mapCv.width = BW; mapCv.height = BH;
+  mapCv.style.width = (BW * scale) + "px";
+  mapCv.style.height = (BH * scale) + "px";
+  mapCtx.imageSmoothingEnabled = false;
+  draw();
+}
+
+function px(ctx, x, y, w, h, col) { ctx.fillStyle = col; ctx.fillRect(x | 0, y | 0, w, h); }
+
+function blit(ctx, spr, x, y) {
+  const s = SPR[spr]; if (!s) return;
+  for (let r = 0; r < s.d.length; r++) for (let c = 0; c < s.d[r].length; c++) {
+    const ch = s.d[r][c]; if (ch === ".") continue;
+    px(ctx, x + c, y + r, 1, 1, s.p[ch]);
+  }
+}
+
+/* 2:1 izometrikus rombusz felso lapja */
+function diamond(ctx, sx, sy, col, ditherCol) {
+  for (let y = 0; y < TH; y++) {
+    const hw = y < TH / 2 ? (y + 1) * 2 : (TH - y) * 2;
+    px(ctx, sx + TW / 2 - hw, sy + y, hw * 2, 1, col);
+    if (ditherCol) for (let x = -hw; x < hw; x++)
+      if (((sx + TW / 2 + x) + (sy + y) * 2) % 7 === 0) px(ctx, sx + TW / 2 + x, sy + y, 1, 1, ditherCol);
+  }
+}
+function sides(ctx, sx, sy, colL, colR) {
+  for (let y = 0; y < TH / 2; y++) {
+    const hw = (TH / 2 - y) * 2;
+    px(ctx, sx + TW / 2 - hw, sy + TH / 2 + y, hw, THICK, colL);
+    px(ctx, sx + TW / 2,      sy + TH / 2 + y, hw, THICK, colR);
+  }
+}
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, Math.max(0, ((n >> 16) & 255) * f)) | 0;
+  const g = Math.min(255, Math.max(0, ((n >> 8) & 255) * f)) | 0;
+  const b = Math.min(255, Math.max(0, (n & 255) * f)) | 0;
+  return "#" + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+}
+
+let flick = 0;
+function draw() {
+  if (!S) return;
+  octx.clearRect(0, 0, BW, BH);
+  px(octx, 0, 0, BW, BH, "#0E131C");
+
+  const order = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) order.push([c, r]);
+  order.sort((a, b) => (a[0] + a[1]) - (b[0] + b[1]));
+
+  /* ervenyes cellak jelolese huzas kozben */
+  const dragging = drag.on;
+
+  for (const [c, r] of order) {
+    const x = cx(c, r) - TW / 2, y = cy(c, r);
+    if (isMaglya(c, r)) { if (c === 3 && r === 3) drawMaglya(x, y); continue; }
+    const cell = S.grid[r][c];
+    if (!cell) {
+      if (dragging && lerakhato(c, r)) {
+        /* ervenyes ures cella: halvany keret */
+        diamond(octx, x, y, "#1b2635", null);
+        outline(octx, x, y, "#39516e");
+      }
+      continue;
+    }
+    const t = T[cell.t];
+    let top = cell.lit ? t.top : t.dark;
+    if (cell.korom >= 3) top = shade(top, 0.6);
+    if (dragging) top = shade(top, 0.55);
+    diamond(octx, x, y, top, shade(top, 0.88));
+    sides(octx, x, y, shade(top, 0.55), shade(top, 0.72));
+
+    /* korom-rovatkak bal also sarok */
+    for (let i = 0; i < Math.min(cell.korom, 6); i++)
+      px(octx, x + 2 + i * 2, y + TH - 2, 1, 2, "#151318");
+
+    if (!dragging) {
+      if (cell.ep === "KUNYHO") blit(octx, "hut", x + TW / 2 - 2, y - 4);
+      else if (cell.ep === "VETES") blit(octx, "crop", x + TW / 2 - 2, y);
+      else if (cell.ep === "FAVAGO") blit(octx, "tree", x + TW / 2 - 2, y - 3);
+      else if (t.spr) blit(octx, t.spr, x + TW / 2 - 2, y - 2);
+      /* lako-figura */
+      if (cell.lako !== null) {
+        const l = S.lakok[cell.lako];
+        const col = l.mod === "orkodik" ? "#C05650" : l.mod === "tisztit" ? "#4a8fc0" : "#E6DCC6";
+        px(octx, x + TW / 2 + 4, y + 2, 1, 3, col);
+        px(octx, x + TW / 2 + 4, y + 1, 1, 1, "#c9a86a");
+      }
+      /* kimerulo forras jelzes */
+      if (cell.keszlet > 0 && cell.keszlet <= 6) px(octx, x + TW - 5, y + 2, 2, 2, "#C05650");
+    }
+    /* el-szinek huzas kozben */
+    if (dragging) drawEdges(octx, c, r, cell);
+  }
+
+  /* szellemcsempe */
+  if (dragging && drag.cell) {
+    const [c, r] = drag.cell;
+    const x = cx(c, r) - TW / 2, y = cy(c, r);
+    const t = T[drag.tile.t];
+    diamond(octx, x, y, t.top, null);
+    sides(octx, x, y, shade(t.top, .55), shade(t.top, .72));
+    drawEdges(octx, c, r, drag.tile, true);
+  }
+
+  mapCtx.clearRect(0, 0, BW, BH);
+  mapCtx.drawImage(off, 0, 0);
+}
+
+function outline(ctx, x, y, col) {
+  for (let y2 = 0; y2 < TH; y2++) {
+    const hw = y2 < TH / 2 ? (y2 + 1) * 2 : (TH - y2) * 2;
+    px(ctx, x + TW / 2 - hw, y + y2, 1, 1, col);
+    px(ctx, x + TW / 2 + hw - 1, y + y2, 1, 1, col);
+  }
+}
+/* A rombusz csucsai (lokalisan): felso (TW/2,0), jobb (TW,TH/2), also (TW/2,TH), bal (0,TH/2).
+   Iranyok kepernyore: +c = le-jobbra, +r = le-balra, -c = fel-balra, -r = fel-jobbra.
+   Ezert d=0 a jobb-also el, d=1 a bal-also, d=2 a bal-felso, d=3 a jobb-felso. */
+function edgePixel(d, i) {
+  if (d === 0) return [TW - 2 - i * 2, TH / 2 + i];       // K  -> jobb-also
+  if (d === 1) return [TW / 2 - 2 - i * 2, TH - 1 - i];   // D  -> bal-also
+  if (d === 2) return [i * 2, TH / 2 - 1 - i];            // NY -> bal-felso
+  return [TW / 2 + i * 2, i];                             // E  -> jobb-felso
+}
+/* a rombusz negy elenek szinezese: PART / VIZ / SZIKLA */
+function drawEdges(ctx, c, r, cell, keret) {
+  const e = edgesOf(cell);
+  const x = cx(c, r) - TW / 2, y = cy(c, r);
+  for (let d = 0; d < 4; d++) {
+    const nc = c + DIRS[d][0], nr = r + DIRS[d][1];
+    const van = isMaglya(nc, nr) || (inGrid(nc, nr) && S.grid[nr][nc]);
+    if (van && !keret) continue;                   // csak a szabad elek szamitanak
+    const col = EDGE_COL[e[d]];
+    for (let i = 0; i < TH / 2; i++) {
+      const [ox, oy] = edgePixel(d, i);
+      px(ctx, x + ox, y + oy, 2, 1, col);
+    }
+  }
+}
+
+function drawMaglya(x, y) {
+  /* 2x2-es blokk kozepe */
+  const bx = x, by = y;
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) {
+    const px0 = cx(3 + c, 3 + r) - TW / 2, py0 = cy(3 + c, 3 + r);
+    diamond(octx, px0, py0, "#3a3128", "#2e271f");
+    sides(octx, px0, py0, "#231d17", "#2c251d");
+  }
+  const fx = cx(4, 4) - TW / 2 - 6, fy = cy(3, 3) + 1;
+  const f = Math.floor(flick) % 2;
+  const flame = ["#E8873B", "#F5C264"];
+  px(octx, fx + 5, fy + 6, 6, 2, "#4a3527");
+  px(octx, fx + 6, fy + 3 + f, 4, 3, flame[0]);
+  px(octx, fx + 7, fy + 1 + f, 2, 3, flame[1]);
+  px(octx, fx + 7, fy - 1 + f, 1, 2, "#fbe6b0");
+  /* lang-allapot */
+  for (let i = 0; i < 5; i++)
+    px(octx, fx + 4 + i * 2, fy + 9, 1, 2, i < S.lang ? "#E8873B" : "#2a2b2e");
+}
+
+/* ---------- interakcio ---------- */
+let mode = "fold";
+let selBuild = null;
+const drag = { on:false, tile:null, cell:null, from:0 };
+
+function pointToCell(px0, py0) {
+  /* kepernyo -> alap-pixel -> racs (kozelito rombusz-teszt + hiszterezis nelkul) */
+  const rect = mapCv.getBoundingClientRect();
+  const bx = (px0 - rect.left) / scale, by = (py0 - rect.top) / scale;
+  const fx = bx - ORIGIN_X, fy = by - ORIGIN_Y - TH / 2;
+  const c = Math.round((fx / (TW / 2) + fy / (TH / 2)) / 2);
+  const r = Math.round((fy / (TH / 2) - fx / (TW / 2)) / 2);
+  return inGrid(c, r) ? [c, r] : null;
+}
+
+function setupInput() {
+  const slot0 = document.getElementById("slot0");
+  let downT = 0, moved = false, startX = 0, startY = 0;
+
+  slot0.addEventListener("pointerdown", e => {
+    if (S.vege || mode !== "fold") return;
+    slot0.setPointerCapture(e.pointerId);
+    downT = Date.now(); moved = false; startX = e.clientX; startY = e.clientY;
+  });
+  slot0.addEventListener("pointermove", e => {
+    if (!downT) return;
+    if (!moved && Math.hypot(e.clientX - startX, e.clientY - startY) > 8) {
+      moved = true; drag.on = true; drag.tile = S.slots[0]; drag.cell = null;
+      document.getElementById("pill").classList.add("on");
+    }
+    if (moved) updateDrag(e);
+  });
+  slot0.addEventListener("pointerup", e => {
+    if (!downT) return;
+    if (!moved && Date.now() - downT < 400) { S.slots[0].rot = (S.slots[0].rot + 1) & 3; renderSlots(); draw(); }
+    else if (moved) dropTile();
+    downT = 0; moved = false; endDrag();
+  });
+  slot0.addEventListener("pointercancel", () => { downT = 0; moved = false; endDrag(); });
+
+  mapCv.addEventListener("pointerdown", e => {
+    if (S.vege) return;
+    const cell = pointToCell(e.clientX, e.clientY);
+    if (cell) mapTap(cell[0], cell[1]);
+  });
+
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+    mode = t.dataset.mode; selBuild = null;
+    document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === t));
+    ui();
+  });
+  document.querySelectorAll(".bbtn").forEach(b => {
+    if (b.id === "maglyaBtn") { b.onclick = maglyaFejleszt; return; }
+    b.onclick = () => { selBuild = selBuild === b.dataset.b ? null : b.dataset.b; ui(); };
+  });
+  document.getElementById("dusk").onclick = alkonyat;
+  document.getElementById("undo").onclick = visszavon;
+}
+
+function updateDrag(e) {
+  const OFF = e.pointerType === "touch" ? 110 : 24;   // a szellem az UJJ FOLOTT
+  const c = pointToCell(e.clientX, e.clientY - OFF);
+  drag.cell = (c && lerakhato(c[0], c[1])) ? c : null;
+  pill();
+  draw();
+}
+function endDrag() {
+  drag.on = false; drag.cell = null;
+  document.getElementById("pill").classList.remove("on");
+  draw();
+}
+
+/* a harom szam elonezete */
+function pill() {
+  const p = document.getElementById("pill");
+  const head = document.getElementById("pillHead");
+  const warn = document.getElementById("pillWarn");
+  if (!drag.cell) {
+    head.textContent = "Nem rakható ide";
+    document.getElementById("pvPer").textContent = "—";
+    document.getElementById("pvLit").textContent = "—";
+    document.getElementById("pvYld").textContent = "—";
+    warn.textContent = ""; return;
+  }
+  const [c, r] = drag.cell, g = ring(c, r);
+  const ar = lerakAr(c, r, drag.tile.t);
+  const elotte = peremLanek(S.grid);
+  const proba = S.grid.map(row => row.slice());
+  proba[r][c] = { t: drag.tile.t, rot: drag.tile.rot };
+  const utana = peremLanek(proba);
+  const dPer = utana - elotte;
+  const t = T[drag.tile.t];
+  const hozam = t.term === "fa" ? g + " fa" : t.term === "etel" ? g + " étel"
+              : t.term === "parazs" ? "2 ✦" : "—";
+
+  head.textContent = "Ár " + ar + " ✦ · " + g + ". gyűrű · Első Vetés +" + elsoVetesErtek(g) + " ✦";
+  const per = document.getElementById("pvPer");
+  per.textContent = (dPer > 0 ? "+" : "") + dPer;
+  per.parentElement.classList.toggle("good", dPer <= 0);
+  document.getElementById("pvLit").textContent = "−" + g + "/éj";
+  document.getElementById("pvYld").textContent = hozam;
+
+  let w = "";
+  if (ar > S.parazs) w = "Nincs elég Parázs (" + S.parazs + ")";
+  else if (t.term && !gyujthato(c, r)) w = "Fényláncon kívül — nem fog termelni";
+  warn.textContent = w;
+  p.classList.toggle("dockBot", cy(c, r) < BH * 0.42);
+  p.classList.toggle("dockTop", cy(c, r) >= BH * 0.42);
+}
+
+function dropTile() {
+  if (!drag.cell) return;
+  const [c, r] = drag.cell;
+  const ar = lerakAr(c, r, drag.tile.t);
+  if (ar > S.parazs) { olvas("Nincs elég Parázs a lerakáshoz.", true); return; }
+  mentUndo();
+  S.parazs -= ar;
+  const cell = ujCella(drag.tile.t, drag.tile.rot, false);
+  cell.vetesJar = true;          // ma este fizet, DE csak ha addigra kivilagitod
+  S.grid[r][c] = cell;
+  S.slots.shift(); S.slots.push(huz());
+  S.tettMa = true;
+  olvas(T[cell.t].nev + " lerakva a " + ring(c, r) + ". gyűrűbe. " + ar + " ✦.");
+  ui();
+}
+
+function mapTap(c, r) {
+  const cell = at(c, r);
+  if (mode === "feny") {
+    if (!cell) return;
+    mentUndo();
+    if (cell.lit) { cell.lit = false; const v = fenyLancFrissit();
+      olvas(v ? "A lánc megszakadt: " + (v + 1) + " csempe kialudt." : "Kioltva."); }
+    else if (!gyujthato(c, r)) olvas("Csak a fényláncra köthető csempe gyújtható meg.", true);
+    else { cell.lit = true; olvas("Meggyújtva. Éjjel −" + fenyDij(c, r) + " ✦."); }
+    ui(); return;
+  }
+  if (mode === "epit") {
+    if (!cell || !selBuild) return;
+    const koltseg = selBuild === "KUNYHO" ? 6 : 4;
+    if (cell.ep) { olvas("Már áll rajta valami."); return; }
+    if (!cell.lit) { olvas("Csak megvilágított csempére építhetsz.", true); return; }
+    if (S.fa < koltseg) { olvas("Nincs elég fa (" + S.fa + "/" + koltseg + ").", true); return; }
+    if (selBuild === "VETES" && cell.t !== "SZANTO") { olvas("Vetés csak Szántóra.", true); return; }
+    if (selBuild === "FAVAGO" && cell.t !== "RENGETEG") { olvas("Favágó csak Rengetegre.", true); return; }
+    mentUndo();
+    S.fa -= koltseg; cell.ep = selBuild;
+    if (selBuild === "KUNYHO") { const l = ujLako(); const l2 = ujLako();
+      olvas("Kunyhó áll. " + [l, l2].filter(Boolean).map(x => x.nev).join(" és ") + " megérkezett."); }
+    else olvas(selBuild === "VETES" ? "Vetés elültetve." : "Favágó felállt.");
+    selBuild = null; ui(); return;
+  }
+  if (mode === "nep") {
+    if (!cell) return;
+    mentUndo();
+    if (cell.lako !== null) { S.lakok[cell.lako].cell = null; cell.lako = null; olvas("Lakó levéve."); }
+    else {
+      const i = S.lakok.findIndex(l => l.cell === null);
+      if (i < 0) { olvas("Nincs szabad lakó.", true); return; }
+      S.lakok[i].cell = [c, r]; cell.lako = i;
+      olvas(S.lakok[i].nev + " (" + S.lakok[i].vonas + ") munkába állt.");
+    }
+    ui(); return;
+  }
+  if (mode === "fold" && cell) {
+    /* elsullyesztes */
+    if (S.sullyesztettMa) { olvas("Körönként egy csempét süllyeszthetsz el."); return; }
+    const kimerult = cell.keszlet === 0 && T[cell.t].keszlet;
+    const munka = (T[cell.t].olcso || kimerult) ? 1 : 3;
+    if (S.parazs < 5) { olvas("Az elsüllyesztés 5 ✦.", true); return; }
+    /* a peremvaltozas elojele POZITIV is lehet: belulrol kivenni lane-t nyit befele */
+    const elotte = peremLanek(S.grid);
+    const proba = S.grid.map(row => row.slice()); proba[r][c] = null;
+    const dPer = peremLanek(proba) - elotte;
+    const nev = T[cell.t].nev;
+    kerdez("Elsüllyeszted?", [
+      "!" + nev + " · " + ring(c, r) + ". gyűrű" + (cell.lako !== null ? " · " + S.lakok[cell.lako].nev + " rajta áll" : ""),
+      "Ár: 5 ✦ és " + munka + " munkásnap. Hamuként visszatér a készletbe.",
+      (dPer > 0 ? "!Figyelem: a perem NŐ " + dPer + " éllel — befelé nyílik lane."
+                : "A perem " + Math.abs(dPer) + " éllel csökken."),
+    ], () => {
+      mentUndo();
+      S.parazs -= 5;
+      if (cell.lako !== null) S.lakok[cell.lako].cell = null;
+      S.grid[r][c] = null; S.hamuVar++; S.sullyesztettMa = true;
+      ujraIndexel(); fenyLancFrissit();
+      olvas(nev + " elsüllyedt. Hamuként visszajön.");
+      ui();
+    }, "ELSÜLLYESZT");
+  }
+}
+
+function olvas(s, warn) {
+  const el = document.getElementById("read");
+  el.innerHTML = s; el.classList.toggle("warn", !!warn);
+}
+
+/* sajat megerosito parbeszed — a beagyazott oldalon a natiV confirm() blokkolt lehet */
+let kerdesOk = null;
+function kerdez(cim, sorok, onOk, okCimke) {
+  kerdesOk = onOk;
+  const m = document.getElementById("modal");
+  m.innerHTML = "<h2>" + cim + "</h2>"
+    + sorok.map(s => "<p" + (s.startsWith("!") ? "" : " class='dim'") + ">"
+        + (s.startsWith("!") ? s.slice(1) : s) + "</p>").join("")
+    + "<button onclick='kerdesIgen()'>" + (okCimke || "IGEN") + "</button>"
+    + "<button onclick='kerdesNem()' style='background:#1B2230;border-color:#2A3341;color:#8D95A4'>MÉGSEM</button>";
+  m.classList.add("on");
+}
+function kerdesIgen() {
+  document.getElementById("modal").classList.remove("on");
+  const f = kerdesOk; kerdesOk = null; if (f) f();
+}
+function kerdesNem() {
+  document.getElementById("modal").classList.remove("on"); kerdesOk = null;
+}
+
+/* ---------- visszavonas ---------- */
+function mentUndo() {
+  S.undo = JSON.stringify({ grid:S.grid, lakok:S.lakok, parazs:S.parazs, fa:S.fa,
+    etel:S.etel, slots:S.slots, hamuVar:S.hamuVar, sullyesztettMa:S.sullyesztettMa });
+}
+function visszavon() {
+  if (!S.undo) return;
+  const u = JSON.parse(S.undo);
+  Object.assign(S, u); S.undo = null;
+  olvas("Visszavonva."); ui();
+}
+
+/* ---------- alkonyat ---------- */
+function alkonyat() {
+  if (S.vege) return;
+  const o = osszes();
+  const dagalyMa = S.nap >= S.kovDagaly;
+
+  /* a lista nem kerdez, hanem megmutat — aki megnyomta, tudta */
+  const fig = [];
+  const bevetel = maglyaAlap() + 3 * Math.min(S.fa, faPlafon());
+  if (o.fenyszamla + orokSzama() > bevetel + S.parazs) fig.push("!Nem futja fényre — csempék alszanak ki.");
+  if (o.hozamEtel + S.etel < S.lakok.length) {
+    const eh = S.lakok[S.lakok.length - 1];
+    fig.push("!" + (eh ? eh.nev : "Valaki") + " éhezni fog.");
+  }
+  let kimerul = 0;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const cell = S.grid[r][c];
+    if (cell && cell.keszlet > 0 && cell.keszlet <= 1 + ring(c, r)) kimerul++;
+  }
+  if (kimerul) fig.push("!" + kimerul + " erdő kimerül — Hamvadt lesz, és PART-élt nyit.");
+  if (dagalyMa) fig.push("!MA ÉJJEL JÖN A FEKETE DAGÁLY — " + dagalySav() + ".");
+
+  if (fig.length) { kerdez("Alkonyat · " + S.nap + ". nap", fig, alkonyatVegrehajt, "ALKONYAT"); return; }
+  alkonyatVegrehajt();
+}
+
+function alkonyatVegrehajt() {
+  const o = osszes();
+  const dagalyMa = S.nap >= S.kovDagaly;
+  S.undo = null;
+  const log = [];
+
+  /* 1. termeles */
+  S.fa += o.hozamFa; S.etel += o.hozamEtel; S.parazs += o.hozamPar;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const cell = S.grid[r][c]; if (!cell) continue;
+    const p = termel(cell, c, r);
+    if (p.fa && cell.keszlet > 0) {
+      cell.keszlet -= p.fa;
+      if (cell.keszlet <= 0) {  /* kimerules: Hamvadta valik ES kinyitja az eleit */
+        cell.t = "HAMVADT"; cell.ep = null; cell.keszlet = 0;
+        log.push("Egy erdő kimerült — Hamvadt földdé vált, és PART-élei nyíltak.");
+      }
+    }
+  }
+
+  /* 2. Maglya: ehseg, majd tuzeles.
+     A lang visszaszerezheto — enelkul az elso ures fa-keszlet garantalt halalspiral lenne,
+     a veszteseg pedig lejto, nem nehez dontes. */
+  if (S.ehseg > 0) {
+    if (S.fa >= S.ehseg) {
+      S.fa -= S.ehseg;
+      if (S.fa >= 1 && S.lang < 5) { S.lang++; log.push("A Máglya jóllakott: a láng erősödik (" + S.lang + "/5)."); }
+    } else {
+      S.fa = 0; S.lang--;
+      log.push("A Máglya éhezik: a láng gyengül (" + S.lang + "/5).");
+    }
+  } else if (S.lang < 5 && S.fa >= 1) {
+    S.lang++; log.push("A láng erősödik (" + S.lang + "/5).");
+  }
+  /* A Maglya csak a FELESLEGET egeti el. Tartalek marad az ehsegre es egy epuletre —
+     enelkul a fa minden ejjel nullara egne, es se epiteni, se a langot etetni nem lehetne. */
+  const tartalek = S.ehseg + 2;
+  const eget = Math.max(0, Math.min(faPlafon(), S.fa - tartalek));
+  S.fa -= eget;
+  S.parazs += maglyaAlap() + 3 * eget;
+
+  /* 3. fenyszamla + orok fakalyaja */
+  let szamla = o.fenyszamla + orokSzama();
+  if (szamla > S.parazs) {
+    /* kioltas a legdragabb csempektol, amig ki nem jon */
+    const lista = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++)
+      if (S.grid[r][c] && S.grid[r][c].lit) lista.push([c, r, ring(c, r)]);
+    lista.sort((a, b) => b[2] - a[2]);
+    while (szamla > S.parazs && lista.length) {
+      const [c, r, g] = lista.shift();
+      S.grid[r][c].lit = false; szamla -= g;
+    }
+    fenyLancFrissit();
+    log.push("Nem futotta fényre: csempék maradtak sötétben.");
+  }
+  S.parazs -= szamla;
+
+  /* 4. Elso Vetes — a lerakast KOVETO alkonyatkor, KIZAROLAG ha a csempe vilagos.
+     Enelkul letezne a zart penzgep: lerak a 3. gyuruben (-9), bezsebel (+13), soteten hagy (0). */
+  let vetesOssz = 0;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const cell = S.grid[r][c]; if (!cell || !cell.vetesJar) continue;
+    cell.vetesJar = false;
+    if (cell.lit) vetesOssz += elsoVetesErtek(ring(c, r));
+  }
+  if (vetesOssz) { S.parazs += vetesOssz; log.push("Első Vetés: +" + vetesOssz + " ✦."); }
+
+  /* 5. etkezes */
+  const kell = S.lakok.length;
+  if (S.etel >= kell) S.etel -= kell;
+  else {
+    S.etel = 0;
+    const aldozat = S.lakok[S.lakok.length - 1];
+    if (aldozat) {
+      if (aldozat.cell) { const [c, r] = aldozat.cell; if (S.grid[r][c]) S.grid[r][c].lako = null; }
+      S.lakok.pop();
+      log.push(aldozat.nev + " éhen halt.");
+      kronika(aldozat.nev + " éhen halt.");
+      ujraIndexel();
+    }
+  }
+  /* etel-plafon: a felhalmozas lehetetlen */
+  const etelPlafon = 8 + 2 * szamlalEpulet("KUNYHO");
+  if (S.etel > etelPlafon) { log.push((S.etel - etelPlafon) + " adag megromlott."); S.etel = etelPlafon; }
+
+  /* 6. korom */
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const cell = S.grid[r][c]; if (!cell) continue;
+    const lako = cell.lako !== null ? S.lakok[cell.lako] : null;
+    if (lako && lako.mod === "tisztit") cell.korom = Math.max(0, cell.korom - 3);
+    else if (!cell.lit) cell.korom++;
+    if (cell.korom >= 6) {
+      log.push("Egy csempét elvitt a Korom.");
+      if (cell.lako !== null) { S.lakok[cell.lako].cell = null; }
+      S.grid[r][c] = null; S.hamuVar++;
+    }
+  }
+  ujraIndexel(); fenyLancFrissit();
+
+  /* 7. parazs-plafon */
+  const pf = parazsPlafon();
+  if (S.parazs > pf) { log.push((S.parazs - pf) + " Parázs kialudt (túlcsordulás)."); S.parazs = pf; }
+  if (S.parazs < 0) S.parazs = 0;
+
+  /* 8. Fekete Dagaly */
+  if (dagalyMa) dagaly(log);
+
+  /* 9. nap zarasa */
+  S.nap++; S.sullyesztettMa = false; S.tettMa = false;
+  if (S.lang <= 0) return vege("A Máglya kialudt.");
+  if (!S.lakok.length) return vege("Az utolsó lakó is elveszett.");
+
+  S.naplo = log.slice(-3);
+  olvas(log.length ? log.slice(-2).map(x => "• " + x).join("<br>") : "Csendes éjszaka.");
+  ment(); ui();
+}
+
+function szamlalEpulet(k) {
+  let n = 0;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++)
+    if (S.grid[r][c] && S.grid[r][c].ep === k) n++;
+  return n;
+}
+function ujraIndexel() {
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (S.grid[r][c]) S.grid[r][c].lako = null;
+  S.lakok.forEach((l, i) => {
+    if (l.cell) { const [c, r] = l.cell;
+      if (S.grid[r] && S.grid[r][c]) S.grid[r][c].lako = i; else l.cell = null; }
+  });
+}
+
+function dagaly(log) {
+  const ero = dagalyEro(), ved = orokSzama() * 3;
+  S.dagalyok++;
+  if (ved >= ero) {
+    log.push("A Dagály megtört a peremen. (" + ved + " ellen " + ero + ")");
+    kronika("A " + S.dagalyok + ". Dagály megtört.");
+  } else {
+    let atteres = ero - ved;
+    const peremek = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const cell = S.grid[r][c]; if (!cell) continue;
+      const e = edgesOf(cell);
+      for (let d = 0; d < 4; d++) {
+        const nc = c + DIRS[d][0], nr = r + DIRS[d][1];
+        const van = isMaglya(nc, nr) || (inGrid(nc, nr) && S.grid[nr][nc]);
+        if (!van && e[d] === "PART") { peremek.push([c, r]); break; }
+      }
+    }
+    peremek.sort((a, b) => ring(b[0], b[1]) - ring(a[0], a[1]));
+    let sertett = 0;
+    while (atteres > 0 && peremek.length) {
+      const [c, r] = peremek.shift(); const cell = S.grid[r][c]; if (!cell) continue;
+      cell.korom += 3; cell.lit = false; atteres -= 2; sertett++;
+      if (cell.korom >= 6) { if (cell.lako !== null) S.lakok[cell.lako].cell = null;
+        S.grid[r][c] = null; S.hamuVar++; }
+    }
+    if (atteres > 0) { S.lang--; log.push("A Dagály elérte a Máglyát: a láng gyengül (" + S.lang + "/5)."); }
+    log.push("A Dagály áttört: " + sertett + " csempe kormos lett. (" + ved + " ellen " + ero + ")");
+    kronika("A " + S.dagalyok + ". Dagály áttört — " + sertett + " csempe odaveszett.");
+    ujraIndexel(); fenyLancFrissit();
+  }
+  /* kovetkezo evszak: a koz rovidul 10 -> 6, a Maglya ehsege no */
+  const koz = Math.max(6, 10 - S.dagalyok);
+  S.kovDagaly = S.nap + koz;
+  S.ehseg = S.dagalyok;   /* a Maglya ehsege evszakonkent no, de nem duplazva */
+  S.dagalyIrany = pick(["ÉK", "DK", "DNy", "ÉNy"]);
+  log.push("A következő Dagály " + koz + " nap múlva, " + S.dagalyIrany + " felől.");
+}
+
+/* ---------- vege ---------- */
+function vege(ok) {
+  S.vege = true; ment();
+  const o = osszes();
+  const m = document.getElementById("modal");
+  m.innerHTML =
+    "<h2>" + ok + "</h2>" +
+    "<p class='dim'>Nem támadás végzett veled — hanem az, hogy egy évszakkal tovább tartottál világosan több csempét, mint amennyit megengedhettél.</p>" +
+    "<div class='statRow'>" +
+      "<div class='statBox'><div class='sv'>" + S.nap + "</div><div class='sl'>nap</div></div>" +
+      "<div class='statBox'><div class='sv'>" + S.dagalyok + "</div><div class='sl'>dagály</div></div>" +
+      "<div class='statBox'><div class='sv'>" + o.placed + "</div><div class='sl'>csempe</div></div>" +
+    "</div>" +
+    "<div id='chron'>" + (S.kronika.length ? S.kronika.map(x => "• " + x).join("<br>")
+      : "Nem történt semmi említésre méltó.") + "</div>" +
+    "<button onclick='ujraKezd()'>ÚJ SZIGET</button>";
+  m.classList.add("on");
+}
+function ujraKezd() {
+  document.getElementById("modal").classList.remove("on");
+  try { localStorage.removeItem("layland"); } catch (e) {}
+  ujJatek(); ui();
+}
+
+/* ---------- mentes ---------- */
+function ment() {
+  try { localStorage.setItem("layland", JSON.stringify({ S, seed })); } catch (e) {}
+}
+function tolt() {
+  try {
+    const raw = localStorage.getItem("layland"); if (!raw) return false;
+    const d = JSON.parse(raw); if (!d || !d.S || !d.S.grid) return false;
+    S = d.S; seed = d.seed || 1; return true;
+  } catch (e) { return false; }
+}
+
+/* ---------- UI ---------- */
+function renderSlots() {
+  const PADI = 3, W = TW + PADI * 2, H = TH + THICK + PADI * 2 + 4;
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById("slot" + i);
+    const cv = el.querySelector("canvas"), ctx = cv.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const s = S.slots[i]; if (!s) continue;
+    const t = T[s.t];
+
+    const tmp = document.createElement("canvas"); tmp.width = W; tmp.height = H;
+    const tc = tmp.getContext("2d");
+    const ox = PADI, oy = PADI + 4;
+    diamond(tc, ox, oy, t.top, shade(t.top, .88));
+    sides(tc, ox, oy, shade(t.top, .55), shade(t.top, .72));
+    const e = edgesOf(s);
+    for (let d = 0; d < 4; d++) {
+      const col = EDGE_COL[e[d]];
+      for (let k = 0; k < TH / 2; k++) {
+        const [ex, ey] = edgePixel(d, k);
+        px(tc, ox + ex, oy + ey, 2, 1, col);
+      }
+    }
+    if (t.spr) blit(tc, t.spr, ox + TW / 2 - 2, oy - 2);
+
+    const sc = i === 0 ? 2 : 1;
+    ctx.drawImage(tmp, Math.round((cv.width - W * sc) / 2), Math.round((cv.height - H * sc) / 2),
+                  W * sc, H * sc);
+  }
+  document.getElementById("cost0").textContent = T[S.slots[0].t].nev;
+}
+
+function renderPeople() {
+  const box = document.getElementById("people");
+  box.classList.toggle("on", mode === "nep");
+  if (mode !== "nep") return;
+  box.innerHTML = "";
+  S.lakok.forEach((l, i) => {
+    const row = document.createElement("div"); row.className = "prow";
+    const hely = l.cell ? "" : " · szabad";
+    row.innerHTML = "<div class='pname'>" + l.nev + " <small>" + l.vonas + hely + "</small></div>";
+    const md = document.createElement("div"); md.className = "pmode";
+    [["termel","Termel"],["tisztit","Tisztít"],["orkodik","Őrködik"]].forEach(([k, cim]) => {
+      const b = document.createElement("button");
+      b.className = "pm" + (l.mod === k ? " on" : ""); b.textContent = cim;
+      b.onclick = () => { mentUndo(); l.mod = k; ui(); };
+      md.appendChild(b);
+    });
+    row.appendChild(md); box.appendChild(row);
+  });
+}
+
+function ui() {
+  if (!S) return;
+  const o = osszes();
+  document.getElementById("hDay").textContent = S.nap;
+  document.getElementById("hEmber").textContent = S.parazs;
+  const bevetel = maglyaAlap() + 3 * Math.min(S.fa, faPlafon());
+  const szamla = o.fenyszamla + orokSzama();
+  const hn = document.getElementById("hNight");
+  hn.textContent = "éjjel −" + szamla + " / +" + bevetel;
+  hn.classList.toggle("bad", szamla > S.parazs + bevetel);
+
+  const hatra = S.kovDagaly - S.nap;
+  const tv = document.getElementById("hTideV"), ts = document.getElementById("hTideS");
+  tv.textContent = hatra <= 0 ? "MA ÉJJEL" : hatra + " nap";
+  ts.textContent = S.dagalyIrany + " · " + dagalySav();
+  document.getElementById("hTide").classList.toggle("near", hatra <= 2);
+
+  document.getElementById("bPlaced").textContent = o.placed + "/60";
+  document.getElementById("bLit").textContent = o.lit;
+  document.getElementById("bPer").textContent = o.perem;
+  document.getElementById("bRes").textContent = S.fa + "·" + S.etel;
+
+  document.getElementById("undo").disabled = !S.undo;
+  document.querySelectorAll(".bbtn").forEach(b => {
+    b.classList.toggle("on", selBuild === b.dataset.b);
+    b.disabled = mode !== "epit";
+  });
+
+  const mAr = maglyaAra();
+  document.getElementById("maglyaCost").textContent =
+    mAr === null ? "max szint" : mAr + " fa · most " + S.maglyaSzint + ".";
+  /* a csempe-sav csak FOLD modban latszik; az epitogombok csak EPIT modban */
+  const foldMod = mode === "fold";
+  ["slot0", "slot1", "slot2"].forEach(id =>
+    document.getElementById(id).style.display = foldMod ? "flex" : "none");
+  document.getElementById("slots").style.display = mode === "nep" ? "none" : "flex";
+  document.getElementById("builds").style.display = mode === "epit" ? "flex" : "none";
+
+  document.getElementById("slotHint").textContent =
+      foldMod        ? "Húzd a nagy csempét a szigetre. Koppints rá: forog. Meglévő csempére koppintva elsüllyesztheted."
+    : mode === "epit" ? "Válassz épületet, majd koppints egy megvilágított csempére."
+    : mode === "feny" ? "Koppints egy csempére: meggyújtod vagy kioltod. A fény csak a Máglyához kötött láncon terjed."
+    : "";
+
+  if (foldMod) renderSlots();
+  renderPeople(); draw();
+}
+
+/* ---------- bevezeto ---------- */
+function intro() {
+  const m = document.getElementById("modal");
+  m.innerHTML =
+    "<h2>Lay Land</h2>" +
+    "<p>Te rakod le a földet, amin megtámadnak — és minden lámpa, amit felgyújtasz, nagyobbra hívja azt, ami eljön érte.</p>" +
+    "<p class='dim'>Minden lerakás három dolgot csinál egyszerre. Húzás közben mind a hármat előre látod:</p>" +
+    "<ul>" +
+      "<li><b>Perem</b> — hány új PART-él nyílik a Dagálynak. Csak PART-élen tudnak partra szállni.</li>" +
+      "<li><b>Fény</b> — mennyivel nő az éjszakai számlád. Örökre.</li>" +
+      "<li><b>Hozam</b> — mennyit termel. De csak megvilágítva, lakóval és épülettel.</li>" +
+    "</ul>" +
+    "<p class='dim'>A sziget nem nő: 60 cella, három gyűrű. Kifelé több a hozam, de drágább a fény és nyitottabb a perem. Az erdők kimerülnek, és kimerülve <b>kinyitják a peremet, amit zártnak terveztél</b>.</p>" +
+    "<p class='dim'>A fény lánc: csak a Máglyához kötött csempe gyújtható. Nincs győzelem — a játék addig tart, amíg ki nem alszik a Máglya.</p>" +
+    "<button onclick='zarIntro()'>KEZDJÜK</button>";
+  m.classList.add("on");
+}
+function zarIntro() { document.getElementById("modal").classList.remove("on"); ui(); }
+
+/* ---------- indulas ---------- */
+initCanvas();
+setupInput();
+if (!tolt()) { ujJatek(); intro(); } else { olvas("Folytatod a " + S.nap + ". napot."); }
+ui();
+setInterval(() => { flick += 1; if (!drag.on) draw(); }, 420);
+</script>
+
+</body></html>

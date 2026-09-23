@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --text: #1d1d1f; --text-2: #55555f; --border: #e3e1da; --head: #f1efe8;
+    --accent: #3b5bdb; --code: #f1f1f4; --zebra: #f7f6f2;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214; --text: #ececf0; --text-2: #a9a9b3; --border: #33333a; --head: #1e1e23;
+      --accent: #91a7ff; --code: #1e1e23; --zebra: #17171b;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px max(18px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+  h1 { margin: 4px 0 6px; font-size: 27px; line-height: 1.2; letter-spacing: -.01em; }
+  h1 + p { margin-top: 0; color: var(--text-2); font-size: 15px; }
+  h2 {
+    margin: 36px 0 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 21px;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+  }
+  p { margin: 10px 0; }
+  strong { font-weight: 650; }
+  a { color: var(--accent); }
+  ul, ol { padding-left: 24px; }
+  li { margin: 5px 0; }
+  li > p { margin: 0; }
+  code {
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: var(--code);
+    font: 14.5px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  pre {
+    overflow-x: auto;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--code);
+    -webkit-overflow-scrolling: touch;
+  }
+  pre code { padding: 0; background: none; font-size: 14px; }
+
+  /* Széles táblázatok: vízszintesen görgethetők, az oldal nem csúszik szét */
+  .table-wrap {
+    margin: 14px 0;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.45; }
+  th, td { padding: 9px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { background: var(--head); font-weight: 650; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:nth-child(even) td { background: var(--zebra); }
+  @media (max-width: 600px) {
+    table { font-size: 14px; }
+    th, td { padding: 8px 10px; min-width: 128px; }
+  }
+
+  /* Kipipálható lista */
+  li[data-checked] { list-style: none; margin-left: -24px; }
+  li[data-checked] > p { display: flex; gap: 10px; align-items: flex-start; }
+  li[data-checked] input {
+    flex: none;
+    width: 22px; height: 22px;
+    margin: 2px 0 0;
+    accent-color: var(--accent);
+  }
+  li[data-checked="true"] > p { color: var(--text-2); }
+
+  .mermaid { margin: 16px 0; text-align: center; overflow-x: auto; }
+  .mermaid svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<main>
+{{BODY}}
+</main>
+<script>
+  (function () {
+    var KEY = 'tanulas.doc.{{ID}}.checks';
+
+    // Táblázatok becsomagolása görgethető dobozba
+    document.querySelectorAll('table').forEach(function (t) {
+      var w = document.createElement('div');
+      w.className = 'table-wrap';
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+
+    // A „pipáld ki” lista mentése ezen az eszközön
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+    document.querySelectorAll('li[data-checked] input[type="checkbox"]').forEach(function (box, i) {
+      var li = box.closest('li');
+      box.disabled = false;
+      box.checked = !!saved[i];
+      li.setAttribute('data-checked', String(box.checked));
+      box.addEventListener('change', function () {
+        saved[i] = box.checked;
+        li.setAttribute('data-checked', String(box.checked));
+        try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+      });
+    });
+
+    // Mermaid ábrák (online kirajzolva; offline a forrásszöveg látszik)
+    var blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (!blocks.length) return;
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js';
+    s.onload = function () {
+      var dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      window.mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+      blocks.forEach(function (code) {
+        var div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = code.textContent;
+        code.parentNode.replaceWith(div);
+      });
+      window.mermaid.run({ querySelector: '.mermaid' }).catch(function () {});
+    };
+    document.head.appendChild(s);
+  })();
+</script>
+</body>
+</html>

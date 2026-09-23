@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>ATTR jegyzet – APT és CLDATA (19–41. dia)</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --text: #1d1d1f; --text-2: #55555f; --border: #e3e1da; --head: #f1efe8;
+    --accent: #3b5bdb; --code: #f1f1f4; --zebra: #f7f6f2;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214; --text: #ececf0; --text-2: #a9a9b3; --border: #33333a; --head: #1e1e23;
+      --accent: #91a7ff; --code: #1e1e23; --zebra: #17171b;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px max(18px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+  h1 { margin: 4px 0 6px; font-size: 27px; line-height: 1.2; letter-spacing: -.01em; }
+  h1 + p { margin-top: 0; color: var(--text-2); font-size: 15px; }
+  h2 {
+    margin: 36px 0 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 21px;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+  }
+  p { margin: 10px 0; }
+  strong { font-weight: 650; }
+  a { color: var(--accent); }
+  ul, ol { padding-left: 24px; }
+  li { margin: 5px 0; }
+  li > p { margin: 0; }
+  code {
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: var(--code);
+    font: 14.5px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  pre {
+    overflow-x: auto;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--code);
+    -webkit-overflow-scrolling: touch;
+  }
+  pre code { padding: 0; background: none; font-size: 14px; }
+
+  /* Széles táblázatok: vízszintesen görgethetők, az oldal nem csúszik szét */
+  .table-wrap {
+    margin: 14px 0;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.45; }
+  th, td { padding: 9px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { background: var(--head); font-weight: 650; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:nth-child(even) td { background: var(--zebra); }
+  @media (max-width: 600px) {
+    table { font-size: 14px; }
+    th, td { padding: 8px 10px; min-width: 128px; }
+  }
+
+  /* Kipipálható lista */
+  li[data-checked] { list-style: none; margin-left: -24px; }
+  li[data-checked] > p { display: flex; gap: 10px; align-items: flex-start; }
+  li[data-checked] input {
+    flex: none;
+    width: 22px; height: 22px;
+    margin: 2px 0 0;
+    accent-color: var(--accent);
+  }
+  li[data-checked="true"] > p { color: var(--text-2); }
+
+  .mermaid { margin: 16px 0; text-align: center; overflow-x: auto; }
+  .mermaid svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<main>
+<h1 id="attr-jegyzet-apt-és-cldata-1941-dia">ATTR jegyzet – APT és CLDATA (19–41. dia)</h1>
+<p>GTA IV / 7. fejezet: Az automatizált technológiai tervezőrendszerek (Cser István) · <time data-atom="date" datetime="2026-09-17">2026-09-17</time></p>
+<h2 id="visszacsatolási-térkép-mire-épül-a-1941-dia">Visszacsatolási térkép – mire épül a 19–41. dia</h2>
+<p>A fejezet második fele nem nyit új témát: a 7.2. ábra input–output–kapcsolat hármasát és a 7.3. ábra modularitását tölti ki konkrét tartalommal. Ebben a táblázatban minden új fogalom mellett ott van a már átvett fogalom, amire visszavezethető. Tanuláskor mindig innen indulj: ha egy új fogalmat nem tudsz visszakötni, nem tudod.</p>
+<table><thead><tr><th>Új fogalom (dia)</th><th>Már átvett fogalom (dia)</th><th>A kapcsolat</th></tr></thead><tbody><tr><td>Sorrendtervező, Művelettervező, Műveletelemtervező (20.)</td><td>Vertikális modularitás, 7.3. ábra (6–7.)</td><td>A három modul pontosan az egymást követő tervezési szintek</td></tr><tr><td>A származtatás korlátai szintenként (19.)</td><td>Variáns elv, „egyszerűsítéssel, némi átszámítással” (5., 10.)</td><td>Most derül ki, melyik szinten drágul a típustechnológiából való származtatás</td></tr><tr><td>„Létrejön egy eltérés az optimumtól” (19.)</td><td>t→min, K→min, P→max, p→max, 7.1. ábra (1–3.)</td><td>Az eltérés mindig valamelyik célfüggvénytől való eltérés</td></tr><tr><td>Adat- és tudásbázis tíz adatcsoporttal (20.)</td><td>Az adaptálhatóság feltételei (5., 8.)</td><td>A 8. dia felsorolása itt kap konkrét tartalmat</td></tr><tr><td>Típustechnológiai megoldások az adatbázisban (20.)</td><td>Típustechnológia, reprezentáns alkatrész, 7.5. ábra (9–18.)</td><td>A csoportosítás terméke adatbázis-tartalomként tér vissza</td></tr><tr><td>Technológiai tervezési szabályok az adatbázisban (20.)</td><td>Generatív elv, mérnöki heurisztika (5.)</td><td>A heurisztikus szabályok tárolt formája</td></tr><tr><td>Interaktivitás nyilai a 7.6. ábrán (20.)</td><td>Az interaktív tervezés lehetősége (8.)</td><td>Ugyanaz a tulajdonság, most ábrába rajzolva</td></tr><tr><td>Input formái: bemenő nyelv, szöveges és grafikus párbeszédes, vegyes (20.)</td><td>Input: tartalom és forma, 7.2. ábra (4.)</td><td>A „forma” szó konkretizálása</td></tr><tr><td>APT processzor–posztprocesszor struktúra (21–22.)</td><td>Processzor–posztprocesszor felépítés (5., 8.)</td><td>Ugyanaz az elv, most működő rendszeren bemutatva</td></tr><tr><td>CLDATA mint közbenső nyelv (22., 34–41.)</td><td>Kompatibilitás, szabványos interfészek (8.)</td><td>A CLDATA az a szabványos interfész, amit a 8. dia említ</td></tr><tr><td>Szintaxis és szemantika (23.)</td><td>Input: tartalom és forma (4.)</td><td>Forma = szintaxis, tartalom = szemantika</td></tr><tr><td>Horizontális és vertikális struktúra (23.)</td><td>Horizontális és vertikális modularitás (6–7.)</td><td>Ugyanaz a két irány, más tárgyon: ott modulokon, itt nyelvi mondatokon</td></tr><tr><td>PART/MATERL, C45, RA, 12.5, IT8 (28.)</td><td>A kód 8. pozíciója (anyag) és 10. pozíciója (IT osztály) (15.)</td><td>Ugyanaz az adat, most programsorban</td></tr><tr><td>DRILL/…, CORED (30.)</td><td>A kód 4. pozíciója (belső felület) és 9. pozíciója (öntvény) (14–15.)</td><td>A furat és az öntött előfurat kódolt tulajdonsága</td></tr><tr><td>A fúrási ciklus paraméterei (39–40.)</td><td>Műveletelemtervezés, mozgásciklusok parametrikus algoritmusai (19.)</td><td>Ezek azok a paraméterek, amiket a ciklusalgoritmus megkap</td></tr><tr><td>„Ismerni kell a teljes CLDATA-specifikációt” (41.)</td><td>Adaptálhatóság a helyi viszonyokra (5., 8.)</td><td>A posztprocesszor az a pont, ahol a helyi illesztés megtörténik</td></tr></tbody></table>
+<h2 id="19-dia-a-származtatás-három-tervezési-szinten">19. dia: a származtatás három tervezési szinten</h2>
+<p>Minél lejjebb megyünk a tervezési szinteken, annál több gondot okoz a típustechnológiai folyamatból a konkrét folyamat származtatása. A három szint ugyanaz, mint a 7.6. ábra három processzormodulja, és ugyanaz, mint a vertikális modularitás szintjei a 7.3. ábrán.</p>
+<table><thead><tr><th>Tervezési szint</th><th>Mi történik automatizált üzemmódban</th><th>Amit hozzá tudni kell</th></tr></thead><tbody><tr><td>Műveleti sorrendtervezés</td><td>Problémamentes</td><td>A sorrend a csoport közös tulajdonsága, ezt hordozza a reprezentáns alkatrész (10., 17. dia)</td></tr><tr><td>Művelettervezés</td><td>Gondot jelenthet a méretes szerszámok kiválasztása, mert nincs alkatrészleírás</td><td>A méretes szerszám (fúró, dörzsár, menetfúró) mérete maga a felület mérete; a technológiai kód (11–16. dia) csak osztályoz, méretet nem ad</td></tr><tr><td>Műveletelemtervezés</td><td>A forgácsolási paraméterek többnyire átszámítás nélkül alkalmazhatók</td><td>Cserébe „létrejön egy eltérés az optimumtól”: a 7.1. ábra t, K, P, p célfüggvényétől</td></tr><tr><td>Mozgásciklusok tervezése</td><td>Parametrikus algoritmusok alkalmazhatók</td><td>A paraméterek konkrét listáját a 39–40. dia fúrási ciklusa adja</td></tr></tbody></table>
+<p>A 19. dia alján kezdődik a 7.2. alfejezet: „Az ATTR-ek fő építőelemei, APT bemenő nyelv, CLDATA”. Innentől a fejezet a 7.2. ábra fekete dobozt bontja fel.</p>
+<p><strong>Amit felelni kell:</strong> a három szintet sorrendben, és mindegyikhez az egy darab minősítést – problémamentes, szerszámválasztás gond, paraméterek átszámítás nélkül ám optimumtól eltérve.</p>
+<h2 id="76-ábra-20-dia-az-attr-felépítése">7.6. ábra (20. dia): az ATTR felépítése</h2>
+<p>Az ATTR fő építőelemei: input, processzor három tervező modullal, CLDATA, posztprocesszor, output, és mindezek mellett végig az adat- és tudásbázis. Ez a 7.2. ábra fekete dobozának a felbontása.</p>
+<pre><code class="language-mermaid">flowchart TD
+  I[&quot;Input&quot;] --&gt; S[&quot;Sorrendtervező&quot;]
+  S --&gt; M[&quot;Művelettervező&quot;]
+  M --&gt; E[&quot;Műveletelemtervező&quot;]
+  E --&gt; C[(&quot;CLDATA&quot;)]
+  C --&gt; PP[&quot;Posztprocesszor&quot;]
+  PP --&gt; O[&quot;Output&quot;]
+  DB[(&quot;Adat- és tudásbázis&quot;)] &lt;--&gt; S
+  DB &lt;--&gt; M
+  DB &lt;--&gt; E
+  DB &lt;--&gt; PP</code></pre>
+<p>A három tervező modul együtt alkotja a <strong>processzort</strong>; az ábrán mindháromnál és a posztprocesszornál is ott van az <strong>interaktivitás</strong> nyila (a 8. dia „interaktív tervezés lehetőségének biztosítása” követelménye).</p>
+<p><strong>Az input négy lehetséges formája</strong> (a 7.2. ábra „tartalom és forma” szavából a forma):</p>
+<ol><li><p>bemenő nyelv (esetleg táblázatos)</p></li><li><p>szöveges párbeszédes</p></li><li><p>grafikus párbeszédes</p></li><li><p>vegyes</p></li></ol>
+<p><strong>Az adat- és tudásbázis tíz fő adatcsoportja</strong> – mindegyiket kérik, és mindegyik visszavezethető korábbi anyagra:</p>
+<table><thead><tr><th>Adatcsoport</th><th>Hova kötődik</th></tr></thead><tbody><tr><td>Gyártórendszerek leírása, adatai</td><td>„Gyártórendszer összetétele” mint helyi viszony (8. dia)</td></tr><tr><td>Gyártóberendezések adatai</td><td>„Egyes gyártóberendezések technológiai képességei” (8. dia)</td></tr><tr><td>Gyártóeszközök (szerszámok, készülékek) leírása, adatai</td><td>„Alkalmazott gyártóeszközök” (8.), és az egységes szerszámozás a csoportmegmunkálásnál (9. dia)</td></tr><tr><td>Típustechnológiai megoldások</td><td>A 9–18. dia teljes anyaga: osztályozás, kód, reprezentáns alkatrész</td></tr><tr><td>Technológiai tervezési szabályok</td><td>A generatív elv mérnöki heurisztikája (5. dia)</td></tr><tr><td>Technológiai adatok</td><td>A műveletelemtervezés forgácsolási paraméterei (19. dia)</td></tr><tr><td>Anyagok megmunkálhatósági jellemzői</td><td>A kód 8. pozíciója: acél, ötvözött acél, öntöttvas (15. dia)</td></tr><tr><td>Szabványok, normáliák (ISO tűréstábla), szabványos alakzatok méretei</td><td>A kód 10. pozíciója: IT osztály (15. dia)</td></tr><tr><td>Szövegek, üzenetek</td><td>A párbeszédes üzemmód és a párbeszédes kódolás (8., 17. dia)</td></tr><tr><td>Tervezési eredmények, közbenső eredmények, kiindulási adatok</td><td>A generatív elv visszalépése: csak tárolt közbenső eredményből lehet korábbi fázishoz visszatérni (5. dia)</td></tr></tbody></table>
+<p><strong>Az output: a technológiai dokumentáció négy eleme.</strong> Figyeld meg, hogy párba állíthatók a tervező modulokkal:</p>
+<table><thead><tr><th>Kimenő dokumentum</th><th>Melyik modul állítja elő</th></tr></thead><tbody><tr><td>Műveleti sorrendterv</td><td>Sorrendtervező</td></tr><tr><td>Művelettervek</td><td>Művelettervező</td></tr><tr><td>Gyártóeszköz-lista</td><td>Művelettervező a gyártóeszköz-adatbázisból</td></tr><tr><td>NC-CNC vezérlőprogramok</td><td>Műveletelemtervező → CLDATA → posztprocesszor</td></tr></tbody></table>
+<p><strong>Amit felelni kell:</strong> a lánc sorrendje pontosan Input → Processzor (Sorrendtervező, Művelettervező, Műveletelemtervező) → CLDATA → Posztprocesszor → Output, és az adat- és tudásbázis mindegyikkel kétirányú kapcsolatban áll.</p>
+<h2 id="2122-dia-az-apt-és-a-77-ábra">21–22. dia: az APT és a 7.7. ábra</h2>
+<p>Az APT (Automatically Programmed Tools) az első NC programozási rendszer, az 1950-es évek második felében dolgozták ki a MIT-ben. Azért kerül ide, mert rajta lehet megmutatni a 8. dián már kimondott két követelményt: a processzor–posztprocesszor felépítést és a szabványos interfészt.</p>
+<p><strong>Tények, amiket szó szerint kérnek:</strong></p>
+<ul><li><p>APT = Automatically Programmed Tools, az <strong>első</strong> NC programozási rendszer.</p></li><li><p>Kidolgozás: az 1950-es évek második fele, MIT (Massachusetts Institute of Technology – a dián elírva szerepel).</p></li><li><p>Alapul szolgált további rendszerekhez: <strong>EXAPT, NELAPT, IFAPT, ADAPT, FAPT</strong> stb. (mindegyik nevében ott az APT).</p></li><li><p>Alapul szolgált <strong>ISO szabványajánlásokhoz</strong> is.</p></li><li><p>A korszerű CNC gyártók a vezérléshez <strong>opcióként</strong> ajánlják; ekkor az APT az ISO NC nyelv helyett használható CNC programozásra.</p></li></ul>
+<p><strong>Az APT három fő ismérve</strong> (ez a három pont a 7.7. ábra tartalma):</p>
+<ol><li><p>szabad formátumú bemenő nyelv az alkatrészprogram leírására,</p></li><li><p>processzor–posztprocesszor struktúra,</p></li><li><p>CLDATA processzor–posztprocesszor közbenső nyelv.</p></li></ol>
+<p><strong>A 7.7. ábra lánca:</strong> Input: APT alkatrészprogram → Processzor → CLDATA (Cutter Location Data), <strong>ISO TC 184</strong> → Posztprocesszor → Output: NC-CNC vezérlőprogram.</p>
+<p>Vesd össze a 7.6. ábrával: a 7.7. ábra nem más, mint a 7.6. ábra alsó fele. Ami ott a műveletelemtervezőtől lefelé tart, az itt az egész rendszer, mert az APT csak NC-programot készít, műveleti sorrendet nem.</p>
+<p>A 23. dia első két mondata zárja le a gondolatot: ezek az ismérvek a mai ATTR-ekre is jellemzőek, és az APT-alapú bemenő nyelv, valamint a CLDATA az ISO ajánlás kidolgozásának alapja lett.</p>
+<p><strong>Buktató:</strong> ne mondd azt, hogy az APT NC-programot ad. A processzor kimenete <strong>CLDATA</strong>, és csak a posztprocesszor után lesz belőle gépspecifikus NC-CNC vezérlőprogram.</p>
+<h2 id="23-dia-a-bemenő-nyelv-hat-jellemzője">23. dia: a bemenő nyelv hat jellemzője</h2>
+<p>A bemenő nyelv az alkatrészprogram leírására szolgál, a műszaki nyelvhez közelálló fogalmakkal, adott nyelvtani szabályok szerint. Hat jellemzője van, és mind a hat visszatér a CLDATA-nál is (35. dia) – ezt a mondatot a dia szó szerint kimondja.</p>
+<table><thead><tr><th>Jellemző</th><th>A dia definíciója</th><th>Hol látod működés közben</th></tr></thead><tbody><tr><td>Szintaxis</td><td>A bemenő nyelv nyelvtana</td><td>A mondat általános felépítése a 24. dián</td></tr><tr><td>Szemantika</td><td>A nyelvi mondatok, az alkatrészprogram értelmezése, fogalmi oldala</td><td>A 7.8. ábra: mit jelent a kördefiníció rajzban</td></tr><tr><td>Predefinitség</td><td>Egy fogalomra csak a meghatározása (definíciója) után lehet hivatkozni</td><td>A 30. dia: P1=POINT/50, 50 előbb, CUT/P1 csak azután</td></tr><tr><td>Modalitás</td><td>Öröklődés: egy utasítás mindaddig érvényben marad, amíg a megváltoztatását kiváltó utasítás meg nem jelenik</td><td>A 30. dia: a FEDRAT/0.2 után a GODLTA előtolással megy, ezért kell utána újra RAPID</td></tr><tr><td>Horizontális struktúra</td><td>A nyelvi mondatok felépítése</td><td>Egy mondaton belül: főszó, módosítók, paraméterek</td></tr><tr><td>Vertikális struktúra</td><td>A nyelvi mondatok alkatrészprogramon belüli sorrendisége</td><td>A 7.9. ábra: PARTNO elöl, FINI a végén</td></tr></tbody></table>
+<p>A két struktúra ugyanaz a két irány, mint a modularitásnál a 6–7. dián: <strong>horizontális = egy szinten belül</strong>, <strong>vertikális = a szintek, illetve a sorrend egymás után</strong>. Ott modulokról volt szó, itt nyelvi mondatokról.</p>
+<p><strong>Amit felelni kell:</strong> a predefinitség és a modalitás nem keverhető össze. A predefinitség a hivatkozás <strong>sorrendjéről</strong> szól (előbb definiálj, aztán hivatkozz), a modalitás az érvényesség <strong>időtartamáról</strong> (amíg meg nem változtatod).</p>
+<h2 id="2426-dia-nyelvi-elemek-és-a-mondat-felépítése">24–26. dia: nyelvi elemek és a mondat felépítése</h2>
+<p>A nyelvi elemek öt csoportja egymásra épül: jelekből lesz szó, szavakból mondat, mondatokból alkatrészprogram. Ez a felépítés maga a horizontális és vertikális struktúra az előző diáról.</p>
+<ol><li><p><strong>Alkalmazható jelek:</strong> betűk, számok, speciális jelek.</p></li><li><p><strong>Szavak</strong> (hossza, felépítése: APT-ben <strong>maximum 6 karakter és betűvel kezdődik</strong>):</p><ul><li><p><strong>szótári szavak</strong>: <strong>főszavak</strong> (a mondat típusát határozzák meg) és <strong>módosítók</strong> (módosítják a mondat típusát, megadják a következő paraméter jelentését, vagy önálló jelentéssel bírnak),</p></li><li><p><strong>szótáron kívüli szavak</strong>: azonosítók és formális paraméterek.</p></li></ul></li><li><p><strong>Karakterlánc</strong> (string, szöveg).</p></li><li><p><strong>Mondat, utasítás</strong>, melynek összeállítási szabályait a nyelv rögzíti.</p></li><li><p><strong>Alkatrészprogram</strong>: nyelvi mondatok rendezett halmaza (26. dia vége).</p></li></ol>
+<p>A 6 karakteres korlát magyarázza, miért néz ki minden APT-szó rövidítésnek: FEDRAT, SPINDL, GODLTA, TOOLNO, PARTNO.</p>
+<p><strong>A mondat általános felépítése a dián:</strong></p>
+<p><code>[&lt;azonosító&gt;=]&lt;főszó&gt;{&lt;módosító&gt;!&lt;paraméter&gt;!&lt;azonosító&gt;]}</code></p>
+<p><strong>A példa (24–25. dia):</strong> <code>C1=CIRCLE/TANTO, IN, C2, OUT, C3, RADIUS, 50, YLARGE</code></p>
+<table><thead><tr><th>A mondat része</th><th>Melyik elem</th><th>Mit jelent</th></tr></thead><tbody><tr><td>C1</td><td>azonosító (szótáron kívüli szó)</td><td>A definiált kör neve</td></tr><tr><td>CIRCLE</td><td>főszó</td><td>A mondat típusa: kördefiníció</td></tr><tr><td>TANTO</td><td>módosító</td><td>Érintőlegesen</td></tr><tr><td>IN, C2</td><td>módosító + azonosító</td><td>Belülről érinti a C2 kört</td></tr><tr><td>OUT, C3</td><td>módosító + azonosító</td><td>Kívülről érinti a C3 kört</td></tr><tr><td>RADIUS, 50</td><td>módosító + paraméter</td><td>A módosító mondja meg, hogy az 50 sugár és nem átmérő (50 mm)</td></tr><tr><td>YLARGE</td><td>módosító</td><td>A két lehetséges megoldás közül a nagyobb y irányú</td></tr></tbody></table>
+<p>A 7.8. ábra pont ezt rajzolja: a C2 (középpontja P1) és a C3 (középpontja P2) körökhöz több 50-es sugarú érintő kör is illeszkedik, ezért kell a YLARGE. Ez a módosítók hármas szerepének iskolapéldája.</p>
+<p><strong>Elhagyható részek (26. dia):</strong> az azonosító és a törtvonal utáni paraméterek elhagyhatók, pontosabban vannak olyan mondattípusok, ahol ezekre nincs szükség.</p>
+<table><thead><tr><th>Példa a diáról</th><th>Mit ír elő</th><th>Megjegyzés</th></tr></thead><tbody><tr><td>TOOLNO/256432, 22</td><td>Szerszám előírása</td><td>Azonosító nélküli mondat</td></tr><tr><td>SPINDL/400, CLW</td><td>Orsóforgás: fordulatszám és forgásirány</td><td>CLW = clockwise, az óramutató járásával megegyező</td></tr><tr><td>FEDRAT/0.5, PERREV</td><td>Előtolás fordulatonkénti dimenzióban</td><td>A PERREV módosító adja a 0.5 mértékegységét</td></tr><tr><td>GOTO/P2</td><td>Szerszámmozgás adott pontba</td><td>A P2-t előbb definiálni kell (predefinitség)</td></tr><tr><td>STOP</td><td>Szerszámgép leállítása</td><td>Se azonosító, se törtvonal, se paraméter</td></tr></tbody></table>
+<p>Ezt az öt példát jegyezd meg: a 35. dia szerint az <strong>elemi technológiai utasítások döntően a 2000-es CLDATA-rekordoknak felelnek meg</strong>, és a 36–38. dián pont ezek térnek vissza kódszámmal (TOOLNO = 1025, SPINDL = 1031, FEDRAT = 1009, STOP = 2).</p>
+<h2 id="2730-dia-az-alkatrészprogram-felépítése">27–30. dia: az alkatrészprogram felépítése</h2>
+<p>Minden APT alkatrészprogram három részből áll, és a két szélső rész kötött szóval kezdődik, illetve végződik. Ez a vertikális struktúra legegyszerűbb megjelenése.</p>
+<table><thead><tr><th>A 7.9. ábra része</th><th>A hozzá tartozó mondat</th></tr></thead><tbody><tr><td>Program kezdete</td><td>PARTNO/ &lt;szöveg&gt; – például PARTNO/FÚRÁS, HÁZ6678</td></tr><tr><td>Program törzse</td><td>A négy adatcsoport (lásd lent)</td></tr><tr><td>Program vége</td><td>FINI</td></tr></tbody></table>
+<p><strong>A programtörzs fő adatcsoportjai (28. dia):</strong></p>
+<ol><li><p>általános adatok a munkadarabra, megmunkálásra vonatkozóan,</p></li><li><p>geometriai leírás, definíciók,</p></li><li><p>technológia:</p><ul><li><p>technológiai definíciók,</p></li><li><p>technológiai definíciók aktivizálása,</p></li><li><p>megmunkálási helyek kijelölése,</p></li><li><p>esetleg elemi technológiai utasítások.</p></li></ul></li></ol>
+<p><strong>Az általános adatok három példája – mindhárom korábbi anyagra mutat vissza:</strong></p>
+<table><thead><tr><th>Mondat</th><th>Mit mond ki</th><th>Visszacsatolás</th></tr></thead><tbody><tr><td>PART/MATERL, C45, RA, 12.5, IT8</td><td>Anyag C45, felületi érdesség Ra 12,5, tűrés IT8</td><td>A technológiai kód 8. pozíciója (anyag) és 10. pozíciója (IT osztály, 15. dia)</td></tr><tr><td>CLDIST/0.5, 2</td><td>Biztonsági (ráállási) távolság előírása</td><td>Ugyanez a cldist tér vissza a fúrási ciklusban (7.13. ábra)</td></tr><tr><td>SAFPOS/800, 800, 1000</td><td>Biztonsági, szerszámcsere-helyzet koordinátái</td><td>A program utolsó mozgása pont ide tér vissza, és a CLDATA 1094-es rekordja ezt kódolja (38. dia)</td></tr></tbody></table>
+<p><strong>A 30. dia mintaprogramja sorról sorra.</strong> Ezt kérd számon magadon, mert egyben mutatja a geometriát, a technológiai definíciót és az elemi utasításokat.</p>
+<table><thead><tr><th>Sor</th><th>Csoport</th><th>Mit csinál</th></tr></thead><tbody><tr><td>ZSURF/100</td><td>geometria</td><td>A megmunkálási sík z-szintje 100</td></tr><tr><td>P1=POINT/50, 50</td><td>geometria</td><td>Pontdefiníció; predefinitség: előbb ez, aztán a hivatkozás</td></tr><tr><td>P2=POINT/100, 100</td><td>geometria</td><td>Második furat helye</td></tr><tr><td>T1= DRILL/DIAMETH, 16, DEPTH, 10, CORED</td><td>technológiai definíció</td><td>Ø16-os, 10 mély fúrás előfurattal (7.10. ábra)</td></tr><tr><td>WORK/T1</td><td>aktivizálás</td><td>Innentől a T1 definíció érvényes (modalitás)</td></tr><tr><td>CUT/P1, P2, INVERZ</td><td>megmunkálási hely</td><td>Hol kell a T1-et végrehajtani</td></tr><tr><td>WORK/NOMORE</td><td>aktivizálás vége</td><td>A modalitás lezárása</td></tr><tr><td>TOOLNO/779837, 12</td><td>elemi utasítás</td><td>Szerszám azonosítója és helye a gépen</td></tr><tr><td>SPINDL/800, CCLW</td><td>elemi utasítás</td><td>800 1/min, CCLW = counterclockwise</td></tr><tr><td>RAPID</td><td>elemi utasítás</td><td>Gyorsmenet bekapcsolása</td></tr><tr><td>GOTO/(P3=POINT/80, 80, 102</td><td>elemi utasítás</td><td>Mozgás a helyben definiált P3 pontba</td></tr><tr><td>FEDRAT/0.2</td><td>elemi utasítás</td><td>Előtolás 0,2; a RAPID érvénye itt szűnik meg</td></tr><tr><td>GODLTA/-15</td><td>elemi utasítás</td><td>15-tel lefelé előtolással: ez maga a fúrás</td></tr><tr><td>RAPID</td><td>elemi utasítás</td><td>Vissza gyorsmenetre</td></tr><tr><td>GODLTA/15</td><td>elemi utasítás</td><td>15-tel vissza felfelé</td></tr><tr><td>GOTO/800, 800, 1000</td><td>elemi utasítás</td><td>Vissza a SAFPOS-ba</td></tr><tr><td>FINI</td><td>program vége</td><td>A 7.9. ábra záró mondata</td></tr></tbody></table>
+<p><strong>Két út ugyanarra a furatra.</strong> A T1–WORK–CUT hármas azt bízza a rendszerre, hogy a mozgásciklust ő tervezze meg (19. dia: parametrikus algoritmusok); az elemi utasítások sora ugyanezt kézzel írja le. Ezért szerepel a 28. dián az „esetleg” szó az elemi technológiai utasításoknál.</p>
+<p><strong>Buktatók:</strong> a GODLTA növekményes (delta) mozgás, a GOTO abszolút pontba visz. A GOTO/(P3=POINT/80, 80, 102 sor a dián hiányos, a záró zárójel lemaradt.</p>
+<h2 id="3133-dia-mozgásutasítások">31–33. dia: mozgásutasítások</h2>
+<p>A mozgásutasítások két csoportba oszlanak: pozicionáló mozgások és pályamenti mozgást vezérlő utasítások. Az előbbit már láttad a 30. dia programjában, az utóbbi a marás típusú megmunkálás nyelve.</p>
+<p><strong>a) Pozicionáló mozgások</strong></p>
+<table><thead><tr><th>Utasítás</th><th>Jelentés</th></tr></thead><tbody><tr><td>GOTO/P1</td><td>Mozgás a definiált P1 pontba</td></tr><tr><td>GOTO/X1, Y1, Z1</td><td>Mozgás koordinátákkal megadott pontba</td></tr><tr><td>GODLTA/dx, dy, dz</td><td>Mozgás növekménnyel, mindhárom tengelyen</td></tr><tr><td>GODLTA/dz</td><td>Mozgás növekménnyel, csak z irányban</td></tr></tbody></table>
+<p><strong>b) Pályamenti mozgást vezérlő utasítások</strong></p>
+<p>A három felülettípus (7.11. ábra) – ezt a három rövidítést angolul és magyarul is kérik:</p>
+<table><thead><tr><th>Rövidítés</th><th>Angolul</th><th>Magyarul</th><th>Szerepe</th></tr></thead><tbody><tr><td>ds</td><td>drive surface</td><td>vezető felület</td><td>Ezt követi a szerszám oldala</td></tr><tr><td>ps</td><td>part surface</td><td>alkatrész felület</td><td>Ezen „lépked” a szerszám vége, ez adja a mélységet</td></tr><tr><td>cs</td><td>check surface</td><td>ellenőrző felület</td><td>Itt áll meg a mozgás</td></tr></tbody></table>
+<p>Ráállás három felületre: <code>GO/{TO|ON|PAST}, ds, {TO|ON|PAST}, ps, {TO|ON|PAST}, cs</code></p>
+<p>Mozgás felületek mentén: <code>GOFWD | GOBACK | GORGT | GOLFT /{TO|ON|PAST}, ds, {TO|ON|PAST}, cs</code> – magyarul előre, hátra, jobbra, balra.</p>
+<p>Két dolgot vegyél észre. Először: a ráállásnál három felület szerepel, a további mozgásoknál már csak kettő, mert a ps a ráállásnál rögzül és modálisan érvényben marad. Másodszor: <strong>az adott mozgás iránya mindig az előző mozgás irányához viszonyítva adandó meg</strong> – ez is öröklődés, mint a modalitás.</p>
+<p><strong>Kiegészítés a három módosítóhoz.</strong> A dia nem írja le a jelentésüket, de a 7.12. ábráról leolvasható: TO = a szerszám a felület innenső oldalán áll meg, ON = a szerszám középpontja kerül a felületre, PAST = a szerszám túlhalad a felületen.</p>
+<p><strong>A 7.12. ábra példája, sorról sorra</strong> (L1 az alsó, L3 a felső vízszintes, L2 a bal, L4 a jobb függőleges egyenes):</p>
+<table><thead><tr><th>Utasítás</th><th>Mi történik</th></tr></thead><tbody><tr><td>GOTO/P1</td><td>Pozicionálás a kiinduló P1 pontba</td></tr><tr><td>GO/[TO]L1</td><td>Ráállás az L1 egyenesre; a szögletes zárójel az elhagyható TO módosítót jelöli</td></tr><tr><td>GOLFT/L1, PAST, L2</td><td>Balra fordul, az L1 mentén halad, és az L2-n túl áll meg</td></tr><tr><td>GORGT/L2, TO, L3</td><td>Jobbra fordul, az L2 mentén halad, az L3 előtt áll meg</td></tr><tr><td>GORGT/L3, ON, L4</td><td>Jobbra fordul, az L3 mentén halad, középpontja az L4-re áll</td></tr></tbody></table>
+<p><strong>Amit felelni kell:</strong> a ds–ps–cs hármast, a négy irányszavat, a három módosítót, és azt a mondatot, hogy az irány mindig az előző mozgáshoz képest értendő.</p>
+<h2 id="3435-dia-a-cldata-felépítése">34–35. dia: a CLDATA felépítése</h2>
+<p>A CLDATA (Cutter Location Data) <strong>rekordok szekvenciális sorozata</strong>, és a rekordok <strong>szavakból</strong> állnak. Ez a 8. dia „szabványos interfész” követelményének a konkrét alakja, és ez a „forma” a 7.2. ábra „tartalom és forma” párjából.</p>
+<table><thead><tr><th>Szó</th><th>Hossz</th><th>Típus</th><th>Tartalom</th></tr></thead><tbody><tr><td>Sz0</td><td>4 Byte</td><td>I</td><td>length: a rekord további szavainak száma</td></tr><tr><td>Sz1</td><td>4 Byte</td><td>I</td><td>iseqno: a rekord sorszáma</td></tr><tr><td>Sz2</td><td>4 Byte</td><td>I</td><td>a rekord típuskódja</td></tr><tr><td>Sz3</td><td>4 Byte</td><td>I</td><td>a rekord alaptípus kódja (ha van), vagy valamilyen kód típusú adat</td></tr><tr><td>Sz4…Szn, n ≤ 245</td><td>8 Byte</td><td>I, R, N vagy T</td><td>a rekord típusától és altípusától függ</td></tr></tbody></table>
+<p>A négy adattípus: <strong>I = egész szám, R = valós szám, N = név (azonosító), T = string</strong>. Az első négy szó mindig 4 Byte és mindig egész; minden további szó 8 Byte.</p>
+<p>A 35. dia egy mondatban visszautal a bemenő nyelvre: a szintaxis, a szemantika, a modalitás, valamint a horizontális és vertikális struktúra <strong>értelmezése ugyanaz, mint a bemenő nyelvnél</strong> (23. dia). Egy vizsgakérdésre tehát ugyanaz a hat definíció a válasz.</p>
+<p><strong>A két rekordtípus, amit a dia részletesen megad:</strong></p>
+<table><thead><tr><th>Típuskód</th><th>Név</th><th>Felépítés</th><th>Mire való</th></tr></thead><tbody><tr><td>1000</td><td>CARDNO</td><td>Sz1 = iseqno; Sz2 = 1000, CARDNO; Sz3 = icard</td><td>Az icard annak az alkatrészprogram-mondatnak a sorszáma, amely a további rekordok forrása</td></tr><tr><td>2000</td><td>Posztprocesszor utasítások</td><td>Sz1 = iseqno; Sz2 = 2000; Sz3 = altípus-kód, a további szavak az altípuskódtól is függnek</td><td><strong>Döntően a bemenő nyelv elemi technológiai utasításainak felelnek meg</strong></td></tr></tbody></table>
+<p>Az 1000-es rekord a visszakereshetőség eszköze: megmondja, melyik APT-mondatból származnak az utána következő rekordok. A 2000-es rekordnál pedig állítsd párba a 26. és a 30. dia elemi utasításait a 36–39. dia kódszámaival – szó szerint ugyanazok térnek vissza.</p>
+<h2 id="3639-dia-a-2000-es-rekordok-tételesen">36–39. dia: a 2000-es rekordok tételesen</h2>
+<p>Mind a 2000-es típusba tartozik, tehát az Sz2 mindegyiknél 2000, és az <strong>Sz3 hordozza az altípus-kódot</strong>. A táblázat utolsó oszlopa mutatja, hogy szinte mindegyik a már ismert APT-utasítás párja.</p>
+<table><thead><tr><th>Sz3 kód</th><th>Név</th><th>Sz4</th><th>Sz5 és további szavak</th><th>Mit csinál</th><th>Honnan ismerős</th></tr></thead><tbody><tr><td>1002</td><td>HEAD</td><td>193</td><td>Sz5 = ihead, megmunkáló fej vagy szán kódja</td><td>A megnevezett szán vagy megmunkáló fej működésbe léptetése</td><td>Új; a gyártóberendezések adatai az adatbázisból (20. dia)</td></tr><tr><td>1009</td><td>FEDRAT</td><td>501 = PERMIN, 504 = PERREV</td><td>Sz5 = s, az előtolás értéke</td><td>Az előtolás bekapcsolása</td><td>FEDRAT/0.5, PERREV (26. dia)</td></tr><tr><td>1025</td><td>TOOLNO</td><td>e, a szerszám azonosító kódja</td><td>Sz5 = f, a szerszám helye a szerszámgépen, majd esetleges méret- és korrekcióadatok</td><td>A szerszám aktivizálása</td><td>TOOLNO/256432, 22 (26.) és TOOLNO/779837, 12 (30. dia)</td></tr><tr><td>1031</td><td>SPINDL</td><td>71 = ON, 72 = OFF, 246 = ORIENT (orientált kikapcsolás, rögzítés), 114 = LOCK (kikapcsolás + rögzítés)</td><td>–</td><td>Orsóforgás be- és kikapcsolása</td><td>SPINDL/400, CLW (26.) és SPINDL/800, CCLW (30. dia)</td></tr><tr><td>1049</td><td>COUPLE</td><td>71 = ON, 72 = OFF</td><td>–</td><td>Orsóforgás és előtolás szinkronizálása menetvágáshoz</td><td>A kód 5. pozíciója: a menet mint mellékelem (15. dia)</td></tr><tr><td>5</td><td>RAPID</td><td>–</td><td>–</td><td>Gyorsmenet bekapcsolása</td><td>RAPID a 30. dia programjában</td></tr><tr><td>1094</td><td>SAFPOS</td><td>53 = NOMORE (érvényesség vége), 1258 = FIX (szerszámcsere gépi fix helyzetben); a koordinátás változatban Sz4 (R) = x</td><td>Sz5 (R) = y, Sz6 (R) = z</td><td>Szerszámcsere-helyzet előírása</td><td>SAFPOS/800, 800, 1000 (28. dia)</td></tr><tr><td>2</td><td>STOP</td><td>–</td><td>–</td><td>Megállás</td><td>STOP (26. dia)</td></tr><tr><td>3</td><td>OPSTOP</td><td>–</td><td>–</td><td>Feltételes megállás</td><td>–</td></tr><tr><td>1012</td><td>OPSKIP</td><td>71 = ON, 72 = OFF</td><td>–</td><td>Vezérlőmondatok feltételes átugrása</td><td>–</td></tr><tr><td>1010</td><td>DELAY</td><td>98 = SPIN (sec-ban adva), 97 = REV (orsófordulatok számával adva)</td><td>Sz5 = a, a késleltetés értéke az Sz4 dimenziójában</td><td>Késleltetés előírása</td><td>A fúrási ciklus késleltetése (7.13. ábra)</td></tr></tbody></table>
+<p><strong>Három fogódzó a számok megjegyzéséhez.</strong> A 71 = ON és a 72 = OFF három helyen is visszatér (SPINDL, COUPLE, OPSKIP), tehát egyszer kell megtanulni. A kétjegyűnél rövidebb Sz3-kódok (2, 3, 5) azok az utasítások, amelyeknek nincs paramétere. Az 1000 feletti kódok mind paraméterezett posztprocesszor-utasítások.</p>
+<p><strong>Pontosítás, amit érdemes tudni.</strong> A 38. dia a STOP és az OPSTOP alá közösen írja oda, hogy „feltételes stop”. Szigorúan véve az OPSTOP (optional stop) a feltételes, kezelői kapcsolótól függő megállás, a STOP pedig feltétel nélkül állít meg.</p>
+<h2 id="3940-dia-a-fúrási-ciklus-és-a-713-ábra">39–40. dia: a fúrási ciklus és a 7.13. ábra</h2>
+<p>A ciklusrekord az a hely, ahol a 19. dia ígérete – „a mozgásciklusok tervezéséhez parametrikus algoritmusok alkalmazhatók” – konkrét paraméterlistát kap. Tizenkét szó, és mindegyiket kérik.</p>
+<table><thead><tr><th>Szó</th><th>Kód vagy érték</th><th>Jelentés</th></tr></thead><tbody><tr><td>Sz3 (I)</td><td>1054</td><td>CYCLE, ciklus</td></tr><tr><td>Sz4 (I)</td><td>163</td><td>DRILL, fúrás</td></tr><tr><td>Sz5 (I)</td><td>depth</td><td>mélység</td></tr><tr><td>Sz6 (I)</td><td>316</td><td>MMPR, azaz mm/fordulat</td></tr><tr><td>Sz7 (R)</td><td>n</td><td>az orsó fordulatszáma</td></tr><tr><td>Sz8 (R)</td><td>cldist</td><td>biztonsági távolság</td></tr><tr><td>Sz9 (I)</td><td>280</td><td>RAPTO, gyors ráállás</td></tr><tr><td>Sz10 (R)</td><td>rdepth</td><td>relatív szabad mélység (ütközési magasság)</td></tr><tr><td>Sz11 (I)</td><td>279</td><td>DWELL</td></tr><tr><td>Sz12 (R)</td><td>delay</td><td>késleltetés fordulatban</td></tr></tbody></table>
+<p><strong>A 7.13. ábra ugyanezt mozgásként mutatja:</strong></p>
+<ol><li><p>A szerszám kiemelkedik az előző furatból.</p></li><li><p>Az <strong>rdepth</strong> szintjén halad át a következő furat fölé; ez az ütközési magasság, ezért kell a lépcsős munkadarabnál.</p></li><li><p>A P1 pont fölött gyorsmenetben áll rá a felülettől <strong>cldist</strong> távolságra (RAPTO).</p></li><li><p>Innen előtolással fúr <strong>depth</strong> mélységig, n fordulatszámmal, mm/ford dimenziójú előtolással.</p></li><li><p>A furat alján <strong>késleltetés</strong> (DWELL, delay fordulatban) – ez tisztítja ki a furat alját.</p></li><li><p>Visszahúzás a biztonságos szintre.</p></li></ol>
+<p><strong>A ciklus három mondata a bemenő nyelven:</strong></p>
+<pre><code>CYCLE/DRILL     fúrási ciklus bekapcsolása
+GOTO/P1         fúrási hely előírása
+CYCLE/OFF       ciklus kikapcsolása</code></pre>
+<p>Ez szóról szóra ugyanaz a modális minta, mint a 30. dián a WORK/T1 – CUT/P1, P2 – WORK/NOMORE hármas: bekapcsolás, helyek felsorolása, kikapcsolás. Ha a modalitás definícióját kérdezik, ezt a két példát mondd.</p>
+<p>Két összefüggés még: a cldist ugyanaz a fogalom, mint a 28. dia CLDIST/0.5, 2 általános adata, a delay pedig ugyanabban a fordulat-dimenzióban értendő, mint a DELAY rekord 97 = REV változata.</p>
+<p><strong>Figyelj:</strong> a dia az Sz5 (depth) értékét I, azaz egész típusúnak írja, míg a cldist és az rdepth R, azaz valós. Vizsgán a dia szerint felelj, de tudd, hogy ez nem következetes.</p>
+<h2 id="41-dia-a-többi-rekordtípus-és-a-záró-tanulság">41. dia: a többi rekordtípus és a záró tanulság</h2>
+<p>A 41. dia felsorolja a maradék rekordtípusokat. Érdemes egyben nézni az összeset, mert a CLDATA rekordtípusai pontosan leképezik a bemenő nyelv adatcsoportjait a 28. diáról.</p>
+<table><thead><tr><th>Típuskód</th><th>Tartalom</th><th>Melyik bemenő nyelvi elem párja</th></tr></thead><tbody><tr><td>1000</td><td>CARDNO: a forrás alkatrészprogram-mondat sorszáma</td><td>Bármelyik mondat, amiből a további rekordok származnak</td></tr><tr><td>2000</td><td>Posztprocesszor utasítások</td><td>Elemi technológiai utasítások: TOOLNO, SPINDL, FEDRAT, RAPID, STOP</td></tr><tr><td>3000</td><td>Geometriai elemek normál alakja</td><td>Geometriai leírás, definíciók: POINT, CIRCLE, ZSURF</td></tr><tr><td>4000 és 5000</td><td>Egyenes vonalú szerszámmozgás; egyenes szakaszokkal közelített görbe pályán történő szerszámmozgás</td><td>GOTO, GODLTA és a pályamenti mozgások (31–33. dia)</td></tr><tr><td>6000</td><td>Szerszám geometria és interpoláció</td><td>A TOOLNO méret- és korrekcióadatai (36. dia)</td></tr><tr><td>14000</td><td>Sz2 = 14000, FINI: a CLDATA vége</td><td>A 7.9. ábra FINI mondata</td></tr><tr><td>15000</td><td>Görbe vonalú szerszámmozgás, például körív mentén</td><td>A kördefiníció (7.8. ábra) mentén haladó mozgás</td></tr></tbody></table>
+<p>A „normál alak” azt jelenti, hogy a processzor minden geometriai elemet egységes, szabványos leírásra hoz, függetlenül attól, hányféleképpen lehetett megadni a bemenő nyelven. A C1 kört a 7.8. ábra szerint három módon is definiálhattad volna, a CLDATA-ban már csak egyféle alakban szerepel.</p>
+<p>Két megfigyelés a táblázatból. A 4000/5000 és a 15000 különbsége az, hogy a görbe pálya egyenes szakaszokkal közelítve vagy valódi körívként megy-e át a posztprocesszorhoz; ez dönti el, hogy a vezérlés interpolál-e. A 14000-es rekord pedig azt mutatja, hogy a CLDATA-nak is van vertikális struktúrája: van eleje és kötött vége, akárcsak az alkatrészprogramnak.</p>
+<p><strong>A fejezet záró mondata:</strong> a leírás csak áttekintést ad a rekordok egy részéről, és <strong>egy posztprocesszor kidolgozásához ismerni kell az adott CAD/CAM rendszer CLDATA teljes specifikációját</strong>. Ez visszaköt az 5. és 8. dia adaptálhatóságához: a rendszer általános része a processzor, a helyi viszonyokra – gépre, vezérlésre – való illesztés pedig a posztprocesszorban történik.</p>
+<h2 id="elírások-és-pontatlanságok-a-diákon">Elírások és pontatlanságok a diákon</h2>
+<p>Ezeket azért kell tudni, hogy vizsgán ne a dia hibáját ismételd, és ne akadj meg, ha furcsát látsz a dián.</p>
+<table><thead><tr><th>Dia</th><th>Ami a dián áll</th><th>Helyesen, illetve megjegyzés</th></tr></thead><tbody><tr><td>19.</td><td>„parametrikus algortimusok”</td><td>algoritmusok</td></tr><tr><td>21.</td><td>„Massachusets Institut of Technology”</td><td>Massachusetts Institute of Technology</td></tr><tr><td>23.</td><td>„Az APT alapú bemenő nyelvi és a CLDATA ISO ajánlás, kidolgozásának alapjául szolgált”</td><td>Hiányos mondat; a tartalma: az APT bemenő nyelve és a CLDATA lett az ISO ajánlás alapja</td></tr><tr><td>24.</td><td>A mondatséma zárójelezése: <code>{&lt;módosító&gt;!&lt;paraméter&gt;!&lt;azonosító&gt;]}</code></td><td>A felkiáltójel itt „vagy” elválasztó, a szögletes zárójel párja hiányzik</td></tr><tr><td>30.</td><td><code>GOTO/(P3=POINT/80, 80, 102</code></td><td>Hiányzik a záró zárójel</td></tr><tr><td>30.</td><td><code>DIAMETH</code></td><td>Hét karakter, tehát megsérti a 24. dián kimondott „maximum 6 karakter” szabályt; a többi szó mind legfeljebb 6</td></tr><tr><td>31.</td><td>„ATP mozgásutasítások”</td><td>APT</td></tr><tr><td>32.</td><td>„ATP felülettípusok” (ábracím)</td><td>APT</td></tr><tr><td>38.</td><td>A STOP és az OPSTOP közös felirata: „Feltételes stop”</td><td>Csak az OPSTOP feltételes</td></tr><tr><td>39.</td><td>„Sz3 (I) = 1054, CYXLE”</td><td>CYCLE</td></tr><tr><td>39.</td><td>„SZ10(R)”</td><td>A többivel egységesen Sz10 (R)</td></tr><tr><td>39.</td><td>Sz5 (I) = depth</td><td>A többi hossz jellegű adat (cldist, rdepth) R típusú</td></tr></tbody></table>
+<p>A rekordleírásokban (35–39. dia) a felsorolás mindig Sz1-gyel kezdődik, de az <strong>Sz0 (length) ettől még minden rekordban ott van</strong> – ezt a 34. dia mondja ki.</p>
+<p>Az első félből ugyanígy jegyezd meg: a (7.3) képletben dp/dt helyett <strong>dP/dt = P/t</strong> a helyes, a 7.4. ábra kódjában a hőkezelés jegye 0, bár a 15. dia táblázata szerint 1 volna, továbbá „céfüggvények”, „heurésztika” és „adtabázis” szerepel célfüggvények, heurisztika és adatbázis helyett.</p>
+<h2 id="kötelező-minimum-amit-fejből-kell-tudni">Kötelező minimum – amit fejből kell tudni</h2>
+<p>Pipald ki, amit már hibátlanul fel tudsz mondani. Amelyikenél megállsz, ahhoz menj vissza a fenti szakaszra.</p>
+<ul><li data-checked="false"><p><input type="checkbox" disabled> A három tervezési szint és mindegyiknél az egy minősítés (problémamentes / szerszámválasztás gond / paraméterek átszámítás nélkül, optimumtól eltérve)</p></li><li data-checked="false"><p><input type="checkbox" disabled> A 7.6. ábra lánca: Input → Processzor (Sorrend-, Művelet-, Műveletelemtervező) → CLDATA → Posztprocesszor → Output, mellette végig az adat- és tudásbázis</p></li><li data-checked="false"><p><input type="checkbox" disabled> Az input négy formája: bemenő nyelv (esetleg táblázatos), szöveges párbeszédes, grafikus párbeszédes, vegyes</p></li><li data-checked="false"><p><input type="checkbox" disabled> Az adat- és tudásbázis tíz adatcsoportja, legalább hat felsorolva</p></li><li data-checked="false"><p><input type="checkbox" disabled> A négy kimenő dokumentum: műveleti sorrendterv, művelettervek, gyártóeszköz-lista, NC-CNC vezérlőprogramok</p></li><li data-checked="false"><p><input type="checkbox" disabled> APT = Automatically Programmed Tools, az első NC programozási rendszer, 1950-es évek második fele, MIT</p></li><li data-checked="false"><p><input type="checkbox" disabled> Az APT-alapú rendszerek: EXAPT, NELAPT, IFAPT, ADAPT, FAPT</p></li><li data-checked="false"><p><input type="checkbox" disabled> Az APT három ismérve és a 7.7. ábra: APT alkatrészprogram → processzor → CLDATA (ISO TC 184) → posztprocesszor → NC-CNC program</p></li><li data-checked="false"><p><input type="checkbox" disabled> A bemenő nyelv hat jellemzője definícióval: szintaxis, szemantika, predefinitség, modalitás, horizontális és vertikális struktúra</p></li><li data-checked="false"><p><input type="checkbox" disabled> A nyelvi elemek öt csoportja; főszó és módosító különbsége; szótári és szótáron kívüli szó; maximum 6 karakter, betűvel kezdődik</p></li><li data-checked="false"><p><input type="checkbox" disabled> A mondatséma és a C1=CIRCLE/TANTO, IN, C2, OUT, C3, RADIUS, 50, YLARGE példa értelmezése</p></li><li data-checked="false"><p><input type="checkbox" disabled> A 7.9. ábra: PARTNO/&lt;szöveg&gt;, programtörzs, FINI</p></li><li data-checked="false"><p><input type="checkbox" disabled> A programtörzs adatcsoportjai, benne a technológia négy alpontja</p></li><li data-checked="false"><p><input type="checkbox" disabled> A T1 = DRILL… → WORK/T1 → CUT/P1, P2 → WORK/NOMORE modális minta</p></li><li data-checked="false"><p><input type="checkbox" disabled> GOTO (abszolút pont) és GODLTA (növekmény) különbsége</p></li><li data-checked="false"><p><input type="checkbox" disabled> ds = vezető, ps = alkatrész, cs = ellenőrző felület; TO, ON, PAST; GOFWD, GOBACK, GORGT, GOLFT; az irány az előző mozgáshoz képest</p></li><li data-checked="false"><p><input type="checkbox" disabled> A CLDATA rekordja: 4 darab 4 bájtos egész szó, majd legfeljebb 245 darab 8 bájtos szó; típusok I, R, N, T</p></li><li data-checked="false"><p><input type="checkbox" disabled> Az első négy szó: Sz0 length, Sz1 iseqno, Sz2 típuskód, Sz3 alaptípus-kód</p></li><li data-checked="false"><p><input type="checkbox" disabled> A rekordtípusok: 1000, 2000, 3000, 4000 és 5000, 6000, 14000, 15000</p></li><li data-checked="false"><p><input type="checkbox" disabled> A 2000-es altípusok kódjai: 1002 HEAD, 1009 FEDRAT, 1025 TOOLNO, 1031 SPINDL, 1049 COUPLE, 5 RAPID, 1094 SAFPOS, 2 STOP, 3 OPSTOP, 1012 OPSKIP, 1010 DELAY, 1054 CYCLE</p></li><li data-checked="false"><p><input type="checkbox" disabled> A visszatérő módosító kódok: 71 ON, 72 OFF, 246 ORIENT, 114 LOCK, 501 PERMIN, 504 PERREV, 53 NOMORE, 1258 FIX, 98 SPIN, 97 REV, 163 DRILL, 316 MMPR, 280 RAPTO, 279 DWELL</p></li><li data-checked="false"><p><input type="checkbox" disabled> A fúrási ciklus négy rajzi paramétere: depth, cldist, rdepth, késleltetés</p></li><li data-checked="false"><p><input type="checkbox" disabled> A záró mondat: posztprocesszorhoz a teljes CLDATA-specifikáció kell</p></li></ul>
+<h2 id="ellenőrző-kérdések">Ellenőrző kérdések</h2>
+<p>Először a kérdéseket olvasd végig, és mondd ki hangosan a választ; csak azután nézd meg a megoldásokat. Aki nem tudja kimondani, az nem tudja.</p>
+<p><strong>Kérdések</strong></p>
+<ol><li><p>Melyik tervezési szinten problémamentes a típustechnológiából való származtatás, és melyiken okoz gondot a méretes szerszámok kiválasztása? Miért?</p></li><li><p>Miért jön létre eltérés az optimumtól a műveletelemtervezés szintjén, és melyik ábra célfüggvényeitől?</p></li><li><p>Sorold fel az ATTR építőelemeit a 7.6. ábra szerint, helyes sorrendben!</p></li><li><p>Mi az input négy lehetséges formája?</p></li><li><p>Nevezz meg öt adatcsoportot az adat- és tudásbázisból, és mindegyikhez mondd meg, melyik korábbi fogalomhoz kötődik!</p></li><li><p>Mi a négy kimenő dokumentum, és melyik modul állítja elő őket?</p></li><li><p>Mit jelent az APT rövidítés, mikor és hol dolgozták ki, és mi a három fő ismérve?</p></li><li><p>Mi a CLDATA szerepe a 7.7. ábrán, és milyen szabványügyi hivatkozás szerepel mellette?</p></li><li><p>Definiáld a predefinitséget és a modalitást, és mondj mindkettőre példát a 30. dia programjából!</p></li><li><p>Mi a különbség a főszó és a módosító között? Mutasd meg a C1=CIRCLE… mondaton!</p></li><li><p>Hány karakter lehet egy APT-szó, és mivel kezdődik?</p></li><li><p>Mi a ds, a ps és a cs magyarul, és mi a különbség a TO, az ON és a PAST között?</p></li><li><p>Mi a szabály a GOFWD, GOBACK, GORGT, GOLFT irányára?</p></li><li><p>Írd le a CLDATA rekord általános felépítését: szóhosszak, típusok, és az első négy szó jelentése!</p></li><li><p>Mit tartalmaz az 1000-es, a 2000-es és a 14000-es rekord?</p></li><li><p>Mit ír elő az 1031-es és az 1009-es altípus-kód, és milyen Sz4 értékek tartoznak hozzájuk?</p></li><li><p>Sorold fel a fúrási ciklus rekordjának szavait a 39. dia szerint!</p></li><li><p>Miért kell a posztprocesszor kidolgozásához a teljes CLDATA-specifikáció, és melyik korábbi követelmény folytatása ez?</p></li></ol>
+<p><strong>Válaszok</strong></p>
+<ol><li><p>A műveleti sorrendtervezés szintjén problémamentes. A művelettervezés szintjén gond a méretes szerszám kiválasztása, mert nincs alkatrészleírás: a kód osztályoz, de méretet nem ad.</p></li><li><p>Mert a forgácsolási paramétereket többnyire átszámítás nélkül vesszük át a típustechnológiából. Az eltérés a 7.1. ábra t, K, P és p célfüggvényeihez képest értendő.</p></li><li><p>Input → processzor (sorrendtervező, művelettervező, műveletelemtervező) → CLDATA → posztprocesszor → output, és mindegyikkel kétirányú kapcsolatban az adat- és tudásbázis.</p></li><li><p>Bemenő nyelv (esetleg táblázatos), szöveges párbeszédes, grafikus párbeszédes, vegyes.</p></li><li><p>Például: gyártórendszerek és gyártóberendezések adatai (a 8. dia helyi viszonyai), gyártóeszközök adatai (8–9. dia), típustechnológiai megoldások (9–18. dia), technológiai tervezési szabályok (generatív elv, 5. dia), szabványok és normáliák, ISO tűréstábla (IT osztály, 15. dia).</p></li><li><p>Műveleti sorrendterv – sorrendtervező; művelettervek – művelettervező; gyártóeszköz-lista – művelettervező a gyártóeszköz-adatbázisból; NC-CNC vezérlőprogram – műveletelemtervező, CLDATA, posztprocesszor.</p></li><li><p>Automatically Programmed Tools; az 1950-es évek második felében a MIT-ben; ismérvei: szabad formátumú bemenő nyelv, processzor–posztprocesszor struktúra, CLDATA közbenső nyelv.</p></li><li><p>A processzor és a posztprocesszor közötti gépfüggetlen közbenső nyelv, amelyből a posztprocesszor készít NC-CNC programot. Az ábra az ISO TC 184-re hivatkozik.</p></li><li><p>Predefinitség: egy fogalomra csak a definíciója után lehet hivatkozni – P1=POINT/50, 50 előbb, CUT/P1 utána. Modalitás: öröklődés, az utasítás a megváltoztatásáig érvényes – a FEDRAT/0.2 után a GODLTA/-15 előtolással megy, ezért kell utána RAPID.</p></li><li><p>A főszó (CIRCLE) a mondat típusát határozza meg. A módosítók (TANTO, IN, OUT, RADIUS, YLARGE) módosítják a mondat típusát, megadják a következő paraméter jelentését, vagy önálló jelentésűek.</p></li><li><p>Legfeljebb 6 karakter, és betűvel kezdődik.</p></li><li><p>Vezető felület, alkatrész felület, ellenőrző felület. TO: a szerszám a felület innenső oldalán áll meg; ON: a középpontja a felületre kerül; PAST: túlhalad a felületen.</p></li><li><p>Az irány mindig az előző mozgás irányához viszonyítva adandó meg.</p></li><li><p>Rekordok szekvenciális sorozata, a rekordok szavakból állnak. Az első négy szó 4 bájtos egész: Sz0 = length, a további szavak száma; Sz1 = iseqno, a rekord sorszáma; Sz2 = típuskód; Sz3 = alaptípus-kód vagy kód típusú adat. A további, legfeljebb 245 szó 8 bájtos, típusa I, R, N vagy T.</p></li><li><p>1000 = CARDNO, a forrás alkatrészprogram-mondat sorszáma (icard). 2000 = posztprocesszor utasítások, döntően az elemi technológiai utasítások párjai. 14000 = FINI, a CLDATA vége.</p></li><li><p>1031 = SPINDL, az orsóforgás be- és kikapcsolása: 71 ON, 72 OFF, 246 ORIENT, 114 LOCK. 1009 = FEDRAT, az előtolás bekapcsolása: 501 PERMIN vagy 504 PERREV, az Sz5 az előtolás értéke.</p></li><li><p>Sz3 = 1054 CYCLE, Sz4 = 163 DRILL, Sz5 = depth, Sz6 = 316 MMPR, Sz7 = n fordulatszám, Sz8 = cldist, Sz9 = 280 RAPTO, Sz10 = rdepth, Sz11 = 279 DWELL, Sz12 = delay.</p></li><li><p>Mert a posztprocesszor az adott CAD/CAM rendszer CLDATA-jából dolgozik, és a rekordok részletei rendszerenként eltérhetnek. Ez az 5. és 8. dia adaptálhatóság- és kompatibilitás-követelményének folytatása.</p></li></ol>
+
+</main>
+<script>
+  (function () {
+    var KEY = 'tanulas.doc.E2uWuWTYLxvMdGiwk14z4D.checks';
+
+    // Táblázatok becsomagolása görgethető dobozba
+    document.querySelectorAll('table').forEach(function (t) {
+      var w = document.createElement('div');
+      w.className = 'table-wrap';
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+
+    // A „pipáld ki” lista mentése ezen az eszközön
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+    document.querySelectorAll('li[data-checked] input[type="checkbox"]').forEach(function (box, i) {
+      var li = box.closest('li');
+      box.disabled = false;
+      box.checked = !!saved[i];
+      li.setAttribute('data-checked', String(box.checked));
+      box.addEventListener('change', function () {
+        saved[i] = box.checked;
+        li.setAttribute('data-checked', String(box.checked));
+        try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+      });
+    });
+
+    // Mermaid ábrák (online kirajzolva; offline a forrásszöveg látszik)
+    var blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (!blocks.length) return;
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js';
+    s.onload = function () {
+      var dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      window.mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+      blocks.forEach(function (code) {
+        var div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = code.textContent;
+        code.parentNode.replaceWith(div);
+      });
+      window.mermaid.run({ querySelector: '.mermaid' }).catch(function () {});
+    };
+    document.head.appendChild(s);
+  })();
+</script>
+</body>
+</html>

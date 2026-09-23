@@ -10,7 +10,9 @@ Tananyagok és Claude dokumentumok egy helyen — iPhone 15 Pro Max-ra és iPad 
 3. Az app ezután teljes képernyőn, saját ikonnal indul, és offline is megnyílik.
 
 ## Funkciók
-- **Claude dokumentumok** — a claude.ai-on lévő Artifact-ok listája (keresés, rendezés, kedvencek), koppintásra a claude.ai-on nyílnak meg.
+- **Claude dokumentumok** — a claude.ai-on lévő Artifact-ok listája (keresés, rendezés, kedvencek). Koppintásra
+  az appon belül, **teljes képernyőn** nyílnak meg (a felső sáv is elrejthető), és egyszeri megnyitás után offline is olvashatók.
+  A másolatok a `docs/` mappában vannak (nyilvánosak); az eredeti a claude.ai-on marad.
 - **Saját linkek** — bármilyen dokumentum linkje hozzáadható; csak az adott eszközön tárolódik.
 - **Kezdőlap** — kedvencek és legutóbb megnyitott dokumentumok.
 - Világos / sötét téma, offline működés (service worker).

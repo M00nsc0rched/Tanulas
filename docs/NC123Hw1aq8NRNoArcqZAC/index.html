@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Asztalgyár – Plant Simulation modell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{
+  --table:#D5DCD7;
+  --sheet:#FCFDFB;
+  --dot:rgba(31,38,45,.17);
+  --ink:#1F262D;
+  --ink-2:#46515C;
+  --muted:#6B7783;
+  --rule:#1F262D;
+  --wire:#39434D;
+  --node:#FFFFFF;
+  --node-edge:#8792A0;
+  --accent:#2457B8;
+  --accent-soft:rgba(36,87,184,.09);
+  --work:#00804E;
+  --block:#DE9F00;
+  --idle:#BAC1C8;
+  --danger:#C62A21;
+  --wood:#C08A55;
+  --p-piros:#C62A21;
+  --p-kek:#1F4E99;
+  --p-feher:#F5F5F2;
+  --panel:#FCFDFB;
+  --btn:#FFFFFF;
+  --btn-ink:#1F262D;
+  --hair:rgba(31,38,45,.16);
+  --hair-2:rgba(31,38,45,.30);
+  --track:rgba(31,38,45,.09);
+  --code-bg:#EEF1EE;
+  --bar-bg:rgba(213,220,215,.9);
+  --paper-shadow:0 1px 2px rgba(25,35,30,.12),0 12px 32px rgba(25,35,30,.10);
+  --f-body:"Barlow","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --f-cond:"Barlow Semi Condensed","Arial Narrow","Roboto Condensed","Segoe UI",system-ui,sans-serif;
+  --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --f-code:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --table:#0B1826;
+    --sheet:#153052;
+    --dot:rgba(214,230,250,.14);
+    --ink:#EAF1F9;
+    --ink-2:#C2D2E4;
+    --muted:#91A9C4;
+    --rule:#D8E5F3;
+    --wire:#B7CBE0;
+    --node:#1A3A60;
+    --node-edge:#7C9CC2;
+    --accent:#9CC3FF;
+    --accent-soft:rgba(156,195,255,.13);
+    --work:#46D68F;
+    --block:#FFC83D;
+    --idle:#58759A;
+    --danger:#FF7B70;
+    --wood:#C99760;
+    --p-piros:#E0473E;
+    --p-kek:#4F86E8;
+    --p-feher:#F3F3EF;
+    --panel:#122A47;
+    --btn:#17355A;
+    --btn-ink:#EAF1F9;
+    --hair:rgba(234,241,249,.16);
+    --hair-2:rgba(234,241,249,.32);
+    --track:rgba(234,241,249,.12);
+    --code-bg:#0E2440;
+    --bar-bg:rgba(11,24,38,.88);
+    --paper-shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --table:#0B1826;
+  --sheet:#153052;
+  --dot:rgba(214,230,250,.14);
+  --ink:#EAF1F9;
+  --ink-2:#C2D2E4;
+  --muted:#91A9C4;
+  --rule:#D8E5F3;
+  --wire:#B7CBE0;
+  --node:#1A3A60;
+  --node-edge:#7C9CC2;
+  --accent:#9CC3FF;
+  --accent-soft:rgba(156,195,255,.13);
+  --work:#46D68F;
+  --block:#FFC83D;
+  --idle:#58759A;
+  --danger:#FF7B70;
+  --wood:#C99760;
+  --p-piros:#E0473E;
+  --p-kek:#4F86E8;
+  --p-feher:#F3F3EF;
+  --panel:#122A47;
+  --btn:#17355A;
+  --btn-ink:#EAF1F9;
+  --hair:rgba(234,241,249,.16);
+  --hair-2:rgba(234,241,249,.32);
+  --track:rgba(234,241,249,.12);
+  --code-bg:#0E2440;
+  --bar-bg:rgba(11,24,38,.88);
+  --paper-shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--table);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--table);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45}
+.wrap{max-width:1120px;margin:0 auto;padding:14px 12px 48px}
+@media (min-width:600px){.wrap{padding:26px 24px 64px}}
+
+/* Fejléc */
+.head h1{font-family:var(--f-display);font-weight:700;font-size:clamp(2.5rem,11vw,3.8rem);line-height:.9;margin:6px 0 10px;letter-spacing:-.005em}
+.head p{margin:0;max-width:60ch;color:var(--ink-2)}
+.nw{white-space:nowrap}
+
+/* Vezérlősáv */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;gap:8px;margin:16px -12px 0;padding:10px 12px;background:var(--bar-bg);border-bottom:1px solid var(--hair)}
+@supports ((-webkit-backdrop-filter:blur(6px)) or (backdrop-filter:blur(6px))){.bar{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}}
+@media (min-width:600px){.bar{margin:20px -24px 0;padding:12px 24px}}
+.btn{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:0 13px;font-family:var(--f-cond);font-weight:600;font-size:16px;line-height:1;color:var(--btn-ink);background:var(--btn);border:1px solid var(--hair-2);border-radius:3px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn svg{width:15px;height:15px;flex:none}
+.btn.primary{background:var(--ink);color:var(--sheet);border-color:var(--ink);min-width:118px;justify-content:flex-start}
+.btn.icon{width:42px;padding:0}
+.btn:hover{border-color:var(--ink-2)}
+.btn:focus-visible,.seg button:focus-visible,.chip:focus-visible,.close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.readout{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;font-family:var(--f-cond);font-variant-numeric:tabular-nums;line-height:1.05}
+#clock{font-weight:700;font-size:21px}
+#done{font-size:14.5px;color:var(--ink-2)}
+.bar2{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:12px;font-family:var(--f-cond);font-size:15.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;border:1px solid var(--hair-2);border-radius:3px;overflow:hidden}
+.seg button{appearance:none;-webkit-appearance:none;border:0;background:var(--btn);color:var(--ink-2);font-family:var(--f-cond);font-weight:600;font-size:14px;padding:9px 11px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--hair)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.status{color:var(--ink);font-weight:600}
+.status:empty{display:none}
+
+/* Rajzlap + panel */
+.layout{display:grid;gap:18px;margin-top:16px}
+@media (min-width:880px){.layout{grid-template-columns:minmax(380px,480px) minmax(320px,1fr);gap:30px;align-items:start}}
+.sheet{background:var(--sheet);box-shadow:var(--paper-shadow);padding:4px}
+@media (min-width:600px){.sheet{padding:8px}}
+.sheet svg{display:block;width:100%;height:auto;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+
+/* SVG elemek */
+.dot{fill:var(--dot)}
+.rule-o{fill:none;stroke:var(--rule);stroke-width:.8}
+.rule-i{fill:none;stroke:var(--rule);stroke-width:1.6}
+.tick{stroke:var(--rule);stroke-width:.8}
+.zone{font-family:var(--f-cond);font-size:9px;font-weight:500;fill:var(--muted);text-anchor:middle}
+.wire{fill:none;stroke:var(--wire);stroke-width:1.3}
+.ctrl{fill:none;stroke:var(--muted);stroke-width:1.1;stroke-dasharray:4 3}
+.ah{fill:var(--wire)}
+.ah.c{fill:var(--muted)}
+.lbl{font-family:var(--f-cond);font-size:10.5px;font-weight:600;fill:var(--ink-2);paint-order:stroke;stroke:var(--sheet);stroke-width:3px;stroke-linejoin:round}
+.badge circle{fill:var(--sheet);stroke:var(--wire);stroke-width:1.1}
+.badge text{font-family:var(--f-cond);font-weight:700;font-size:9.5px;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.node{cursor:pointer;outline:none}
+.node .box{fill:var(--node);stroke:var(--node-edge);stroke-width:1.1}
+.node:hover .box{stroke:var(--ink-2)}
+.node.sel .box,.node:focus-visible .box{stroke:var(--accent);stroke-width:2.4}
+.node .nm{font-family:var(--f-cond);font-weight:600;font-size:13.5px;fill:var(--ink)}
+.node .ty{font-family:var(--f-cond);font-weight:500;font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums}
+.node .rv{font-family:var(--f-cond);font-weight:600;font-size:11px;fill:var(--ink-2);text-anchor:end;font-variant-numeric:tabular-nums}
+.node .cnt{font-size:13.5px;font-weight:700;fill:var(--ink)}
+.ico{fill:none;stroke:var(--ink-2);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.ico .f{fill:var(--ink-2);stroke:none}
+.led{fill:var(--idle);stroke:var(--node);stroke-width:1.6}
+.led.work{fill:var(--work)}
+.led.block{fill:var(--block)}
+.slot{fill:none;stroke:var(--node-edge);stroke-width:1}
+.slot.empty{stroke-dasharray:2 1.5}
+.slot.raw{fill:var(--wood)}
+.slot.piros{fill:var(--p-piros)}
+.slot.kek{fill:var(--p-kek)}
+.slot.feher{fill:var(--p-feher);stroke:var(--ink-2)}
+.slot.blocked{stroke:var(--block);stroke-width:2.2}
+.slot.defect{stroke:var(--danger);stroke-width:1.8;stroke-dasharray:2.2 1.4}
+.slot.defect.blocked{stroke:var(--block)}
+.track{fill:var(--track)}
+.u-w{fill:var(--work)}
+.u-b{fill:var(--block)}
+.u-f{fill:var(--accent)}
+.tb rect,.tb line{fill:none;stroke:var(--rule);stroke-width:1.1}
+.tb rect.bg{fill:var(--sheet)}
+.tb .big{font-family:var(--f-display);font-weight:700;font-size:23px;fill:var(--ink)}
+.tb .k{font-family:var(--f-cond);font-size:8.5px;fill:var(--muted)}
+.tb .v{font-family:var(--f-cond);font-size:10.5px;font-weight:600;fill:var(--ink)}
+
+/* Részletek panel */
+.panel{background:var(--panel);border:1px solid var(--hair-2);padding:18px 18px 20px;font-family:var(--f-cond);font-size:16px}
+.panel h2{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1;margin:0}
+.p-head{display:flex;align-items:baseline;gap:10px;padding-right:36px}
+.zone-tag{font-size:13px;color:var(--muted);border:1px solid var(--hair-2);padding:1px 5px;border-radius:2px;line-height:1.3}
+.p-sub{margin:6px 0 0;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
+.p-sub b{color:var(--ink);font-weight:600}
+.cap{margin:16px 0 6px;font-size:14px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:minmax(96px,auto) 1fr;gap:5px 14px;margin:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.live{margin-top:14px;padding:4px 12px 10px;background:var(--accent-soft);border-left:3px solid var(--accent)}
+.live .cap{margin-top:8px}
+.notes{list-style:none;margin:14px 0 0;padding:0;font-family:var(--f-body);font-size:15px;color:var(--ink-2)}
+.notes li{position:relative;margin:7px 0;padding-left:14px}
+.notes li::before{content:"";position:absolute;left:0;top:.68em;width:7px;height:1.5px;background:var(--ink-2)}
+pre.code{margin:14px 0 0;padding:10px 12px;background:var(--code-bg);border:1px solid var(--hair);overflow-x:auto;font-family:var(--f-code);font-size:13px;line-height:1.5;tab-size:4;-moz-tab-size:4;color:var(--ink)}
+.intro-p{font-family:var(--f-body);color:var(--ink-2);margin:10px 0 14px;font-size:15px}
+.close{display:none}
+@media (min-width:880px){.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 80px)}}
+@media (max-width:879px){
+  .panel{position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:58vh;overflow-y:auto;border-width:1px 0 0;padding:14px 16px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 32px rgba(0,0,0,.2);transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s}
+  .panel.open{transform:none;visibility:visible;transition:transform .22s ease}
+  .panel::before{content:"";display:block;width:38px;height:4px;border-radius:2px;background:var(--hair-2);margin:0 auto 12px}
+  .close{display:flex;align-items:center;justify-content:center;position:absolute;right:10px;top:12px;width:40px;height:40px;border:1px solid var(--hair-2);border-radius:3px;background:var(--btn);color:var(--btn-ink);font-size:22px;line-height:1;cursor:pointer}
+}
+@media (prefers-reduced-motion:reduce){.panel,.panel.open{transition:none}}
+
+/* Jelmagyarázat */
+.legend{margin-top:26px;max-width:68ch;color:var(--ink-2);font-size:15.5px}
+.legend h2{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1;margin:0 0 10px;color:var(--ink)}
+.legend p{margin:0 0 9px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 4px 0 2px;vertical-align:0}
+.sq{display:inline-block;width:10px;height:10px;margin:0 4px 0 2px;border:1px solid var(--node-edge);vertical-align:0}
+.chip{appearance:none;-webkit-appearance:none;font-family:var(--f-cond);font-weight:600;font-size:15px;color:var(--ink);background:var(--btn);border:1px solid var(--hair-2);border-radius:3px;padding:6px 11px;margin:2px 4px 2px 0;cursor:pointer}
+.note{margin:16px 0 0;max-width:68ch;font-size:14.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <h1>Asztalgyár</h1>
+    <p>A tesztgyári feladat modellje Plant Simulation <span class="nw">2404-hez</span>. Válassz ki egy objektumot a rajzon a beállításaiért, vagy indítsd el a szimulációt, és figyeld, hol torlódnak a lapok.</p>
+  </header>
+
+  <div class="bar" role="toolbar" aria-label="Szimuláció vezérlése">
+    <button class="btn primary" id="play" type="button"></button>
+    <button class="btn icon" id="reset" type="button" aria-label="Visszaállítás az elejére">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 8.4A5.2 5.2 0 1 1 11.6 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12.4 1.6v3.3H9.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn" id="jump" type="button" aria-label="Ugrás a műszak végére">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2.8v10.4L8.2 8zM8.4 2.8v10.4L14.6 8z" fill="currentColor"/></svg><span>8 óra</span>
+    </button>
+    <div class="readout" aria-live="off"><span id="clock">0:00:00</span><span id="done">0 asztal</span></div>
+  </div>
+
+  <div class="bar2">
+    <div class="seg" role="group" aria-label="Tempó">
+      <button type="button" data-speed="60" aria-pressed="false">1 perc/mp</button>
+      <button type="button" data-speed="600" aria-pressed="true">10 perc/mp</button>
+      <button type="button" data-speed="3600" aria-pressed="false">1 óra/mp</button>
+    </div>
+    <span id="rate">Utolsó óra: –</span>
+    <span id="bneck">Legterheltebb: –</span>
+    <span id="status" class="status" aria-live="polite"></span>
+  </div>
+
+  <main class="layout">
+    <section class="sheet" aria-label="Frame rajz">
+      <svg id="frame" role="group" aria-label="Asztalgyár modell, Frame nézet"></svg>
+    </section>
+    <aside id="panel" class="panel" aria-label="Kiválasztott objektum">
+      <button class="close" id="close" type="button" aria-label="Bezárás">×</button>
+      <div id="pbody"></div>
+    </aside>
+  </main>
+
+  <section class="legend" aria-labelledby="lg">
+    <h2 id="lg">Jelmagyarázat</h2>
+    <p>Állapotjelző: <span class="sw" style="background:var(--work)"></span>dolgozik, <span class="sw" style="background:var(--block)"></span>kész, de nem tud továbbmenni (blokkolva), <span class="sw" style="background:var(--idle)"></span>üres.</p>
+    <p>A doboz alján lévő sáv a kihasználtság, mint egy mini BottleneckAnalyzer: zöld a munka, sárga a blokkolás.</p>
+    <p>Lapok: <span class="sq" style="background:var(--wood)"></span>nyers, festés után <span class="sq" style="background:var(--p-piros)"></span>piros, <span class="sq" style="background:var(--p-kek)"></span>kék vagy <span class="sq" style="background:var(--p-feher)"></span>fehér. A piros szaggatott keret hibás lapot jelöl, ez megy javításra.</p>
+    <p>Folytonos vonal: anyagáramlás (Connector). Szaggatott: vezérlés, vagyis a FestesBe metódus a Festes Controls fülén. A körben lévő szám a bekötési sorszám, ebből lesz az utódok és elődök sorrendje.</p>
+    <p>MU-k a Class Library-ben: <button class="chip" type="button" data-mu="Asztallap">Asztallap</button><button class="chip" type="button" data-mu="Lab">Lab</button></p>
+  </section>
+  <p class="note">Feltevések, mert a dián nincsenek megadva: 4 festőrobot, 10 % hibás festés és 10:00 javítási idő. Az animáció egyszerűsítve követi a Plant Simulation működését, a pontos számokat a saját modelled adja.</p>
+</div>
+
+<script>
+(() => {
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+const $ = s => document.querySelector(s);
+
+/* ---------------- Rajz: elrendezés ---------------- */
+const W = 400, H = 782;
+const MAIN = {x0: 30, w: 160};
+const SIDE = {x0: 242, w: 128};
+const NODES = [
+  {id: 'Forras',          col: MAIN, cy: 58,  kind: 'Source',          icon: 'source',   right: '2:00',       slots: 1, led: true},
+  {id: 'Fureszeles',      col: MAIN, cy: 138, kind: 'Station',         icon: 'station',  right: '2:00',       slots: 1, led: true, util: true},
+  {id: 'Maras',           col: MAIN, cy: 218, kind: 'ParallelStation', icon: 'parallel', right: '5:00',       slots: 2, led: true, util: true},
+  {id: 'Festes',          col: MAIN, cy: 298, kind: 'ParallelStation', icon: 'parallel', right: '10:00',      slots: 4, led: true, util: true},
+  {id: 'MinosegEll',      col: MAIN, cy: 378, kind: 'FlowControl',     icon: 'flow',     right: '90 / 10 %',  shape: 'hex'},
+  {id: 'SzerelesPuffer',  col: MAIN, cy: 486, kind: 'Buffer',          icon: 'buffer',   right: '0 / 10',     fill: true},
+  {id: 'Szereles',        col: MAIN, cy: 566, kind: 'AssemblyStation', icon: 'assembly', right: '2:00',       slots: 1, legs: true, led: true, util: true},
+  {id: 'Csomagolas',      col: MAIN, cy: 646, kind: 'Station',         icon: 'station',  right: '1:00',       slots: 1, led: true, util: true},
+  {id: 'Szallitas',       col: MAIN, cy: 726, kind: 'Drain',           icon: 'drain',    right: '',           count: true},
+  {id: 'EventController', col: SIDE, cy: 58,  h: 40, kind: 'EventController', left: '0:00:00', right: 'End 8:00:00', led: true},
+  {id: 'FestesBe',        col: SIDE, cy: 298, h: 40, kind: 'Method',   right: 'SimTalk'},
+  {id: 'Javitas',         col: SIDE, cy: 432, kind: 'Station',         icon: 'station',  right: '10:00',      slots: 1, led: true, util: true},
+  {id: 'LabForras',       col: SIDE, cy: 566, kind: 'Source',          icon: 'source',   right: '0:05',       led: true}
+];
+const byId = {};
+NODES.forEach(n => { byId[n.id] = n; });
+
+const WIRES = [
+  {d: 'M110,84 V112'},
+  {d: 'M110,164 V192'},
+  {d: 'M110,244 V272'},
+  {d: 'M110,324 V352'},
+  {d: 'M110,404 V460', badge: [110, 421, '1'], label: [121, 441, '90 %']},
+  {d: 'M190,378 H306 V406', badge: [205, 378, '2'], label: [254, 371, '10 %', 'middle']},
+  {d: 'M306,458 V486 H190'},
+  {d: 'M110,512 V540', badge: [110, 524, '1']},
+  {d: 'M242,566 H190', badge: [204, 566, '2'], label: [226, 558, '4 láb', 'middle']},
+  {d: 'M110,592 V620'},
+  {d: 'M110,672 V700'},
+  {d: 'M242,298 H190', ctrl: true, label: [216, 290, 'Entrance', 'middle']}
+];
+
+function geom(n) {
+  const h = n.h || 52, x0 = n.col.x0, w = n.col.w;
+  return {x0, x1: x0 + w, y0: n.cy - h / 2, y1: n.cy + h / 2, h, w, cx: x0 + w / 2};
+}
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function zoneOf(n) {
+  const g = geom(n);
+  const col = Math.min(4, Math.max(1, Math.floor((g.cx - 16) / ((W - 32) / 4)) + 1));
+  const row = 'ABCDEFGH'[Math.min(7, Math.max(0, Math.floor((n.cy - 16) / ((H - 32) / 8))))];
+  return row + col;
+}
+
+const svg = $('#frame');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+const defs = el('defs', null, svg);
+const pat = el('pattern', {id: 'dots', width: 10, height: 10, patternUnits: 'userSpaceOnUse'}, defs);
+el('circle', {cx: 5, cy: 5, r: 0.75, class: 'dot'}, pat);
+function marker(id, cls) {
+  const m = el('marker', {id, viewBox: '0 0 10 10', refX: 10, refY: 5, markerWidth: 7, markerHeight: 7, markerUnits: 'userSpaceOnUse', orient: 'auto'}, defs);
+  el('path', {d: 'M0,0 L10,5 L0,10 z', class: cls}, m);
+}
+marker('arr', 'ah');
+marker('arrc', 'ah c');
+
+/* rajzkeret, zónák */
+el('rect', {x: 16, y: 16, width: W - 32, height: H - 32, fill: 'url(#dots)'}, svg);
+el('rect', {x: 2.5, y: 2.5, width: W - 5, height: H - 5, class: 'rule-o'}, svg);
+el('rect', {x: 16, y: 16, width: W - 32, height: H - 32, class: 'rule-i'}, svg);
+const colW = (W - 32) / 4, rowH = (H - 32) / 8;
+for (let k = 1; k < 4; k++) {
+  const x = 16 + colW * k;
+  el('line', {x1: x, y1: 2.5, x2: x, y2: 16, class: 'tick'}, svg);
+  el('line', {x1: x, y1: H - 16, x2: x, y2: H - 2.5, class: 'tick'}, svg);
+}
+for (let k = 0; k < 4; k++) {
+  const x = 16 + colW * (k + 0.5);
+  el('text', {x, y: 12.3, class: 'zone'}, svg, String(k + 1));
+  el('text', {x, y: H - 5.4, class: 'zone'}, svg, String(k + 1));
+}
+for (let k = 1; k < 8; k++) {
+  const y = 16 + rowH * k;
+  el('line', {x1: 2.5, y1: y, x2: 16, y2: y, class: 'tick'}, svg);
+  el('line', {x1: W - 16, y1: y, x2: W - 2.5, y2: y, class: 'tick'}, svg);
+}
+for (let k = 0; k < 8; k++) {
+  const y = 16 + rowH * (k + 0.5) + 3;
+  el('text', {x: 9.3, y, class: 'zone'}, svg, 'ABCDEFGH'[k]);
+  el('text', {x: W - 9.3, y, class: 'zone'}, svg, 'ABCDEFGH'[k]);
+}
+
+/* szövegmező (title block) */
+const tb = el('g', {class: 'tb'}, svg);
+el('rect', {class: 'bg', x: 216, y: 650, width: 168, height: 116}, tb);
+el('line', {x1: 216, y1: 690, x2: 384, y2: 690}, tb);
+el('line', {x1: 216, y1: 715, x2: 384, y2: 715}, tb);
+el('line', {x1: 216, y1: 740, x2: 384, y2: 740}, tb);
+el('line', {x1: 270, y1: 690, x2: 270, y2: 766}, tb);
+el('text', {class: 'big', x: 224, y: 679}, tb, 'Asztalgyár');
+el('text', {class: 'k', x: 377, y: 663, 'text-anchor': 'end'}, tb, 'Lap 1/1');
+[['Megnevezés', 'Anyagáramlási modell', 706], ['Szoftver', 'Plant Simulation 2404', 731], ['Objektum', '.Models.Frame', 757]].forEach(([k, v, y]) => {
+  el('text', {class: 'k', x: 222, y}, tb, k);
+  el('text', {class: 'v', x: 277, y}, tb, v);
+});
+
+/* vezetékek */
+const wiresG = el('g', null, svg);
+for (const w of WIRES) {
+  el('path', {d: w.d, class: w.ctrl ? 'ctrl' : 'wire', 'marker-end': `url(#${w.ctrl ? 'arrc' : 'arr'})`}, wiresG);
+}
+for (const w of WIRES) {
+  if (w.label) el('text', {class: 'lbl', x: w.label[0], y: w.label[1], 'text-anchor': w.label[3] || 'start'}, wiresG, w.label[2]);
+  if (w.badge) {
+    const b = el('g', {class: 'badge'}, wiresG);
+    el('circle', {cx: w.badge[0], cy: w.badge[1], r: 6.5}, b);
+    el('text', {x: w.badge[0], y: w.badge[1] + 0.5}, b, w.badge[2]);
+  }
+}
+
+/* ikonok */
+function drawIcon(g, kind) {
+  switch (kind) {
+    case 'source':
+      el('circle', {cx: 6.5, cy: 10, r: 4.5}, g);
+      el('path', {d: 'M11,10 H18 M15,7 L18,10 L15,13'}, g); break;
+    case 'station':
+      el('rect', {x: 3, y: 3, width: 14, height: 14, rx: 2}, g);
+      el('circle', {cx: 10, cy: 10, r: 3}, g); break;
+    case 'parallel':
+      el('rect', {x: 2, y: 6, width: 11, height: 11, rx: 1.5}, g);
+      el('path', {d: 'M6,6 V3.5 A1.5,1.5 0 0 1 7.5,2 H16.5 A1.5,1.5 0 0 1 18,3.5 V12.5 A1.5,1.5 0 0 1 16.5,14 H13'}, g); break;
+    case 'flow':
+      el('path', {d: 'M2,10 H8 L15,4 M8,10 L15,16'}, g);
+      el('circle', {class: 'f', cx: 16.5, cy: 3.5, r: 1.7}, g);
+      el('circle', {class: 'f', cx: 16.5, cy: 16.5, r: 1.7}, g); break;
+    case 'buffer':
+      el('path', {d: 'M3,5 H17 M3,10 H17 M3,15 H17'}, g); break;
+    case 'assembly':
+      el('path', {d: 'M2,4 L9,10 L2,16 M9,10 H12'}, g);
+      el('rect', {x: 12, y: 6, width: 6, height: 8, rx: 1}, g); break;
+    case 'drain':
+      el('path', {d: 'M2,10 H11 M8,7 L11,10 L8,13 M13.5,4 V16 H18'}, g); break;
+  }
+}
+
+/* objektumok */
+const refs = {};
+const nodesG = el('g', null, svg);
+for (const n of NODES) {
+  const g = geom(n);
+  const small = g.h < 50;
+  const grp = el('g', {class: 'node', 'data-id': n.id, tabindex: '0', role: 'button', 'aria-label': `${n.id} (${n.kind}) – beállítások`}, nodesG);
+  if (n.shape === 'hex') {
+    el('polygon', {class: 'box', points: `${g.x0 + 12},${g.y0} ${g.x1 - 12},${g.y0} ${g.x1},${n.cy} ${g.x1 - 12},${g.y1} ${g.x0 + 12},${g.y1} ${g.x0},${n.cy}`}, grp);
+  } else {
+    el('rect', {class: 'box', x: g.x0, y: g.y0, width: g.w, height: g.h, rx: 3}, grp);
+  }
+  const r = refs[n.id] = {g: grp};
+  let tx = g.x0 + 10;
+  if (n.icon) {
+    drawIcon(el('g', {class: 'ico', transform: `translate(${g.x0 + 9},${g.y0 + 9})`}, grp), n.icon);
+    tx = g.x0 + 37;
+  }
+  const nameY = small ? g.y0 + 17 : g.y0 + 22;
+  const subY = small ? g.y0 + 31 : g.y0 + 37;
+  el('text', {class: 'nm', x: tx, y: nameY}, grp, n.id);
+  r.left = el('text', {class: 'ty', x: tx, y: subY}, grp, n.left != null ? n.left : n.kind);
+  r.right = el('text', {class: 'rv', x: n.shape === 'hex' ? g.x1 - 15 : g.x1 - 9, y: subY}, grp, n.right);
+  if (n.led) {
+    r.led = el('circle', {class: 'led', cx: n.icon ? g.x0 + 29 : g.x1 - 10, cy: n.icon ? g.y0 + 9 : g.y0 + 13, r: 3.4}, grp);
+  }
+  if (n.slots) {
+    r.slots = [];
+    for (let i = 0; i < n.slots; i++) {
+      const sx = g.x1 - 18 - (n.slots - 1 - i) * 12;
+      r.slots.push(el('rect', {class: 'slot empty', x: sx, y: g.y0 + 12, width: 9, height: 9, rx: 1}, grp));
+    }
+  }
+  if (n.legs) r.legs = el('text', {class: 'rv', x: g.x1 - 24, y: nameY}, grp, 'láb 0/4');
+  if (n.count) r.count = el('text', {class: 'rv cnt', x: g.x1 - 9, y: nameY}, grp, '0 db');
+  if (n.util || n.fill) {
+    const bx = g.x0 + 9, bw = g.w - 18, by = g.y1 - 7;
+    el('rect', {class: 'track', x: bx, y: by, width: bw, height: 3}, grp);
+    r.bx = bx; r.bw = bw;
+    if (n.util) {
+      r.uw = el('rect', {class: 'u-w', x: bx, y: by, width: 0, height: 3}, grp);
+      r.ub = el('rect', {class: 'u-b', x: bx, y: by, width: 0, height: 3}, grp);
+    } else {
+      r.uf = el('rect', {class: 'u-f', x: bx, y: by, width: 0, height: 3}, grp);
+    }
+  }
+  grp.addEventListener('click', e => { e.stopPropagation(); select(n.id); });
+  grp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(n.id); }
+  });
+}
+svg.addEventListener('click', () => deselect());
+
+/* ---------------- Szimuláció (egyszerűsített) ---------------- */
+const PROC = {Fureszeles: 120, Maras: 300, Festes: 600, Javitas: 600, Szereles: 120, Csomagolas: 60};
+const CAP = {Fureszeles: 1, Maras: 2, Festes: 4, Javitas: 1, Csomagolas: 1};
+const BUF_CAP = 10, END = 8 * 3600, SRC_INT = 120, LEG_INT = 5, DEFECT = 0.10, LEGS = 4;
+const STATIONS = ['Fureszeles', 'Maras', 'Festes', 'Javitas', 'Szereles', 'Csomagolas'];
+
+function rngFactory(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+let S;
+function resetSim() {
+  S = {
+    t: 0, rng: rngFactory(2404), nid: 1,
+    src: {part: null, next: 0, blockSec: 0, out: 0},
+    st: {},
+    buf: {q: [], occ: 0, in: 0, out: 0},
+    asm: {part: null, busy: false, doneAt: 0, legs: 0, workSec: 0, blockSec: 0, in: 0, out: 0},
+    lab: {next: 0, made: 0, blockSec: 0},
+    fc: {toBuf: 0, toRep: 0},
+    drain: {count: 0, times: []}
+  };
+  for (const id in CAP) S.st[id] = {places: new Array(CAP[id]).fill(null), workSec: 0, blockSec: 0, in: 0, out: 0};
+}
+
+function canAccept(id) {
+  if (id === 'SzerelesPuffer') return S.buf.q.length < BUF_CAP;
+  if (id === 'Szereles') return !S.asm.part;
+  if (id === 'Szallitas') return true;
+  return S.st[id].places.indexOf(null) !== -1;
+}
+function accept(id, part) {
+  if (id === 'SzerelesPuffer') { S.buf.q.push(part); S.buf.in++; return; }
+  if (id === 'Szereles') { S.asm.part = part; S.asm.busy = false; S.asm.in++; return; }
+  if (id === 'Szallitas') { S.drain.count++; S.drain.times.push(S.t); return; }
+  if (id === 'Festes') {           /* FestesBe: belépéskor színt kap */
+    const r = S.rng();
+    part.color = r < 0.33 ? 'piros' : r < 0.66 ? 'kek' : 'feher';
+  }
+  const st = S.st[id];
+  st.places[st.places.indexOf(null)] = {part, doneAt: S.t + PROC[id]};
+  st.in++;
+}
+function nextOf(id, part) {
+  switch (id) {
+    case 'Fureszeles': return 'Maras';
+    case 'Maras': return 'Festes';
+    case 'Festes':                 /* MinosegEll: Percentage 90 / 10 */
+      if (!part.route) {
+        part.route = S.rng() < DEFECT ? 'Javitas' : 'SzerelesPuffer';
+        part.defect = part.route === 'Javitas';
+      }
+      return part.route;
+    case 'Javitas': return 'SzerelesPuffer';
+    case 'Csomagolas': return 'Szallitas';
+  }
+  return null;
+}
+function exitStation(id) {
+  const st = S.st[id];
+  let moved = false;
+  const ready = [];
+  st.places.forEach((p, i) => { if (p && p.doneAt <= S.t) ready.push(i); });
+  ready.sort((a, b) => st.places[a].doneAt - st.places[b].doneAt);
+  for (const i of ready) {
+    const p = st.places[i];
+    const target = nextOf(id, p.part);
+    if (!canAccept(target)) continue;
+    st.places[i] = null;
+    st.out++;
+    if (id === 'Festes') { if (target === 'Javitas') S.fc.toRep++; else S.fc.toBuf++; }
+    if (id === 'Javitas') { p.part.defect = false; p.part.fixed = true; }
+    accept(target, p.part);
+    moved = true;
+  }
+  return moved;
+}
+function asmStep() {
+  const a = S.asm;
+  let moved = false;
+  if (a.part && a.busy && a.doneAt <= S.t && canAccept('Csomagolas')) {
+    const p = a.part; a.part = null; a.busy = false; a.out++;
+    accept('Csomagolas', p); moved = true;
+  }
+  if (!a.part && S.buf.q.length) {
+    const p = S.buf.q.shift(); S.buf.out++;
+    accept('Szereles', p); moved = true;
+  }
+  if (a.part && !a.busy && a.legs >= LEGS) {
+    a.busy = true; a.legs -= LEGS; a.doneAt = S.t + PROC.Szereles; a.part.legs = LEGS;
+  }
+  return moved;
+}
+function srcStep() {
+  const s = S.src;
+  if (!s.part && S.t >= s.next) { s.part = {id: S.nid++, color: 'raw', defect: false}; s.next = S.t + SRC_INT; }
+  if (s.part && canAccept('Fureszeles')) { accept('Fureszeles', s.part); s.part = null; s.out++; return true; }
+  return false;
+}
+function labStep() {
+  if (S.asm.legs < LEGS && S.t >= S.lab.next) { S.asm.legs++; S.lab.made++; S.lab.next = S.t + LEG_INT; }
+}
+function pass() {
+  let m = false;
+  m = exitStation('Csomagolas') || m;
+  m = asmStep() || m;
+  m = exitStation('Javitas') || m;
+  m = exitStation('Festes') || m;
+  m = exitStation('Maras') || m;
+  m = exitStation('Fureszeles') || m;
+  m = srcStep() || m;
+  return m;
+}
+function tick() {
+  labStep();
+  let guard = 0;
+  while (pass() && ++guard < 12) { /* nulla idejű továbbadások */ }
+  asmStep();
+  for (const id in S.st) {
+    const st = S.st[id];
+    for (const p of st.places) { if (!p) continue; if (S.t < p.doneAt) st.workSec++; else st.blockSec++; }
+  }
+  const a = S.asm;
+  if (a.part && a.busy) { if (S.t < a.doneAt) a.workSec++; else a.blockSec++; }
+  if (S.src.part) S.src.blockSec++;
+  if (a.legs >= LEGS) S.lab.blockSec++;
+  S.buf.occ += S.buf.q.length;
+  S.t++;
+}
+
+/* statisztika */
+function util(id) {
+  const t = Math.max(1, S.t);
+  if (S.st[id]) { const st = S.st[id], c = CAP[id]; return {work: st.workSec / (c * t), block: st.blockSec / (c * t)}; }
+  if (id === 'Szereles') return {work: S.asm.workSec / t, block: S.asm.blockSec / t};
+  return {work: 0, block: 0};
+}
+function lastHour() {
+  if (S.t < 3600) return null;
+  const from = S.t - 3600;
+  let n = 0;
+  for (let i = S.drain.times.length - 1; i >= 0 && S.drain.times[i] >= from; i--) n++;
+  return n;
+}
+function busiest() {
+  let best = null, v = -1;
+  for (const id of STATIONS) { const u = util(id).work; if (u > v) { v = u; best = id; } }
+  return {id: best, v};
+}
+function fmt(t) {
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+function pct(x) { return `${Math.round(x * 100)} %`; }
+function stationState(id) {
+  if (id === 'Szereles') {
+    const a = S.asm;
+    if (a.part && a.busy) return a.doneAt < S.t ? 'block' : 'work';
+    return a.part ? 'wait' : 'idle';
+  }
+  const st = S.st[id];
+  let work = false, blk = false;
+  for (const p of st.places) { if (!p) continue; if (p.doneAt < S.t) blk = true; else work = true; }
+  return work ? 'work' : blk ? 'block' : 'idle';
+}
+const STATE_TXT = {work: 'Dolgozik', block: 'Blokkolva', idle: 'Üres', wait: 'Vár a lábakra'};
+
+/* ---------------- Megjelenítés ---------------- */
+function setW(rect, w) { rect.setAttribute('width', Math.max(0, w).toFixed(2)); }
+function slotClass(part, blocked) {
+  if (!part) return 'slot empty';
+  let c = `slot ${part.color || 'raw'}`;
+  if (blocked) c += ' blocked';
+  if (part.defect) c += ' defect';
+  return c;
+}
+function render() {
+  const t = S.t;
+  for (const id in S.st) {
+    const st = S.st[id], r = refs[id];
+    st.places.forEach((p, i) => { r.slots[i].setAttribute('class', slotClass(p && p.part, !!p && p.doneAt < t)); });
+    const s = stationState(id);
+    r.led.setAttribute('class', `led ${s === 'work' ? 'work' : s === 'block' ? 'block' : ''}`);
+    const u = util(id);
+    setW(r.uw, u.work * r.bw);
+    r.ub.setAttribute('x', (r.bx + u.work * r.bw).toFixed(2));
+    setW(r.ub, u.block * r.bw);
+  }
+  /* Szereles */
+  const a = S.asm, rs = refs.Szereles;
+  rs.slots[0].setAttribute('class', slotClass(a.part, a.part && a.busy && a.doneAt < t));
+  rs.legs.textContent = `láb ${a.legs}/4`;
+  const ss = stationState('Szereles');
+  rs.led.setAttribute('class', `led ${ss === 'work' ? 'work' : ss === 'block' ? 'block' : ''}`);
+  const ua = util('Szereles');
+  setW(rs.uw, ua.work * rs.bw);
+  rs.ub.setAttribute('x', (rs.bx + ua.work * rs.bw).toFixed(2));
+  setW(rs.ub, ua.block * rs.bw);
+  /* források, puffer, nyelő, eseményvezérlő */
+  refs.Forras.slots[0].setAttribute('class', slotClass(S.src.part, !!S.src.part));
+  refs.Forras.led.setAttribute('class', `led ${S.src.part ? 'block' : ''}`);
+  refs.LabForras.led.setAttribute('class', `led ${a.legs >= LEGS ? 'block' : 'work'}`);
+  refs.SzerelesPuffer.right.textContent = `${S.buf.q.length} / ${BUF_CAP}`;
+  setW(refs.SzerelesPuffer.uf, (S.buf.q.length / BUF_CAP) * refs.SzerelesPuffer.bw);
+  refs.Szallitas.count.textContent = `${S.drain.count} db`;
+  refs.EventController.left.textContent = fmt(t);
+  refs.EventController.led.setAttribute('class', `led ${running ? 'work' : ''}`);
+  /* kijelzők */
+  $('#clock').textContent = fmt(t);
+  $('#done').textContent = `${S.drain.count} asztal`;
+  const lh = lastHour();
+  $('#rate').textContent = `Utolsó óra: ${lh == null ? '–' : lh + ' asztal'}`;
+  if (t >= 900) { const b = busiest(); $('#bneck').textContent = `Legterheltebb: ${b.id}, ${pct(b.v)}`; }
+  else $('#bneck').textContent = 'Legterheltebb: –';
+  updateLive();
+}
+
+/* ---------------- Részletek ---------------- */
+const FESTESBE_CODE = 'var r: real := z_uniform(1, 0, 1)\nif r < 0.33 then\n\t@.Szin := "piros"\nelseif r < 0.66 then\n\t@.Szin := "kék"\nelse\n\t@.Szin := "fehér"\nend';
+const MF = 'Toolbox, Material Flow fül';
+const DETAILS = {
+  Forras: {type: 'Source', where: MF,
+    rows: [['MU', 'Asztallap'], ['Interval', '2:00'], ['Utód', 'Fureszeles']],
+    notes: ['Az MU-t a Class Library-ből húzd be az MU mezőbe.', 'Ha a fűrész foglalt, a Source vár (blokkolva) – ez itt teljesen rendben van.']},
+  Fureszeles: {type: 'Station', where: MF,
+    rows: [['Processing time', '2:00'], ['Utód', 'Maras']],
+    notes: ['A megmunkálási időt a Times fülön adod meg.']},
+  Maras: {type: 'ParallelStation', where: MF,
+    rows: [['Férőhely', '2'], ['Processing time', '5:00'], ['Utód', 'Festes']],
+    notes: ['A két hely a két marógép. Két külön Station-nel is ugyanezt kapod.', 'Ez a szűk keresztmetszet: 5 perc / 2 gép = 2,5 perc/db, vagyis kb. 24 asztal óránként.']},
+  Festes: {type: 'ParallelStation', where: MF,
+    rows: [['Férőhely', '4 (feltevés)'], ['Processing time', '10:00'], ['Controls, Entrance', 'FestesBe'], ['Utód', 'MinosegEll']],
+    notes: ['10 perc / 4 robot = 2,5 perc/db, pont a marás üteme, így a festés nem fogja vissza a sort.', 'A robotok száma nincs a dián. Ha a feladat megadja, írd át.']},
+  MinosegEll: {type: 'FlowControl', where: MF,
+    rows: [['Exit Strategy', 'Percentage'], ['1. utód: SzerelesPuffer', '90 %'], ['2. utód: Javitas', '10 % (feltevés)']],
+    notes: ['Nincs megmunkálási ideje, csak irányítja a lapokat.', 'A sorszám a bekötés sorrendjéből jön: előbb a SzerelesPuffer-t kösd be, utána a Javitas-t.']},
+  Javitas: {type: 'Station', where: MF,
+    rows: [['Processing time', '10:00 (feltevés)'], ['Utód', 'SzerelesPuffer']],
+    notes: ['Ha a javított lapnak újra át kell mennie az ellenőrzésen, kösd vissza a MinosegEll-be, és tegyél elé egy Buffert, különben beragadhat.']},
+  SzerelesPuffer: {type: 'Buffer', where: MF,
+    rows: [['Capacity', '10'], ['Utód', 'Szereles (1. előd)']],
+    notes: ['Itt fut össze a jó és a javított lap. Azért kell, mert az AssemblyStation csak egyetlen elődtől veszi át a főalkatrészt.']},
+  LabForras: {type: 'Source', where: MF,
+    rows: [['MU', 'Lab'], ['Interval', '0:05'], ['Utód', 'Szereles (2. előd)']],
+    notes: ['A rövid intervallum miatt mindig van kéznél láb.', 'A Szereles-be ezt kösd be másodikként.']},
+  Szereles: {type: 'AssemblyStation', where: MF,
+    rows: [['Processing time', '2:00 (4 × 30 s)'], ['Assembly table', 'Predecessors'], ['Lista', '2. előd, 4 db'], ['Main MU from predecessor', '1'], ['Utód', 'Csomagolas']],
+    notes: ['Bekötés: előbb a SzerelesPuffer (1. előd), utána a LabForras (2. előd).']},
+  Csomagolas: {type: 'Station', where: MF,
+    rows: [['Processing time', '1:00'], ['Utód', 'Szallitas']],
+    notes: []},
+  Szallitas: {type: 'Drain', where: MF,
+    rows: [['Beállítás', 'nincs teendő']],
+    notes: ['A kész asztalok számát a Statistics fülön látod.', 'Várható: nagyjából 180 asztal 8 óra alatt.']},
+  EventController: {type: 'EventController', where: 'Új modellben már ott van a Frame-ben',
+    rows: [['End', '8:00:00']],
+    notes: ['Egy nyolcórás műszakot szimulál. Indítás a Start/Stop gombbal.']},
+  FestesBe: {type: 'Method', where: 'Toolbox, Information Flow fül',
+    rows: [['Hová kerül', 'Festes, Controls fül, Entrance']],
+    notes: ['Előtte az Asztallap-on vegyél fel egy Szin nevű, string típusú user-defined attribútumot.'],
+    code: FESTESBE_CODE},
+  Asztallap: {type: 'MU (Part)', where: 'Class Library, MUs mappa: a Part duplikátuma',
+    rows: [['User-defined attribute', 'Szin (string)'], ['Gyártja', 'Forras']],
+    notes: ['Jobb klikk a Part-on, Duplicate, majd nevezd át.']},
+  Lab: {type: 'MU (Part)', where: 'Class Library, MUs mappa: a Part duplikátuma',
+    rows: [['Gyártja', 'LabForras'], ['Asztalonként', '4 db']],
+    notes: []}
+};
+const LIVE_IDS = new Set(['Forras', 'Fureszeles', 'Maras', 'Festes', 'MinosegEll', 'Javitas', 'SzerelesPuffer', 'LabForras', 'Szereles', 'Csomagolas', 'Szallitas', 'EventController']);
+const INTRO = '<h2>Válassz ki egy objektumot</h2>' +
+  '<p class="intro-p">Itt látod a típusát, a beállításait, és szimuláció közben élőben a kihasználtságát.</p>' +
+  '<dl class="kv"><dt>Szűk keresztmetszet</dt><dd>Maras, 2,5 perc/db</dd>' +
+  '<dt>Elméleti kibocsátás</dt><dd>kb. 24 asztal óránként</dd>' +
+  '<dt>Egy műszak (8 óra)</dt><dd>nagyjából 180 asztal</dd></dl>';
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])); }
+function kv(rows) { return rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join(''); }
+
+function liveRows(id) {
+  const t = Math.max(1, S.t);
+  if (S.st[id] || id === 'Szereles') {
+    const u = util(id);
+    const io = id === 'Szereles' ? [S.asm.in, S.asm.out] : [S.st[id].in, S.st[id].out];
+    const rows = [['Állapot', STATE_TXT[stationState(id)]], ['Dolgozik', pct(u.work)], ['Blokkolva', pct(u.block)]];
+    if (id === 'Szereles') rows.push(['Lábak', `${S.asm.legs} / 4`]);
+    rows.push(['Be / ki', `${io[0]} / ${io[1]}`]);
+    return rows;
+  }
+  switch (id) {
+    case 'Forras': return [['Állapot', S.src.part ? 'Blokkolva' : 'Üres'], ['Blokkolva', pct(S.src.blockSec / t)], ['Kiadott lap', `${S.src.out} db`]];
+    case 'LabForras': return [['Legyártott láb', `${S.lab.made} db`], ['Blokkolva', pct(S.lab.blockSec / t)]];
+    case 'SzerelesPuffer': return [['Bent most', `${S.buf.q.length} db`], ['Átlagos töltés', `${(S.buf.occ / t).toFixed(1).replace('.', ',')} db`], ['Be / ki', `${S.buf.in} / ${S.buf.out}`]];
+    case 'MinosegEll': {
+      const tot = S.fc.toBuf + S.fc.toRep;
+      return [['Szerelés felé', `${S.fc.toBuf} db`], ['Javításra', `${S.fc.toRep} db`], ['Javítási arány', tot ? pct(S.fc.toRep / tot) : '–']];
+    }
+    case 'Szallitas': { const lh = lastHour(); return [['Kész asztal', `${S.drain.count} db`], ['Utolsó óra', lh == null ? '–' : `${lh} db`]]; }
+    case 'EventController': return [['Szimulált idő', fmt(S.t)], ['Állapot', running ? 'Fut' : S.t >= END ? 'Vége' : S.t > 0 ? 'Szünetel' : 'Áll']];
+  }
+  return [];
+}
+function updateLive() {
+  if (!selected || !LIVE_IDS.has(selected)) return;
+  const box = document.getElementById('livekv');
+  if (box) box.innerHTML = kv(liveRows(selected));
+}
+
+let selected = null;
+const panel = $('#panel'), pbody = $('#pbody');
+function renderPanel() {
+  if (!selected) { pbody.innerHTML = INTRO; return; }
+  const d = DETAILS[selected], n = byId[selected];
+  let h = `<div class="p-head"><h2>${esc(selected)}</h2>${n ? `<span class="zone-tag" title="Rajzzóna">${zoneOf(n)}</span>` : ''}</div>`;
+  h += `<p class="p-sub"><b>${esc(d.type)}</b><span>${esc(d.where)}</span></p>`;
+  if (LIVE_IDS.has(selected)) h += '<div class="live"><p class="cap">Szimuláció most</p><dl class="kv" id="livekv"></dl></div>';
+  h += `<p class="cap">Beállítás</p><dl class="kv">${kv(d.rows)}</dl>`;
+  if (d.code) h += `<pre class="code"><code>${esc(d.code)}</code></pre>`;
+  if (d.notes.length) h += `<ul class="notes">${d.notes.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  pbody.innerHTML = h;
+  updateLive();
+}
+function markSelected() {
+  for (const id in refs) refs[id].g.classList.toggle('sel', id === selected);
+}
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+function revealNode(id) {
+  if (!refs[id] || window.matchMedia('(min-width: 880px)').matches) return;
+  requestAnimationFrame(() => {
+    const r = refs[id].g.getBoundingClientRect();
+    const sheetTop = window.innerHeight - panel.getBoundingClientRect().height;
+    const barBottom = $('.bar').getBoundingClientRect().bottom;
+    const behavior = reduceMotion.matches ? 'auto' : 'smooth';
+    if (r.bottom > sheetTop - 12) window.scrollBy({top: r.bottom - sheetTop + 24, behavior});
+    else if (r.top < barBottom + 8) window.scrollBy({top: r.top - barBottom - 16, behavior});
+  });
+}
+function select(id) {
+  selected = id;
+  markSelected();
+  renderPanel();
+  panel.classList.add('open');
+  panel.scrollTop = 0;
+  revealNode(id);
+}
+function deselect() {
+  if (!selected) return;
+  selected = null;
+  markSelected();
+  panel.classList.remove('open');
+  renderPanel();
+}
+$('#close').addEventListener('click', deselect);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
+document.querySelectorAll('[data-mu]').forEach(b => b.addEventListener('click', () => select(b.dataset.mu)));
+
+/* ---------------- Vezérlés ---------------- */
+const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9.2-5.5z" fill="currentColor"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.6 2.5h3.1v11H3.6zM9.3 2.5h3.1v11H9.3z" fill="currentColor"/></svg>';
+let running = false, speed = 600, lastTs = 0, acc = 0, raf = 0;
+const playBtn = $('#play'), statusEl = $('#status');
+
+function setPlayLabel() {
+  const txt = running ? 'Szünet' : S.t >= END ? 'Újra' : S.t > 0 ? 'Folytatás' : 'Indítás';
+  playBtn.innerHTML = `${running ? ICON_PAUSE : ICON_PLAY}<span>${txt}</span>`;
+}
+function loop(ts) {
+  if (!running) return;
+  const dt = lastTs ? Math.min(0.1, (ts - lastTs) / 1000) : 0;
+  lastTs = ts;
+  acc += dt * speed;
+  let n = Math.floor(acc);
+  acc -= n;
+  while (n-- > 0 && S.t < END) tick();
+  if (S.t >= END) { finish(); return; }
+  render();
+  raf = requestAnimationFrame(loop);
+}
+function play() {
+  if (S.t >= END) resetSim();
+  running = true; lastTs = 0; acc = 0;
+  statusEl.textContent = '';
+  setPlayLabel(); render();
+  raf = requestAnimationFrame(loop);
+}
+function pause() {
+  running = false; cancelAnimationFrame(raf);
+  setPlayLabel(); render();
+}
+function finish() {
+  running = false; cancelAnimationFrame(raf);
+  setPlayLabel(); render();
+  statusEl.textContent = `Vége: ${S.drain.count} asztal 8 óra alatt.`;
+}
+playBtn.addEventListener('click', () => { if (running) pause(); else play(); });
+$('#reset').addEventListener('click', () => {
+  running = false; cancelAnimationFrame(raf);
+  resetSim(); statusEl.textContent = '';
+  setPlayLabel(); render();
+});
+$('#jump').addEventListener('click', () => {
+  running = false; cancelAnimationFrame(raf);
+  while (S.t < END) tick();
+  finish();
+});
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  speed = Number(b.dataset.speed);
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+}));
+
+resetSim();
+setPlayLabel();
+renderPanel();
+render();
+})();
+</script>
+</body>
+</html>

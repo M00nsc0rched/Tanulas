@@ -1,41 +1,47 @@
 {
   "source": "claude.ai Artifacts",
-  "updated": "2026-09-23T08:30:00+02:00",
+  "updated": "2026-09-23T10:30:00+02:00",
   "items": [
     {
       "id": "QtEMzHsA3gHsg8AHwR6rGC",
       "title": "Gépész záróvizsga tételtár",
       "url": "https://claude.ai/artifact/QtEMzHsA3gHsg8AHwR6rGC",
+      "local": "docs/QtEMzHsA3gHsg8AHwR6rGC/",
       "updated": "2026-09-22"
     },
     {
       "id": "NC123Hw1aq8NRNoArcqZAC",
       "title": "Asztalgyár – Plant Simulation modell",
       "url": "https://claude.ai/artifact/NC123Hw1aq8NRNoArcqZAC",
+      "local": "docs/NC123Hw1aq8NRNoArcqZAC/",
       "updated": "2026-09-21"
     },
     {
       "id": "E2uWuWTYLxvMdGiwk14z4D",
       "title": "ATTR jegyzet – APT és CLDATA (19–41. dia)",
       "url": "https://claude.ai/artifact/E2uWuWTYLxvMdGiwk14z4D",
+      "local": "docs/E2uWuWTYLxvMdGiwk14z4D/",
       "updated": "2026-09-17"
     },
     {
       "id": "1HZNLhotXR7wHGXf8eRKVN",
       "title": "Lay Land",
       "url": "https://claude.ai/artifact/1HZNLhotXR7wHGXf8eRKVN",
+      "local": "docs/1HZNLhotXR7wHGXf8eRKVN/",
       "updated": "2026-09-09"
     },
     {
       "id": "VfjkiUQp5s6M5Z2VpJJ5nb",
       "title": "Lay Land tervkönyv",
       "url": "https://claude.ai/artifact/VfjkiUQp5s6M5Z2VpJJ5nb",
+      "local": "docs/VfjkiUQp5s6M5Z2VpJJ5nb/",
       "updated": "2026-09-09"
     },
     {
       "id": "8eTsw5DkfqtozsQiRgb3eC",
       "title": "GRAVEBORNE — motion preview",
       "url": "https://claude.ai/artifact/8eTsw5DkfqtozsQiRgb3eC",
+      "local": "docs/8eTsw5DkfqtozsQiRgb3eC/",
       "updated": "2026-08-01"
     }
   ]

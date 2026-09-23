@@ -1,6 +1,6 @@
 // Tanulás — egyszerű, build nélküli PWA. Safari 16 (iPad 5. gen) kompatibilis.
 
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const DATA_URL = 'data/artifacts.json';
 const REPO_URL = 'https://github.com/M00nsc0rched/Tanulas';
 
@@ -87,6 +87,10 @@ const icons = {
   chevron: '<svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>',
   close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   share: '<svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M7 10H5v11h14V10h-2"/></svg>',
+  back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>',
+  external: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  expand: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  shrink: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
 };
 
 /* ---------- Állapot ---------- */
@@ -100,6 +104,8 @@ const state = {
   custom: store.get('custom', []), // [{ id, title, url, added }]
   sort: store.get('sort', 'new'),
   theme: store.get('theme', 'auto'),
+  immersive: store.get('immersive', false), // olvasóban a felső sáv elrejtve
+  returnTo: 'claude', // ahová az olvasó „Vissza” gombja visz
   query: '',
 };
 
@@ -143,6 +149,13 @@ function topbar(title, actions = '') {
   return `<header class="topbar"><div class="topbar-inner"><h1>${esc(title)}</h1>${actions}</div></header>`;
 }
 
+// A helyi másolattal rendelkező dokumentumok az appon belüli olvasóban nyílnak meg.
+function docLink(d) {
+  return d.local
+    ? `href="#/olvaso/${encodeURIComponent(d.id)}"`
+    : `href="${esc(d.url)}" target="_blank" rel="noopener"`;
+}
+
 function docCard(d, meta) {
   const fav = state.favs.has(d.id);
   const letter = (Array.from(d.title.trim())[0] || '?').toUpperCase();
@@ -150,7 +163,7 @@ function docCard(d, meta) {
     ? `<span class="badge">Saját</span>Hozzáadva: ${esc(relDay(d.added))}`
     : `Frissítve: ${esc(relDay(d.updated))}`;
   return `<li class="doc">
-    <a class="doc-main" href="${esc(d.url)}" target="_blank" rel="noopener" data-open="${esc(d.id)}">
+    <a class="doc-main" ${docLink(d)} data-open="${esc(d.id)}">
       <span class="doc-tile tint-${tint(d.title)}" aria-hidden="true">${esc(letter)}</span>
       <span class="doc-text">
         <span class="doc-title">${esc(d.title)}</span>
@@ -242,9 +255,9 @@ function renderClaude() {
         </div>
       </div>
       <ul class="doc-list" id="doc-list"></ul>
-      <p class="hint">A lista a claude.ai-on lévő Artifact-jaidból készül. Új dokumentum után kérd meg Claude-ot:
-        <strong>„Frissítsd a Tanulás app dokumentumlistáját”</strong>, majd koppints a frissítés gombra.
-        A dokumentumok a claude.ai-on nyílnak meg, ott be kell lenned jelentkezve.</p>
+      <p class="hint">A dokumentumok az appon belül, teljes képernyőn nyílnak meg, és egyszeri megnyitás után offline is
+        olvashatók. A lista a claude.ai-on lévő Artifact-jaidból készül. Új vagy módosított dokumentum után kérd meg Claude-ot:
+        <strong>„Frissítsd a Tanulás app dokumentumlistáját”</strong>, majd koppints a frissítés gombra.</p>
     </div>`;
 }
 
@@ -326,21 +339,71 @@ function renderSettings() {
     </div>`;
 }
 
-/* ---------- Router ---------- */
+/* ---------- Olvasó (teljes képernyős, appon belüli) ---------- */
 
-const routes = { '': renderHome, claude: renderClaude, beallitasok: renderSettings };
-const view = $('#view');
+function renderReader(id) {
+  const d = docById(id);
+  const back = `<a class="reader-back" href="#/${state.returnTo}">${icons.back}<span>Vissza</span></a>`;
 
-function currentRoute() {
-  const r = location.hash.replace(/^#\/?/, '').split(/[?/]/)[0];
-  return Object.prototype.hasOwnProperty.call(routes, r) ? r : '';
+  if (!d || !d.local) {
+    const msg = !state.remote && state.loading
+      ? '<span class="spinner" aria-hidden="true"></span>Betöltés…'
+      : 'Ez a dokumentum nem található.';
+    return `<div class="reader"><header class="reader-bar">${back}</header>
+      <div class="reader-body"><div class="reader-loading" role="status">${msg}</div></div></div>`;
+  }
+
+  return `<div class="reader${state.immersive ? ' is-immersive' : ''}" id="reader">
+    <header class="reader-bar">
+      ${back}
+      <h1 class="reader-title">${esc(d.title)}</h1>
+      <a class="reader-btn" href="${esc(d.url)}" target="_blank" rel="noopener" aria-label="Megnyitás a claude.ai-on">${icons.external}</a>
+      <button class="reader-btn" type="button" data-action="immersive" aria-label="Teljes képernyő">${icons.expand}</button>
+    </header>
+    <div class="reader-body">
+      <div class="reader-loading" id="reader-loading" role="status"><span class="spinner" aria-hidden="true"></span>Betöltés…</div>
+      <iframe class="reader-frame" src="${esc(d.local)}" title="${esc(d.title)}" allow="fullscreen; clipboard-write"></iframe>
+    </div>
+    <button class="reader-exit" type="button" data-action="immersive" aria-label="Felső sáv megjelenítése">${icons.shrink}</button>
+  </div>`;
 }
 
+function toggleImmersive() {
+  state.immersive = !state.immersive;
+  store.set('immersive', state.immersive);
+  $('#reader')?.classList.toggle('is-immersive', state.immersive);
+}
+
+/* ---------- Router ---------- */
+
+const routes = {
+  '': renderHome,
+  claude: renderClaude,
+  beallitasok: renderSettings,
+  olvaso: (id) => renderReader(id),
+};
+const view = $('#view');
+
+function parseHash(hash) {
+  const [route = '', param = ''] = hash.replace(/^#\/?/, '').split('?')[0].split('/');
+  return Object.prototype.hasOwnProperty.call(routes, route)
+    ? { route, param: decodeURIComponent(param) }
+    : { route: '', param: '' };
+}
+
+const currentRoute = () => parseHash(location.hash).route;
+
 function render({ keepScroll = false } = {}) {
-  const route = currentRoute();
+  const { route, param } = parseHash(location.hash);
   const y = window.scrollY;
-  view.innerHTML = routes[route]();
+  view.innerHTML = routes[route](param);
   if (route === 'claude') renderDocList();
+
+  const reading = route === 'olvaso';
+  document.documentElement.classList.toggle('is-reading', reading);
+  if (reading) {
+    $('.reader-frame')?.addEventListener('load', () => $('#reader-loading')?.remove(), { once: true });
+  }
 
   document.querySelectorAll('.nav-item').forEach((a) => {
     if (a.dataset.route === route) a.setAttribute('aria-current', 'page');
@@ -350,19 +413,27 @@ function render({ keepScroll = false } = {}) {
   if (keepScroll) window.scrollTo(0, y);
 }
 
-window.addEventListener('hashchange', () => {
+window.addEventListener('hashchange', (e) => {
+  const prev = parseHash(new URL(e.oldURL).hash).route;
+  if (currentRoute() === 'olvaso' && prev !== 'olvaso') state.returnTo = prev;
   state.query = '';
   render();
   window.scrollTo(0, 0);
   view.focus({ preventScroll: true });
 });
 
-// Csak a változó részeket frissíti (a keresőmező fókusza megmarad).
+// Csak a változó részeket frissíti (a keresőmező fókusza megmarad, a megnyitott dokumentum nem töltődik újra).
 function refreshInPlace() {
   document.querySelectorAll('[data-sync-summary]').forEach((el) => { el.textContent = syncSummary(); });
   document.querySelectorAll('[data-action="sync"].icon-btn').forEach((b) => b.classList.toggle('is-busy', state.loading));
-  if (currentRoute() === 'claude') renderDocList();
-  else render({ keepScroll: true });
+  const route = currentRoute();
+  if (route === 'olvaso') {
+    if (!$('.reader-frame')) render(); // a lista még töltődött, amikor a dokumentumot kérték
+  } else if (route === 'claude') {
+    renderDocList();
+  } else {
+    render({ keepScroll: true });
+  }
 }
 
 /* ---------- Téma ---------- */
@@ -542,6 +613,7 @@ document.addEventListener('click', (e) => {
       applyTheme(state.theme);
       btn.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
       break;
+    case 'immersive': toggleImmersive(); break;
     case 'close-install':
       store.set('installHintClosed', true);
       btn.closest('.banner').remove();
@@ -572,7 +644,7 @@ function backgroundSync() {
 // Visszatéréskor (pl. a claude.ai-ról) frissülnek a relatív idők, és ha rég volt, a lista is.
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible' || dialog.open) return;
-  render({ keepScroll: true });
+  if (currentRoute() !== 'olvaso') render({ keepScroll: true });
   if (Date.now() - store.get('lastSync', 0) > AUTO_SYNC_MS) backgroundSync();
 });
 
