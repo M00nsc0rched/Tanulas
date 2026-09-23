@@ -1,6 +1,6 @@
 // Tanulás — egyszerű, build nélküli PWA. Safari 16 (iPad 5. gen) kompatibilis.
 
-const APP_VERSION = '1.1.1';
+const APP_VERSION = '1.2.0';
 const DATA_URL = 'data/artifacts.json';
 const REPO_URL = 'https://github.com/M00nsc0rched/Tanulas';
 
@@ -466,16 +466,40 @@ function layoutReader() {
   }
 }
 
+/*
+ * Bővítmények: a Tanulás saját kiegészítései egy-egy dokumentumhoz (pl. interaktív ábra egy tételhez).
+ * Az ext/ mappában vannak, az olvasó tölti be őket a dokumentumba, így a docs/ másolat szinkronizálása
+ * nem írja felül őket, és a claude.ai-os eredetihez sem kell nyúlni.
+ */
+const EXTENSIONS = {
+  QtEMzHsA3gHsg8AHwR6rGC: ['ext/fe-c/fe-c.js'], // Gépész záróvizsga tételtár → A/01: interaktív vas–szén állapotábra
+};
+
+function injectExtensions(doc, docId) {
+  (EXTENSIONS[docId] || []).forEach((path) => {
+    const s = doc.createElement('script');
+    s.src = new URL(path, location.href).href;
+    doc.head.appendChild(s);
+  });
+}
+
 function setupReader() {
   const frame = $('.reader-frame');
   if (!frame) return;
+  const docId = parseHash(location.hash).param;
   let timer;
   // Minden betöltéskor (a lapon belüli navigáció után is) újra kell igazítani.
   frame.addEventListener('load', () => {
     $('#reader-loading')?.remove();
     let doc = null;
     try { doc = frame.contentDocument; } catch { /* idegen oldal */ }
-    if (doc) patchSafeArea(doc);
+    if (doc) {
+      patchSafeArea(doc);
+      // Csak a dokumentum saját kezdőlapjába (a lapon belüli továbbnavigálásnál nem)
+      if (doc.location.pathname.endsWith(`/docs/${docId}/`) || doc.location.pathname.endsWith(`/docs/${docId}/index.html`)) {
+        injectExtensions(doc, docId);
+      }
+    }
     layoutReader();
     // Témaváltás a dokumentumon belül → új háttérszín
     doc?.addEventListener('click', () => { clearTimeout(timer); timer = setTimeout(layoutReader, 350); });

@@ -43,6 +43,17 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 - `sw.js`: az app shell verziózott cache-ben van; a `docs/` fájlok (`tanulas-docs`) és a Google Fonts / CDN
   (`tanulas-cdn`) külön cache-ben, verzióváltáskor is megmaradnak. Egy dokumentum az első online megnyitás után offline is olvasható.
 
+## Bővítmények (saját kiegészítések a dokumentumokhoz)
+- Az `ext/` mappában vannak, és a `js/app.js` `EXTENSIONS` táblája rendeli őket dokumentumhoz. Az olvasó a
+  dokumentum kezdőlapjának betöltésekor `<script>`-ként illeszti be őket az iframe-be (ugyanaz az origin).
+- Így a `docs/` másolat szinkronizálása nem írja felül őket, és a claude.ai-os eredetihez sem nyúlunk.
+  Csak az appban látszanak.
+- `ext/fe-c/fe-c.js`: Gépész záróvizsga tételtár → A/01: „Interaktív · vas–szén állapotábra” alfejezet a
+  Témaösszefoglaló után (a tételtár `#ccode` = `A/01` és `#doc` DOM-jára épít; ha a tételtár szerkezete változik,
+  ezt ellenőrizni kell). Értékei a dokumentum saját Fe–C ábráit követik (S 0,8%/723 °C, E 2,06%/1147 °C,
+  C 4,3%, G 911 °C, P 0,025%, A 1536 °C), az eljárások hőmérsékletei az A/01 kidolgozásaiból valók.
+  Színei a tételtár CSS-változói (`--surface`, `--ink`, `--acc` …), így követi a tételtár világos/sötét témáját.
+
 ## Kiadás
 - Verzió: `APP_VERSION` a `js/app.js`-ben és `CACHE` a `sw.js`-ben — együtt emeld.
 - Ikonok/indítóképek: PowerShell + System.Drawing szkripttel készültek; a könyv-ikon SVG változata `icons/favicon.svg`.

@@ -1,6 +1,6 @@
 // Tanulás service worker — hálózat először, offline esetén a gyorsítótárból.
 // Kiadáskor emeld a verziót (és a js/app.js APP_VERSION értékét).
-const CACHE = 'tanulas-v1.1.1';
+const CACHE = 'tanulas-v1.2.0';
 // A dokumentumok és a betűkészletek verzióváltáskor is megmaradnak (nem kell újra letölteni a ~50 MB-ot).
 const DOCS_CACHE = 'tanulas-docs';
 const CDN_CACHE = 'tanulas-cdn';
@@ -17,6 +17,7 @@ const SHELL = [
   'icons/icon-32.png',
   'icons/apple-touch-icon.png',
   'icons/icon-192.png',
+  'ext/fe-c/fe-c.js',
 ];
 
 const OFFLINE_DOC = `<!doctype html><html lang="hu"><meta charset="utf-8">
