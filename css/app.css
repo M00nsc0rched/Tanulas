@@ -613,15 +613,14 @@ svg { flex: none; }
 /* ---------- Olvasó: dokumentum teljes képernyőn, az appon belül ---------- */
 
 .is-reading, .is-reading body { overflow: hidden; }
-.is-reading .nav, .is-reading .toast { display: none; }
+.is-reading .nav, .is-reading .toast, .is-reading .statusbar-bg { display: none; }
 
 .reader {
   position: fixed;
-  z-index: 35; /* a status bar sáv (40) fölötte marad, így az óra mindig olvasható */
+  z-index: 35;
   inset: 0;
   display: flex;
   flex-direction: column;
-  padding-top: var(--safe-t);
   background: var(--bg);
 }
 
@@ -630,8 +629,8 @@ svg { flex: none; }
   display: flex;
   align-items: center;
   gap: 2px;
-  min-height: 48px;
-  padding: 0 max(6px, var(--safe-r)) 0 max(4px, var(--safe-l));
+  min-height: calc(48px + var(--safe-t));
+  padding: var(--safe-t) max(6px, var(--safe-r)) 0 max(4px, var(--safe-l));
   background: var(--brand);
   color: var(--on-brand);
 }
@@ -676,21 +675,36 @@ svg { flex: none; }
 }
 .reader-btn svg { width: 22px; height: 22px; }
 
+/* A keret a biztonsági sávokon belül van (--frame-*, JS állítja); a sávokat a dokumentum felső és alsó
+   szélének színe tölti ki (--reader-fill-*), így az óra mögött a dokumentum „folytatódik”. */
 .reader-body {
   position: relative;
   flex: 1;
   min-height: 0;
-  margin: 0 var(--safe-r) var(--safe-b) var(--safe-l);
+  background: linear-gradient(var(--reader-fill-top, var(--bg)) 50%, var(--reader-fill-bottom, var(--bg)) 50%);
 }
 
 .reader-frame {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: var(--frame-top, 0px);
+  left: var(--frame-left, 0px);
+  width: calc(100% - var(--frame-left, 0px) - var(--frame-right, 0px));
+  height: calc(100% - var(--frame-top, 0px) - var(--frame-bottom, 0px));
   border: 0;
   background: transparent;
 }
+
+/* Világos dokumentumnál halvány sötétítés az óra alatt (a status bar szövege mindig fehér) */
+.reader-scrim {
+  display: none;
+  position: absolute;
+  z-index: 1;
+  top: 0; left: 0; right: 0;
+  height: calc(var(--safe-t) + 14px);
+  background: linear-gradient(rgba(0, 0, 0, .4), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+.reader.is-immersive.is-light-top .reader-scrim { display: block; }
 
 .reader-loading {
   position: absolute;

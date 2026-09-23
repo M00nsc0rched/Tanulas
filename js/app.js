@@ -1,6 +1,6 @@
 // Tanulás — egyszerű, build nélküli PWA. Safari 16 (iPad 5. gen) kompatibilis.
 
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 const DATA_URL = 'data/artifacts.json';
 const REPO_URL = 'https://github.com/M00nsc0rched/Tanulas';
 
@@ -362,6 +362,7 @@ function renderReader(id) {
     </header>
     <div class="reader-body">
       <div class="reader-loading" id="reader-loading" role="status"><span class="spinner" aria-hidden="true"></span>Betöltés…</div>
+      <div class="reader-scrim" aria-hidden="true"></div>
       <iframe class="reader-frame" src="${esc(d.local)}" title="${esc(d.title)}" allow="fullscreen; clipboard-write"></iframe>
     </div>
     <button class="reader-exit" type="button" data-action="immersive" aria-label="Felső sáv megjelenítése">${icons.shrink}</button>
@@ -372,7 +373,117 @@ function toggleImmersive() {
   state.immersive = !state.immersive;
   store.set('immersive', state.immersive);
   $('#reader')?.classList.toggle('is-immersive', state.immersive);
+  layoutReader();
 }
+
+/*
+ * Biztonsági sávok (status bar, Dynamic Island, home indicator) az olvasóban.
+ * Az iOS a beágyazott lapnak is átadja az env(safe-area-inset-*) értékeket, ezért a dokumentum a felső sávunk
+ * alatt is kihagyná a status bar helyét (dupla hely); némelyik dokumentum ráadásul maga is kétszer számolja.
+ * Megoldás: a dokumentumban az env()-et 0-ra cseréljük, a helyet mi hagyjuk ki a keret körül,
+ * és ezt a sávot a dokumentum szélének színével töltjük ki — így nincs se kék csík, se dupla hely.
+ */
+const SIDES = ['top', 'right', 'bottom', 'left'];
+const SAFE_RE = /env\(\s*safe-area-inset-(?:top|right|bottom|left)\s*(?:,[^)]*)?\)/g;
+
+function patchSafeArea(doc) {
+  const walk = (rules) => {
+    for (const rule of rules) {
+      if (rule.style && rule.style.cssText.includes('safe-area-inset')) {
+        rule.style.cssText = rule.style.cssText.replace(SAFE_RE, '0px');
+      }
+      if (rule.cssRules) walk(rule.cssRules);
+    }
+  };
+  for (const sheet of doc.styleSheets) {
+    try { walk(sheet.cssRules); } catch { /* idegen stíluslap (pl. Google Fonts) */ }
+  }
+  doc.querySelectorAll('[style*="safe-area-inset"]').forEach((el) => {
+    el.style.cssText = el.style.cssText.replace(SAFE_RE, '0px');
+  });
+}
+
+function readInsets() {
+  const probe = document.createElement('div');
+  // Ugyanazokat a CSS-változókat olvassa, amiket a felület is használ (css/app.css :root --safe-*).
+  probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;'
+    + 'padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l)';
+  document.body.appendChild(probe);
+  const cs = getComputedStyle(probe);
+  const insets = {
+    top: parseFloat(cs.paddingTop) || 0,
+    right: parseFloat(cs.paddingRight) || 0,
+    bottom: parseFloat(cs.paddingBottom) || 0,
+    left: parseFloat(cs.paddingLeft) || 0,
+  };
+  probe.remove();
+  return insets;
+}
+
+// A dokumentum háttérszíne a megadott magasságban (ezzel töltjük ki a sávot, és ebből dől el,
+// kell-e sötétítés az óra alá).
+function docBackground(doc, y) {
+  const win = doc.defaultView;
+  const parse = (c) => (c.match(/[\d.]+/g) || []).map(Number);
+  const pick = (el) => {
+    const c = el && win.getComputedStyle(el).backgroundColor;
+    const v = c ? parse(c) : [];
+    return v.length >= 3 && (v.length < 4 || v[3] > 0.5) ? { css: c, v } : null;
+  };
+  let el = doc.elementFromPoint(doc.documentElement.clientWidth / 2, y);
+  let found = null;
+  while (el && !found) { found = pick(el); el = el.parentElement; }
+  found = found || pick(doc.body) || pick(doc.documentElement);
+  if (!found) {
+    const dark = win.matchMedia('(prefers-color-scheme: dark)').matches;
+    found = { css: dark ? '#000' : '#fff', v: dark ? [0, 0, 0] : [255, 255, 255] };
+  }
+  const [r, g, b] = found.v;
+  return { css: found.css, light: (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.55 };
+}
+
+function layoutReader() {
+  const reader = $('#reader');
+  const frame = $('.reader-frame');
+  if (!reader || !frame) return;
+  let doc = null;
+  try { doc = frame.contentDocument; } catch { /* a lap elnavigált egy idegen oldalra */ }
+
+  const insets = readInsets();
+  const imm = state.immersive;
+  SIDES.forEach((side) => {
+    // Felső sávos módban a sávunk fedi a status bart, ott nem kell külön hely.
+    const edge = side === 'top' && !imm ? 0 : insets[side];
+    reader.style.setProperty(`--frame-${side}`, `${edge}px`);
+  });
+
+  if (doc?.body) {
+    const top = docBackground(doc, 2);
+    const bottom = docBackground(doc, doc.documentElement.clientHeight - 2);
+    reader.style.setProperty('--reader-fill-top', top.css);
+    reader.style.setProperty('--reader-fill-bottom', bottom.css);
+    reader.classList.toggle('is-light-top', imm && insets.top > 0 && top.light);
+  }
+}
+
+function setupReader() {
+  const frame = $('.reader-frame');
+  if (!frame) return;
+  let timer;
+  // Minden betöltéskor (a lapon belüli navigáció után is) újra kell igazítani.
+  frame.addEventListener('load', () => {
+    $('#reader-loading')?.remove();
+    let doc = null;
+    try { doc = frame.contentDocument; } catch { /* idegen oldal */ }
+    if (doc) patchSafeArea(doc);
+    layoutReader();
+    // Témaváltás a dokumentumon belül → új háttérszín
+    doc?.addEventListener('click', () => { clearTimeout(timer); timer = setTimeout(layoutReader, 350); });
+  });
+}
+
+window.addEventListener('resize', () => { if (currentRoute() === 'olvaso') layoutReader(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => setTimeout(layoutReader, 100));
 
 /* ---------- Router ---------- */
 
@@ -401,9 +512,7 @@ function render({ keepScroll = false } = {}) {
 
   const reading = route === 'olvaso';
   document.documentElement.classList.toggle('is-reading', reading);
-  if (reading) {
-    $('.reader-frame')?.addEventListener('load', () => $('#reader-loading')?.remove(), { once: true });
-  }
+  if (reading) setupReader();
 
   document.querySelectorAll('.nav-item').forEach((a) => {
     if (a.dataset.route === route) a.setAttribute('aria-current', 'page');

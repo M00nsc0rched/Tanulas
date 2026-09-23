@@ -1,6 +1,6 @@
 // Tanulás service worker — hálózat először, offline esetén a gyorsítótárból.
 // Kiadáskor emeld a verziót (és a js/app.js APP_VERSION értékét).
-const CACHE = 'tanulas-v1.1.0';
+const CACHE = 'tanulas-v1.1.1';
 // A dokumentumok és a betűkészletek verzióváltáskor is megmaradnak (nem kell újra letölteni a ~50 MB-ot).
 const DOCS_CACHE = 'tanulas-docs';
 const CDN_CACHE = 'tanulas-cdn';

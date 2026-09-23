@@ -37,6 +37,9 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 
 ## Olvasó és offline működés
 - Az olvasó iframe-ben, ugyanarról az originről tölti a másolatot (a dokumentumok `localStorage`-a így megmarad).
+- Biztonsági sávok: az iOS az iframe-nek is átadja az `env(safe-area-inset-*)` értékeket (dupla hely lenne), ezért
+  betöltéskor a dokumentum stíluslapjaiban az `env()` → `0px` csere történik (`patchSafeArea`), a helyet az olvasó
+  hagyja ki a keret körül, és a dokumentum szélének színével tölti ki (`layoutReader`). Nincs kék status bar csík.
 - `sw.js`: az app shell verziózott cache-ben van; a `docs/` fájlok (`tanulas-docs`) és a Google Fonts / CDN
   (`tanulas-cdn`) külön cache-ben, verzióváltáskor is megmaradnak. Egy dokumentum az első online megnyitás után offline is olvasható.
 
