@@ -33,6 +33,14 @@
     A14: [['forgadat'], ['lehajlas']],
     A15: [['furat']],
     A16: [['maras']],
+    A17: [['korong']],
+    A18: [['kup']],
+    A19: [['menet']],
+    A20: [['pontossag'], ['retegek']],
+    A21: [['evolvens']],
+    A22: [['maag'], ['evolvens']],
+    A23: [['kupkerek']],
+    A24: [['csiga']],
     A4: [['acjel'], ['ce'], ['fec', { set: 'a4', title: 'Hegesztés előtti és utáni hőkezelések az állapotábrán', sub: 'Előmelegítés, hidrogénmentesítés, feszültségcsökkentés, megeresztés, normalizálás' }]],
   };
 
