@@ -27,6 +27,12 @@
     A8: [['vfi'], ['munkapont', { mode: 'lapos', sub: 'Lapos (feszültségtartó) jelleggörbe és belső szabályozás — hasonlítsd össze a BKI-vel' }]],
     A9: [['forma'], ['hegtab'], ['ce']],
     A10: [['fec', { set: 'a10', title: 'Kovácsolás és a hidegalakítás hőkezelései az állapotábrán', sub: 'Felső és alsó kovácsolási hőköz · feszültségcsökkentés, lágyítás, újrakristályosítás, patentírozás' }], ['kovacs']],
+    A11: [['vagas'], ['savterv']],
+    A12: [['tures'], ['nyomkp'], ['savterv']],
+    A13: [['fec', { set: 'a13', title: 'Öntöttvasak a vas–szén állapotábrán', sub: 'Metastabil és stabil (vas–grafit) rendszer · temperálás · öntési szempontok' }], ['minta']],
+    A14: [['forgadat'], ['lehajlas']],
+    A15: [['furat']],
+    A16: [['maras']],
     A4: [['acjel'], ['ce'], ['fec', { set: 'a4', title: 'Hegesztés előtti és utáni hőkezelések az állapotábrán', sub: 'Előmelegítés, hidrogénmentesítés, feszültségcsökkentés, megeresztés, normalizálás' }]],
   };
 

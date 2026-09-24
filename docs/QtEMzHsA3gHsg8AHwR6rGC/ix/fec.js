@@ -298,8 +298,26 @@
   }
   HINTS.a10 = ['Alakítás szempontjából', hintForge];
 
+  // A/13 — öntöttvasak: stabil (vas–grafit) rendszer, temperálás (Gyártás I., Anyagismeret jegyzet)
+  PROC.stab = { label: 'Stabil rendszer', title: 'Stabil (vas–grafit) rendszer', text: 'Igen lassú hűlésnél (< 1 °C/perc) és grafitképző Si mellett a szén grafitként válik ki: a 4,25% C-os ömledék 1153 °C-on grafiteutektikummá dermed, az eutektoidos átalakulás 738 °C-on megy végbe (szaggatott vonalak). Így dermed a szürke (lemezgrafitos) öntöttvas; gyors hűlésnél és Mn mellett a metastabil (folytonos vonalú) rendszer szerint ledeburit keletkezik — fehér öntöttvas.', go: function () { return [3.4, 1100]; }, layer: function (x) { return '<path class="ln dash" style="stroke:var(--acc);stroke-width:2" d="' + x.path([[2.03, 1153], [6.67, 1153]]) + '"/><path class="ln dash" style="stroke:var(--acc);stroke-width:2" d="' + x.path([[0.02, 738], [6.67, 738]]) + '"/><path class="ln dash" style="stroke:var(--acc);stroke-width:2" d="' + x.path([[2.03, 1153], [0.69, 738]]) + '"/>' + x.lab(4.4, 1175, 'stabil: 1153 °C, 4,25% C') + x.lab(4.4, 760, 'stabil: 738 °C'); } };
+  PROC.temper = { label: 'Temperálás', title: 'Temperöntvény: a fehér nyersvas izzítása', text: 'A fehér (ledeburitos) nyersvasat 980–1050 °C-on hosszan izzítják: a Fe₃C elbomlik, a szén gömbszerű temperszénként (szekunder grafit) válik ki. Semleges közegben fekete temperöntvény (ferrites, törete fekete), oxidáló közegben a szén részben ki is ég: fehér temperöntvény.', go: function () { return [2.8, 1015]; }, layer: function (x) { return x.band([[2.06, 980], [3.6, 980], [3.6, 1050], [2.06, 1050]]) + x.lab(3.7, 1015, '980–1050 °C, hosszú izzítás'); } };
+  function hintCast(id, c, t) {
+    if (id === 'L') return 'Olvadék: az öntés hőmérséklete a likviduszvonal fölött van. Az eutektikus (4,3% C) ötvözet olvad a legalacsonyabb hőmérsékleten és a leghígfolyósabb — ezért jól önthető.';
+    if (id === 'Lg' || id === 'Lc') return 'Dermedési hőköz (olvadék + szilárd): minél szélesebb, annál rosszabb az önthetőség. Az eutektikus összetétel egy hőmérsékleten dermed.';
+    if (c < 2.06) return c < 0.6 ? 'Acélöntvény tartomány (ötvözetlen acélöntvény: C < 0,6%). Az acél zsugorodása 5–7%, nagy a dermedési hőköz, rossz a hígfolyóssága — felöntések és normalizálás kell.' : 'Acél tartomány: 2,06% C alatt a vas–szén ötvözet acél, nem öntöttvas.';
+    if (t > 1147) return 'Az eutektikus hőmérséklet fölött: az öntöttvas még részben folyékony.';
+    if (t > 723) return 'Metastabil rendszerben ausztenit + ledeburit + szekunder cementit (fehér öntöttvas); stabil rendszerben ausztenit + grafit. Itt, 980–1050 °C-on temperálják a fehér nyersvasat.';
+    return 'Szobahőmérsékleten: metastabil dermedésnél perlit + ledeburit (+ Fe₃C) — kemény, rideg fehér öntöttvas; stabil dermedésnél perlit/ferrit + grafit — szürkeöntvény. A kokillával érintkező kéreg gyorsan hűl, cementites lesz (kéregöntvény).';
+  }
+  HINTS.a13 = ['Öntés szempontjából', hintCast];
+
   // Eljáráskészletek tételenként
   var SETS = {
+    a13: {
+      procs: ['none', 'stab', 'temper'],
+      view: 'full', sv: 'steel', c0: 3.4, t0: 900,
+      lead: 'Az öntöttvas 2,06%-nál több szenet tartalmaz. <b>Válaszd a stabil rendszert</b>: a szaggatott vonalak a vas–grafit rendszert mutatják (1153 °C, 738 °C), a folytonosak a metastabil vas–vaskarbid rendszert. A temperálás a fehér nyersvas izzítása. Koppints az ábrára: a kártya az öntés szempontjából értelmezi a pontot.',
+    },
     a10: {
       procs: ['none', 'kovt', 'kfesz', 'hlagy', 'kujra', 'kpat'],
       view: 'forge', sv: 'forge', c0: 0.45, t0: 1100,
