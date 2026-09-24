@@ -44,23 +44,39 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
   (`tanulas-cdn`) külön cache-ben, verzióváltáskor is megmaradnak. Egy dokumentum az első online megnyitás után offline is olvasható.
 
 ## Bővítmények (saját kiegészítések a dokumentumokhoz)
-- Az `ext/` mappában vannak, és a `js/app.js` `EXTENSIONS` táblája rendeli őket dokumentumhoz. Az olvasó a
-  dokumentum kezdőlapjának betöltésekor `<script>`-ként illeszti be őket az iframe-be (ugyanaz az origin).
-- Így a `docs/` másolat szinkronizálása nem írja felül őket, és a claude.ai-os eredetihez sem nyúlunk.
-  Csak az appban látszanak.
-- `ext/fe-c/fe-c.js`: Gépész záróvizsga tételtár → A/01: „Interaktív · vas–szén állapotábra” alfejezet a
-  Témaösszefoglaló után (a tételtár `#ccode` = `A/01` és `#doc` DOM-jára épít; ha a tételtár szerkezete változik,
-  ezt ellenőrizni kell). Értékei a dokumentum saját Fe–C ábráit követik (S 0,8%/723 °C, E 2,06%/1147 °C,
-  C 4,3%, G 911 °C, P 0,025%, A 1536 °C), az eljárások hőmérsékletei az A/01 kidolgozásaiból valók.
-  Színei a tételtár CSS-változói (`--surface`, `--ink`, `--acc` …), így követi a tételtár világos/sötét témáját.
+- A `js/app.js` `EXTENSIONS` táblája (jelenleg üres) az `ext/` mappából `<script>`-ként illeszthet be kódot egy
+  dokumentum iframe-jébe, ha valamit csak az appban akarunk mutatni. A korábbi `ext/fe-c/fe-c.js` a tételtárba költözött
+  (`ix/fec.js`), az `ext/` mappa megszűnt.
+
+## Tételtár interaktív ábrái (`docs/QtEMzHsA3gHsg8AHwR6rGC/ix/`)
+- A tételtár része (a claude.ai-os eredetiben is benne van), az `index.html` tölti be a `data-b.js` után:
+  `ix/core.js`, `fec.js`, `a-anyag.js`, `a-hegesztes.js`, `a-alakitas.js`, `a-forgacsolas.js`, `a-nc.js`;
+  a `show()` végén `AVIX.show(r, doc)` hívódik. **Szinkronkor ezek a módosítások a claude.ai-os oldalon is megvannak** —
+  ha mégis eltérne, az `index.html` két kiegészítését (script tagek + `AVIX.show`) vissza kell tenni.
+- `core.js`: `REG` (tétel id → `[[widget, opts], …]`), `AVIX.def(név, {title, sub, mount(el, opt, U, r)})`, segédek `U`-ban
+  (`slider`, `seg`, `chips`, `plot`, `scale`, `axes`, `kv`, `quiz`, `store` → localStorage `avix.*`). ES5 stílus (Safari 16).
+  Színek a tételtár CSS-változóiból (`--ix-1..8`, `--surface`, `--ink`, `--acc`), így követik a világos/sötét témát.
+- `fec.js`: vas–szén állapotábra (nézetek `steel`, `steelw`, `full`, `forge`; `PROC` eljárássávok, `SETS.a1/a3/a4/a5/a10/a13`).
+  Értékei a dokumentum saját Fe–C ábráit követik (S 0,8%/723 °C, E 2,06%/1147 °C, C 4,3%, G 911 °C, P 0,025%, A 1536 °C).
+- Az ábrák saját rajzok (a jegyzetek ábráit nem másoljuk). A statikus SVG-k a `data-a.js`-ben `figure.ixfig` elemek.
+- Tesztelés: a tételtár betöltés után visszaállítja a görgetést, ezért képernyőképhez érdemes a widgetet külön oldalon
+  mountolni (`AVIX` + `data-a.js` betöltése, majd `AVIX.show` egy `#doc` elemre).
 
 ## Tételtár tartalmi javításai
 - A Gépész záróvizsga tételtár (`docs/QtEMzHsA3gHsg8AHwR6rGC/`) adatai a `data-a.js` / `data-b.js` fájlokban vannak
   (`window.AV_B=[{id,g,n,t,sub,q,one,sum,body,…}]`; csak a `"` van escape-elve, nyers UTF-8).
 - Tartalmi javítást a claude.ai-os eredetin **és** a repóbeli másolaton is el kell végezni (Artifact publish `url` +
   `files: {"data-b.js": …}`), különben a következő szinkron felülírja. Eszközök: `tools\tetel-dump.ps1 -Id B3 -Field body`
-  (kiírja a mező HTML-jét), `tools\tetel-patch.ps1 -Patch <fájl> [-DryRun]` (egyedi találatú keresés–csere, JSON-ellenőrzéssel).
+  (kiírja a mező HTML-jét), `tools\tetel-patch.ps1 -Patch <fájl> -Target <data-x.js> [-DryRun]` (egyedi találatú
+  keresés–csere, JSON-ellenőrzéssel). A patch-szkriptet a PowerShell tool-lal futtasd (Bash-ből az execution policy
+  megakasztja). A patchfájl sorait trimeli és elválasztó nélkül fűzi össze, ezért minden bekezdés / SVG-elem egy sorba kerüljön.
+  A/B publikálásnál a módosított `ix/*.js` fájlokat is add át a `files`-ban.
 - 2026-09-23: B/01–B/08 átnézve Dudás Illés *Gyártási folyamatok és rendszerek* jegyzete alapján (claude.ai Version 6).
+- 2026-09-24: A/01–A/30 átnézve az *EA – Anyagismeret*, *Gyártás 1*, *Gyártás 2* és *Megmunkálási eljárások* jegyzetek
+  alapján, javítva, bővítve, interaktív ábrákkal (claude.ai Version 7). Az A/26–A/30 (NC) témának nincs forrása ebben a
+  négy jegyzetben, ott csak belső következetességet ellenőriztünk.
+- A repó iCloud Drive-ban van: gyors egymás utáni átírásnál az iCloud „fájl 2.ext” névre tehet át fájlt (404-es script).
+  Commit előtt: `find . -name "* 2.*" -not -path "./.git/*"`.
 - A gyökérben lévő `zarovizsga-teteltar.html` a felhasználó saját fájlja, nem része az appnak — ne commitold.
 
 ## Kiadás

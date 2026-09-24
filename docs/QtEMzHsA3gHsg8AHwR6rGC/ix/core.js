@@ -41,6 +41,12 @@
     A22: [['maag'], ['evolvens']],
     A23: [['kupkerek']],
     A24: [['csiga']],
+    A25: [['tomeg'], ['szakaszok']],
+    A26: [['ncsim', { prog: 'kontur' }]],
+    A27: [['nullpont'], ['ncsim', { prog: 'novm', title: 'Abszolút és növekményes méretmegadás', sub: 'G90: a W nullponthoz képest · G91: az előző ponthoz képest — léptesd a programot' }]],
+    A28: [['korr'], ['ncsim', { prog: 'kontur' }]],
+    A29: [['ncsim', { prog: 'hibas', title: 'Programellenőrzés grafikus szimulációval', sub: 'A szimulátor jelzi a hibás körívet és a hiányzó előtolást — javítsd ki a programot' }]],
+    A30: [['ncsim', { prog: 'kontur', title: 'Egyenes és körív menti mondatok', sub: 'G00 pontvezérlés · G01 egyenes · G02/G03 körív végponttal és I, J középponttal vagy R sugárral' }]],
     A4: [['acjel'], ['ce'], ['fec', { set: 'a4', title: 'Hegesztés előtti és utáni hőkezelések az állapotábrán', sub: 'Előmelegítés, hidrogénmentesítés, feszültségcsökkentés, megeresztés, normalizálás' }]],
   };
 
