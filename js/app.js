@@ -1,6 +1,6 @@
 // Tanulás — egyszerű, build nélküli PWA. Safari 16 (iPad 5. gen) kompatibilis.
 
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 const DATA_URL = 'data/artifacts.json';
 const REPO_URL = 'https://github.com/M00nsc0rched/Tanulas';
 
@@ -472,7 +472,7 @@ function layoutReader() {
  * nem írja felül őket, és a claude.ai-os eredetihez sem kell nyúlni.
  */
 const EXTENSIONS = {
-  QtEMzHsA3gHsg8AHwR6rGC: ['ext/fe-c/fe-c.js'], // Gépész záróvizsga tételtár → A/01: interaktív vas–szén állapotábra
+  // A Gépész záróvizsga tételtár interaktív ábrái (a korábbi ext/fe-c is) már a tételtár része: docs/QtEMzHsA3gHsg8AHwR6rGC/ix/
 };
 
 function injectExtensions(doc, docId) {

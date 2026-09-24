@@ -343,6 +343,11 @@ kbd{font-family:var(--mono);font-size:11.5px;background:var(--surface);
 
 <script defer src="data-a.js"></script>
 <script defer src="data-b.js"></script>
+<script defer src="ix/core.js"></script>
+<script defer src="ix/fec.js"></script>
+<script defer src="ix/a-anyag.js"></script>
+<script defer src="ix/a-hegesztes.js"></script>
+<script defer src="ix/a-alakitas.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   var ALL = [].concat(window.AV_A||[], window.AV_B||[]);
@@ -437,6 +442,7 @@ document.addEventListener('DOMContentLoaded', function(){
       t.parentNode.insertBefore(w,t); w.appendChild(t);
     });
     observeLazy(doc);
+    if(window.AVIX){ try{ AVIX.show(r, doc); }catch(e){} }
     var d=$('#done'); d.setAttribute('aria-pressed', st.done[id]?'true':'false');
     var i=ALL.indexOf(r);
     $('#prev').disabled = i<=0; $('#next').disabled = i>=ALL.length-1;

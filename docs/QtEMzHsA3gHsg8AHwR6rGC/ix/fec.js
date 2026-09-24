@@ -1,19 +1,15 @@
 /*
- * Tanulás bővítmény — interaktív vas–szén (Fe–Fe₃C) állapotábra az A/01 tételhez
- * („Felületkeményítő (kérgesítő) hőkezelő eljárások és anyagaik”, Gépész záróvizsga tételtár).
+ * Gépész záróvizsga tételtár — interaktív vas–szén (Fe–Fe₃C) állapotábra (AVIX ábra: 'fec')
  *
- * A Tanulás olvasója tölti be a tételtár dokumentumába (js/app.js → EXTENSIONS), így a claude.ai-os
- * eredetihez és a docs/ másolathoz nem kell nyúlni, és a szinkronizálás sem írja felül.
- * Az értékek a tételtár saját állapotábráit követik (S 0,8% / 723 °C, E 2,06% / 1147 °C, C 4,3%,
- * G 911 °C, P 0,025%, A 1536 °C), az eljárások hőmérsékletei az A/01 kidolgozásaiból valók.
+ * Több tétel használja, más-más eljáráskészlettel (opt.set): a1 = felületkeményítés, a5 = lágyító
+ * és egyéb térfogati hőkezelések, a10 = kovácsolás, a13 = öntöttvasak. Az értékek a tételtár saját
+ * állapotábráit és a tanszéki Anyagismeret jegyzetet követik (S 0,8% / 723 °C, E 2,06% / 1147 °C,
+ * C 4,3%, G 911 °C, P 0,025%, A 1536 °C).
  * Színek és betűk: a tételtár CSS-változói (--surface, --ink, --acc …), így világos és sötét témában is illeszkedik.
  */
 (function () {
   'use strict';
-  if (window.__tanulasFeC) return;
-  window.__tanulasFeC = true;
-
-  var TARGET = 'A/01'; // a tételtár #ccode mezője a megjelenített tételnél
+  if (!window.AVIX) return;
 
   /* ------------------------------------------------------------------ */
   /* Az állapotábra (a dokumentum egyszerűsített, metastabil Fe–Fe₃C ábrája) */
@@ -136,7 +132,7 @@
   function edzHigh(c) { return (c <= 0.8 ? a3(c) : 723) + 50; }
 
   // Megjegyzés az A/01 szemszögéből (edzhetőség, eljárások)
-  function hint(id, c, t) {
+  function hintEdzes(id, c, t) {
     if (id === 'L' || id === 'Lg' || id === 'Lc') return 'Olvadék is van jelen: hőkezeléskor ezt a tartományt sosem érjük el (a cementálás is legfeljebb 960 °C).';
     if (c > 2.06) return 'Öntöttvas-tartomány (> 2,06% C): a felületkeményítő eljárások acélokra vonatkoznak.';
     if (id === 'a' && t >= 723) return 'Szinte szénmentes vas, ferrites állapotban: szén nélkül nem edzhető.';
@@ -149,9 +145,30 @@
     }
     if (id === 'ga') return 'Nem teljesen ausztenites: edzéskor a ferrit megmarad (lágy foltok). Edzéshez a GS vonal (Ac3) fölé kell hevíteni 30–50 °C-kal.';
     if (id === 'gc') return 'Hipereutektoidos acél: elég az SK vonal (Ac1) fölé 30–50 °C-kal hevíteni — edzés után a martenzit mellett a szekunder cementit is megmarad (kopásálló), a szilárdsági jellemzők kedvezőbbek.';
-    if (t >= 500 && t <= 580) return 'Az A1 (723 °C) alatt nincs ausztenit, ezért innen nem lehet edzeni. Pont itt dolgozik a nitridálás (500–580 °C): nincs fázisátalakulás, ezért utána nem kell edzeni, és alig vetemedik.';
+    if (t >= 500 && t <= 580) return 'Az A1 (723 °C) alatt nincs ausztenit, ezért innen nem lehet edzeni. Pont itt dolgozik a nitridálás (500–550 °C): nincs fázisátalakulás, ezért utána nem kell edzeni, és alig vetemedik.';
     return 'Az A1 (723 °C) alatt nincs ausztenit: innen nem lehet edzeni, előbb ausztenitesíteni kell (Ac3 / Ac1 fölé hevíteni).';
   }
+
+  // A/03: tulajdonságok a szövetszerkezet szerint
+  function hintProp(id, c, t) {
+    var liquid = id === 'L' || id === 'Lg' || id === 'Lc';
+    if (liquid) return 'Olvadék van jelen — ez már az öntés tartománya.';
+    var s;
+    if (t >= 723) {
+      s = id === 'g' ? 'Ausztenit (lapközepes köbös γ-vas): lágy, jól alakítható — ezért kovácsolnak ausztenites állapotban. Innen a hűtési sebesség dönti el a szövetet: lassan → ferrit + perlit, közepesen → bainit, a kritikusnál gyorsabban → martenzit (edzés).'
+        : c > 2.06 ? 'Öntöttvas-tartomány: a ledeburit kemény, rideg. Gyors hűtéssel a szén cementitként marad (fehér öntöttvas), lassúval grafit válik ki (szürkeöntvény).'
+          : 'Kétfázisú mező: az ausztenit mellett ferrit vagy szekunder cementit van egyensúlyban.';
+      if (t >= 768 && c <= 0.5 && (id === 'ga' || id === 'a')) s += ' A ferrit 768 °C felett már nem mágneses (Curie-pont, A2).';
+      return s;
+    }
+    if (c <= 0.025) return 'Ferrit (térközepes köbös α-vas): a leglágyabb, legjobban alakítható szövet — de a BCC rács miatt alacsony hőmérsékleten elridegedhet (TTKV!).';
+    if (c < 0.8) return 'Ferrit + perlit: minél több a C, annál több a perlit → nő a szilárdság és a keménység, csökken a szakadási nyúlás és az ütőmunka. Szerkezeti acélok tartománya.';
+    if (c <= 0.815) return 'Tiszta perlit (0,8% C): ferrit és cementit lemezes eutektoidja — kemény, kopásálló; szferoidizálva (gömbös cementit) jól forgácsolható.';
+    if (c <= 2.06) return 'Perlit + szekunder cementit a szemcsehatárokon: kemény, kopásálló, de ridegebb — szerszámacélok tartománya.';
+    return 'Öntöttvas: ledeburit (átalakult) és cementit — fehér öntöttvasként kemény és rideg, nem forgácsolható.';
+  }
+
+  var HINTS = { a1: ['Edzés szempontjából', hintEdzes], a3: ['Tulajdonság szempontjából', hintProp] };
 
   /* ------------------------------------------------------------------ */
   /* Eljárások (A/01 kidolgozásainak értékei)                            */
@@ -162,39 +179,150 @@
     edzes: {
       label: 'Edzés',
       title: 'Közönséges (térfogati) edzés',
-      text: 'Hevítés a GSK vonal fölé 30–50 °C-kal (hipoeutektoidos acélnál Ac3 + 30–50 °C), hőntartás, majd hűtés a kritikusnál gyorsabban (v > v_krit) az Mf alá. Feltétel: C > 0,3%. 0,8% C felett elég az SK fölé hevíteni: a martenzit mellett II. cementit is marad, de a szilárdsági jellemzők kedvezőbbek. Az ábra csak a hevítés célhőmérsékletét adja meg — a martenzit nem egyensúlyi szövet, ezért nincs rajta.',
+      text: 'Hevítés a GSK vonal fölé 30–50 °C-kal (hipoeutektoidos acélnál Ac3 + 30–50 °C), hőntartás, majd hűtés a kritikusnál gyorsabban (v > v_krit) az Mk (martenzitképződés kezdete) alá. Feltétel: C > 0,3%. 0,8% C felett elég az SK fölé hevíteni: a martenzit mellett II. cementit is marad, de a szilárdsági jellemzők kedvezőbbek. Ötvözött acélt jóval Ac1 fölé kell hevíteni, hogy a karbidok feloldódjanak. Hűtőközeg: víz, olaj, erősen ötvözött acélnál levegő. Az ábra csak a hevítés célhőmérsékletét adja meg — a martenzit nem egyensúlyi szövet, ezért nincs rajta.',
       go: function (s) { var c = s.c >= 0.3 && s.c <= 2.06 ? s.c : 0.45; return [c, (edzLow(c) + edzHigh(c)) / 2]; },
     },
     feluleti: {
       label: 'Felületi edzés',
       title: 'Felületi edzés (láng, indukciós, lézer, fürdős)',
-      text: 'Csak a kéreg hevül Ac3 fölé, és a hűtéskor csak az edződik martenzitté; a mag hideg marad, a kémiai összetétel nem változik. A rövid hevítés miatt nagyobb túlhevítés kell (fürdős edzésnél a fürdő legalább 100 °C-kal Ac3 fölött van, sófürdő 850–950 °C). Feltétel: C > 0,2%; jellemző anyagok: Cf35, C45, 41CrMo4. Utána megeresztés 150–200 °C-on.',
+      text: 'Csak a kéreg hevül Ac3 fölé, és a hűtéskor csak az edződik martenzitté; a mag szívós marad, a kémiai összetétel nem változik. A hevítési hőmérséklet nagyobb, mint a közönséges edzésé, de a rövid hőntartás miatt nem durvul el a szemcse (fürdős edzésnél a fürdő legalább 100 °C-kal Ac3 fölött van). Feltétel: C > 0,3% (a jegyzet szerint), előkészítő hőkezelés: nemesítés. Jellemző anyagok: Cf35, C45, 41CrMo4. Utána megeresztés 150–200 °C-on.',
       go: function () { return [0.45, a3(0.45) + 70]; },
     },
     cement: {
       label: 'Cementálás',
       title: 'Cementálás (C-dúsítás)',
-      text: 'A kis C-tartalmú (C < 0,2%) acélt szenet leadó közegben 830–960 °C-on, 8–24 órán át izzítják — ausztenites állapotban, mert a γ-vas sok szenet old, a ferrit alig. A kéreg C-tartalma 0,6–1,2%-ra (optimum ~0,8%) nő, a kéregvastagság 0,1–3 mm. Az ábrán a kéreg pontja a mag C-tartalmáról jobbra tolódik: a felület hipereutektoidos, a mag hipoeutektoidos lesz. Önmagában nem ad kemény kérget — utána edzés és megeresztés kell (→ betétedzés).',
+      text: 'A kis C-tartalmú (C < 0,2%) acélt szenet leadó közegben 830–960 °C-on, 8–24 órán át izzítják — ausztenites állapotban, mert a γ-vas sok szenet old, a ferrit alig; a szén intersztíciósan épül be. A kéreg C-tartalma 0,6–1,1%-ra (optimum 0,8%) nő, a kéregvastagság 0,1–2 mm (a jegyzet szerint; más forrás 0,6–1,2% és 0,1–3 mm). Szilárd közegben a réteg ~0,1–0,15 mm/óra ütemben vastagodik. Az ábrán a kéreg pontja a mag C-tartalmáról jobbra tolódik: a felület eutektoidos–hipereutektoidos, a mag hipoeutektoidos lesz. Önmagában nem ad kemény kérget — utána edzés és megeresztés kell (→ betétedzés).',
       go: function () { return [0.15, 900]; },
       anim: [0.8, 900],
     },
     betet: {
       label: 'Betétedzés',
       title: 'Betétedzés = cementálás + edzés + megeresztés',
-      text: 'A kéreg (~0,8% C) és a mag (~0,15% C) más-más edzési hőmérsékletet kíván. Kéregedzés: a kéreg C-tartalmának megfelelően, ~755–775 °C (SK + 30–50 °C) → finom, kemény kéreg, de a mag durvaszemcsés marad. Magedzés: a GS vonal fölé 30–50 °C-kal a mag C-tartalma szerint, ~905–925 °C → finom, szívós mag, de a kéreg durvaszemcsés lesz. Kettős edzés: előbb a magot, majd a kérget edzik. Végül megeresztés 150–200 °C-on. A kis C-tartalmú mag keményre nem edzhető.',
+      text: 'A kéreg (~0,8% C) és a mag (~0,15% C) más-más edzési hőmérsékletet kíván — a jegyzet négy változata: A. közvetlen edzés a cementálás hőmérsékletéről (olcsó, de kéreg és mag is durvaszemcsés); B. kéregedzés: lassú hűtés után a kéreg C-tartalmának megfelelően, ~755–775 °C (SK + 30–50 °C) → finom kéreg, durva mag; C. magedzés (magfinomítás): a GS vonal fölé 30–50 °C-kal a mag szerint, ~905–925 °C → finom mag, de a kéreg durvaszemcsés; D. kettős edzés: magfinomítás + lágyítás 650–700 °C-on + kéregedzés → finom mag és kéreg. Végül megeresztés 150–200 °C-on, 0,5–1 óra. A kis C-tartalmú mag keményre nem edzhető.',
       go: function () { return [0.8, 765]; },
     },
     nitrid: {
       label: 'Nitridálás',
       title: 'Nitridálás (nitrálás)',
-      text: 'Nemesítés után 500–580 °C-on (jellemzően 500–550 °C), 48–96 órán át aktív nitrogénben (gáznitrálás: ammónia). Az A1 (723 °C) alatt, ferrites állapotban zajlik — nincs fázisátalakulás, ezért utána nem kell edzeni, és alig vetemedik. Réteg 0,3–0,5 mm, keménység 1000–1200 HV. Anyag: nitridképzőkkel (Al, Cr, Mo, V) ötvözött, nemesíthető acél, C = 0,25–0,4%.',
-      go: function () { return [0.35, 540]; },
+      text: 'Nemesítés és készre munkálás után gáznitrálás ammóniában 500–550 °C-on (2NH₃ → 3H₂ + 2N), 48–96 órán át (48 óra → ~0,5 mm). Az A1 (723 °C) alatt, ferrites állapotban zajlik — nincs fázisátalakulás, ezért utána nem kell edzeni, és alig vetemedik (a darab ~0,02 mm-t dagad). Keménynitrálás: az ötvözők (Al, Cr, Mo, V, Ti, W) nitridjei adják a keménységet (~1150 HV, kb. 30%-kal több a betétedzett kéregnél, és 500 °C-ig megmarad); anyaga nemesíthető acél, C = 0,25–0,4%. Lágynitrálás: vasnitridek, ciánsófürdőben 520–570 °C-on 2–5 óra — ötvözetlen acélhoz, a szívósság és a kifáradási határ növelésére.',
+      go: function () { return [0.35, 530]; },
     },
     nitrocem: {
       label: 'Nitrocementálás',
-      title: 'Nitrocementálás és karbonitridálás',
-      text: 'Szén és nitrogén együttes bevitele. A magasabb hőmérsékletű nitrocementálás 750–880 °C-on zajlik (a szén dúsulása dominál, utána edzés kell); az alacsonyabb hőmérsékletű karbonitridálás 540–580 °C-on, az A1 alatt (a nitridálás jellege erősebb).',
-      go: function () { return [0.2, 850]; },
+      title: 'Nitrocementálás és karbonitrálás',
+      text: 'Szén és nitrogén együttes bevitele. Nitrocementálás (a cementálás dominál): gázcementálás 20–24% NH₃-t is tartalmazó gázkeverékben, 800–830 °C-on; a kisebb hőmérséklet miatt a kéreg nem durvul el, közvetlenül edzhető, a nitridek a kopás- és korrózióállóságot is növelik. Karbonitrálás (a nitrálás dominál): még kisebb hőmérsékleten, rövidebb idővel, kisebb alakváltozással — a cementálás kiváltására (más forrás 540–580 °C-ot ad meg).',
+      go: function () { return [0.2, 815]; },
+    },
+  };
+  // A/04 — hegesztett kötések hőkezelése és az előmelegítés
+  PROC.hnorm = {
+    label: 'Normalizálás',
+    title: 'Teljes átkristályosítás: normalizálás, átkristályosító lágyítás',
+    text: 'A kötést az Ac3 fölé (hipereutektoidos acélnál az Ac1 fölé) hevítik 30–50 °C-kal, majd levegőn hűtik. A heganyag öntési szövete az alapanyagéhoz közeli szövetté alakul, így a szilárdsági tulajdonságok is azonossá válnak — ahol lehet, ezt kell választani. Hátránya a magas hőmérséklet, a nagyobb energia és a torzulás.',
+    go: function () { return [0.18, a3(0.18) + 40]; },
+    layer: function (x) { return x.band([[0, 941], [0.8, 753], [1.2, 753], [1.2, 773], [0.8, 773], [0, 961]]) + x.lab(0.62, 845, 'Ac3 + 30–50 °C'); },
+  };
+  PROC.hmeg = {
+    label: 'Nagy hőm. megeresztés',
+    title: 'Nagy hőmérsékletű megeresztés (Ac1 alatt)',
+    text: 'A kötést az Ac1 (723 °C) alatt 30–100 °C-kal hevítik (a gyakorlatban biztonsági ráhagyással, Ac1 − 30…50 °C). A hőhatásövezet martenzitje szferoidittá alakul, a keménység csökken, a saját feszültségek is csökkennek. A heganyag öntési szövete megmarad, de ~200 °C-kal alacsonyabb hőmérséklet, helyi hevítéssel is elvégezhető. Ha átlépnénk az Ac1-et, a HAZ újra ausztenitesedne, és lehűléskor ismét martenzit képződne!',
+    go: function () { return [0.2, 660]; },
+    layer: function (x) { return x.band([[0, 623], [1.2, 623], [1.2, 693], [0, 693]]) + x.lab(0.05, 707, 'Ac1 − 30…100 °C'); },
+  };
+  PROC.hfesz = {
+    label: 'Feszültségcsökkentés',
+    title: 'Feszültségcsökkentő hőkezelés',
+    text: 'A jegyzet szerint 530–580 °C-on, 30 perc hőntartással, majd lassú lehűtéssel (5–7 °C/perc); vastag, ötvözetlen szerkezeti acélnál (s > 40 mm) kb. 650 °C, közepesen ötvözött acélnál 600–700 °C. A cél a hegesztés okozta saját feszültségek csökkentése — ezek külső terhelés nélkül is repedést indíthatnak, és időben alkalmazva a hidegrepedést is megelőzik.',
+    go: function () { return [0.2, 555]; },
+    layer: function (x) { return x.band([[0, 530], [1.2, 530], [1.2, 580], [0, 580]]) + x.band([[0, 600], [1.2, 600], [1.2, 700], [0, 700]], 'band2') + x.lab(0.05, 515, '530–580 °C (jegyzet)') + x.lab(0.62, 650, '600–700 °C: közepesen ötvözött'); },
+  };
+  PROC.helo = {
+    label: 'Előmelegítés',
+    title: 'Előmelegítés a karbonegyenérték szerint',
+    text: 'A jegyzet táblázata: CE ≤ 0,45% → legfeljebb 100 °C (csak hidegben, vastag lemeznél, fűzéskor); CE = 0,45–0,6% → 100–250 °C; CE > 0,6% → 250–350 °C; Ce ≈ 1% → 400–450 °C. Az előmelegítés a martenzitképződés hőközében lassítja a hűlést, így a HAZ kevésbé keményedik fel, és a hidrogén is könnyebben távozik.',
+    go: function () { return [0.35, 200]; },
+    layer: function (x) { return x.band([[0, 20], [1.2, 20], [1.2, 100], [0, 100]], 'band2') + x.band([[0, 100], [1.2, 100], [1.2, 250], [0, 250]]) + x.band([[0, 250], [1.2, 250], [1.2, 350], [0, 350]], 'band2') + x.lab(0.62, 60, 'CE ≤ 0,45: ≤ 100 °C') + x.lab(0.62, 175, 'CE 0,45–0,6: 100–250 °C') + x.lab(0.62, 300, 'CE > 0,6: 250–350 °C'); },
+  };
+  PROC.hhidr = {
+    label: 'Hidrogénmentesítés',
+    title: 'Hidrogénmentesítő hőkezelés',
+    text: 'Közvetlenül a hegesztés után, kb. 200–350 °C-on, néhány órás hőntartással: a varratban oldott diffundálható hidrogén kidiffundál, mielőtt a késleltetett (órák–napok múlva jelentkező) hidrogénrepedés kialakulna. A jegyzet szerint a H₂ 250–300 °C-on való huzamos hőntartással képes kidiffundálni.',
+    go: function () { return [0.2, 280]; },
+    layer: function (x) { return x.band([[0, 200], [1.2, 200], [1.2, 350], [0, 350]]) + x.lab(0.62, 275, '200–350 °C'); },
+  };
+  function hintWeld(id, c, t) {
+    if (t >= 1147 || id === 'L' || id === 'Lg') return 'Olvadék: ez már a varratfürdő és az összeolvadási zóna hőmérséklete.';
+    if (id === 'g') return t > 1100 ? 'A hőhatásövezet túlhevített (durvaszemcsés) zónájának hőmérséklete: az ausztenitszemcse erősen megnő, gyors hűléskor itt a legnagyobb a felkeményedés és a hidegrepedés veszélye.' : 'Ausztenites állapot: a HAZ-nak ez a része a hűléskor újra átalakul — gyors hűlésnél (nagy C, nagy CE, vastag lemez) martenzit képződhet. Ezt fékezi az előmelegítés.';
+    if (id === 'ga' || id === 'gc') return 'Részleges átkristályosodás tartománya (Ac1–Ac3 között): a HAZ-nak ez a sávja csak részben ausztenitesedik.';
+    if (t >= 600) return 'Ac1 alatt: nincs fázisátalakulás — itt végzik a nagy hőmérsékletű megeresztést és a feszültségcsökkentést (a martenzit megeresztődik, a feszültség csökken).';
+    if (t >= 200) return 'Az előmelegítés és a hidrogénmentesítés tartománya: a hűlés lassítása és a diffundálható hidrogén kihajtása.';
+    return 'Szobahőmérséklet közelében: a hidegrepedés 200 °C alatt, a hegesztés után 10–20 perccel kezdődhet — órák, napok múlva is.';
+  }
+  HINTS.a4 = ['Hegesztett kötés szempontjából', hintWeld];
+
+  // A/05 — megmunkálhatóságot segítő hőkezelések
+  function bandH(x, t0, t1, cls) { return x.band([[0, t0], [2.2, t0], [2.2, t1], [0, t1]], cls); }
+  PROC.kfesz = { label: 'Feszültségcsökkentő', title: 'Feszültségcsökkentő izzítás', text: 'Ac1 alatt, 550–650 °C (legfeljebb 650 °C), 1–2 óra, lassú hűtés kemencében. Nincs átalakulás: a szövet és a szilárdság nem változik, csak a maradó feszültségek relaxálnak.', go: function (s) { return [s.c <= 2 ? s.c : 0.45, 600]; }, layer: function (x) { return bandH(x, 550, 650) + x.lab(1.1, 665, '550–650 °C'); } };
+  PROC.kujra = { label: 'Újrakristályosítás', title: 'Újrakristályosító izzítás', text: 'Hidegalakítás után, 500 °C fölött (a jegyzet ábráján kb. 500 °C és A1 között), 2–5 óra, levegőn hűtés; a hőfokot és az időt az alakítás mértéke szerint. Új, torzulásmentes szemcsék nőnek; szövet: ferrit–szemcsés perlit.', go: function (s) { return [s.c <= 0.8 ? s.c : 0.2, 600]; }, layer: function (x) { return bandH(x, 500, 715) + x.lab(1.1, 520, '≥ 500 °C … A1 alatt'); } };
+  PROC.klagy = { label: 'Teljes kilágyítás', title: 'Teljes kilágyítás (gömbösítő)', text: '680 °C és az Ac1 között, 2–4 óra, lassú (kemencés) hűtés: a perlit cementitlemezei gömbösödnek → szemcsés perlit (szferoidit), a legjobb forgácsolhatóság nagy C-tartalmú acélnál. Ingázó változat: 680–770 °C között az Ac1 körül fel-le.', go: function () { return [1.0, 705]; }, layer: function (x) { return bandH(x, 680, 723) + bandH(x, 723, 770, 'band2') + x.lab(1.1, 655, '680–723 °C (ingázó: 680–770)'); } };
+  PROC.knorml = { label: 'Normalizáló lágyítás', title: 'Normalizáló lágyítás', text: 'Ötvözött, hipoeutektoidos acél: Ac3 + 30–50 °C (3–3,5 h), levegőn hűtés 680–700 °C-ig, ott 5–6 óra, majd kemence vagy levegő → szemcsés perlit.', go: function () { return [0.4, a3(0.4) + 40]; }, layer: function (x) { return x.band([[0, 941], [0.8, 753], [0.8, 773], [0, 961]]) + bandH(x, 680, 700, 'band2') + x.lab(0.05, 985, 'Ac3 + 30–50 °C') + x.lab(1.1, 655, '→ 680–700 °C, 5–6 h'); } };
+  PROC.kizo = { label: 'Izotermális lágyítás', title: 'Izotermális lágyítás', text: 'Ac3 fölé 30–50 °C-kal (3–3,5 h), majd gyors hűtés Ac1 alá, 600–700 °C-ra, és ott 3–8 óra hőntartás → szemcsés perlit. Kis sebességű forgácsolás (fogazás, bordamarás, üregelés) előtt.', go: function () { return [0.4, 650]; }, layer: function (x) { return x.band([[0, 941], [0.8, 753], [0.8, 773], [0, 961]]) + bandH(x, 600, 700, 'band2') + x.lab(0.05, 985, 'Ac3 + 30–50 °C') + x.lab(1.1, 580, '→ 600–700 °C, 3–8 h'); } };
+  PROC.kaus = { label: 'Ausztenitre lágyítás', title: 'Ausztenitre lágyítás', text: 'Erősen ötvözött (korrózióálló, hőálló, nagy Mn-tartalmú) acél: 1000–1050 °C-ra hevítés a γ-mezőbe, a karbidok feloldása, gyors hűtés (víz, olaj). A Fe–C ábra az ötvözött acélt csak közelítőleg írja le.', go: function () { return [0.1, 1030]; }, layer: function (x) { return bandH(x, 1000, 1050) + x.lab(0.05, 1070, '1000–1050 °C, majd gyors hűtés'); } };
+  PROC.kdurv = { label: 'Szemcsedurvítás', title: 'Szemcsedurvító hőkezelés', text: 'Ac3 fölött, 950–1100 °C, 1–2 óra, olaj, majd levegő; utána normalizálni kell. Kis C-tartalmú és betétben edzhető (Cr, Cr-Mn, Cr-Mo) acélok kis sebességű forgácsolása előtt.', go: function () { return [0.18, 1020]; }, layer: function (x) { return bandH(x, 950, 1100) + x.lab(0.05, 1120, '950–1100 °C (Ac3 fölött)'); } };
+  PROC.kpat = { label: 'Patentírozás', title: 'Patentírozás (huzal)', text: 'Közepes C-tartalmú (0,5–1%) huzal: ausztenitesítés 850–980 °C (a Gyártás I. jegyzet: 850–1100 °C), gyors hűtés 400–520 °C-os ólomfürdőbe, hőntartás a teljes átalakulásig → ferritmentes szorbit.', go: function () { return [0.7, 920]; }, anim: [0.7, 480], layer: function (x) { return bandH(x, 850, 980) + bandH(x, 400, 520, 'band2') + x.band([[0.5, 330], [1.0, 330], [1.0, 1180], [0.5, 1180]], 'band2') + x.lab(1.05, 1000, 'ausztenitesítés') + x.lab(1.05, 460, 'ólomfürdő 400–520 °C') + x.lab(0.75, 345, 'C 0,5–1%', 'middle'); } };
+  function hintSoft(id, c, t) {
+    if (id === 'L' || id === 'Lg' || id === 'Lc') return 'Olvadék — ez az öntés tartománya, hőkezeléskor sosem érjük el (a diffúziós hőkezelés is a szolidusz alatt kb. 100 °C-kal marad).';
+    if (c > 2.06) return 'Öntöttvas-tartomány: a lágyító hőkezelések itt a fehér öntöttvas temperálását jelentenék (lásd A/13).';
+    if (id === 'g') return t >= 950 ? 'Magas ausztenites hőmérséklet: gyors szemcsedurvulás — szándékosan csak a szemcsedurvító hőkezelésnél és az ausztenitre lágyításnál; utána normalizálni kell.' : 'Ausztenites mező: innen indul a normalizálás, a normalizáló és az izotermális lágyítás, a patentírozás (a hevítés Ac3 fölé 30–50 °C-kal). A túlhevítés szemcsedurvulást okoz.';
+    if (id === 'ga' || id === 'gc') return 'Kétfázisú mező az A1 és A3 (Acm) között: az ingázó lágyítás itt, az Ac1 körül (680–770 °C) ingadoztat — a cementitlemezek feldarabolódnak és gömbösödnek.';
+    if (t >= 680) return 'Közvetlenül az A1 alatt: a teljes kilágyítás tartománya (680 °C–A1) — a lemezes cementit gömbösödik, szemcsés perlit keletkezik.';
+    if (t >= 500) return 'Az A1 alatt nincs átalakulás: itt dolgozik az újrakristályosítás (500 °C fölött) és a feszültségcsökkentő izzítás (550–650 °C).';
+    if (t >= 400) return 'A patentírozás ólomfürdőjének tartománya (400–520 °C): az ausztenit itt izotermikusan finomlemezes szorbittá alakul.';
+    return 'Alacsony hőmérséklet: itt már nem történik lényeges szerkezeti változás.';
+  }
+  HINTS.a5 = ['Megmunkálhatóság szempontjából', hintSoft];
+
+  // A/10 — kovácsolás hőmérséklet-tartománya, a hidegen alakított acél hőkezelései (Gyártás I. jegyzet)
+  function forgeTop(lo) { var p = [], c; for (c = 0; c <= 1.6001; c += 0.1) p.push([c, sol(c) - 200]); for (c = 1.6; c >= -0.0001; c -= 0.1) p.push([Math.max(0, c), sol(Math.max(0, c)) - lo]); return p; }
+  PROC.kovt = { label: 'Kovácsolás', title: 'A kovácsolás hőmérséklet-tartománya', text: 'A jegyzet szerint a kovácsolás a γ-mezőben végzett melegalakítás. Kezdés a lehető legmagasabb hőmérsékleten (kisebb alakítási ellenállás és munka, kisebb szerszámterhelés), de kb. 200 °C-kal a szolidusz alatt (szemcsedurvulás, szénkiégés, felületi olvadás). A befejezés a GOS vonal fölött (az ábrán kb. 800–900 °C): nagy alakítással itt finom szemcse érhető el. C ≤ 0,8%-ig korlátlanul, 0,8–2,1% között korlátozottan kovácsolható (a szekunder cementit ridegít).', go: function (s) { return [s.c <= 1.6 ? s.c : 0.45, 1100]; }, layer: function (x) { var mid = forgeTop(250).slice(17).concat([[0, 900], [1.6, 900]]); return x.band(mid, 'band2') + x.band(forgeTop(250)) + x.band([[0, 800], [2.06, 800], [2.06, 900], [0, 900]]) + x.lab(0.05, 1318, 'felső hőköz ≈ szolidusz − 200 °C') + x.lab(1.28, 838, 'alsó hőköz ≈ 800–900 °C'); } };
+  PROC.hlagy = { label: 'Lágyítás', title: 'Lágyítás hidegalakítás után', text: 'A jegyzet szerint 600–700 °C, 4–5 óra hőntartás; csökkenti az alakítási ellenállást. Minél nagyobb volt az előzetes hidegalakítás, annál kisebb a lágyulási hőmérséklet; a hőfok függ a C-tartalomtól, az alakítás mértékétől és a hőntartás idejétől.', go: function (s) { return [s.c <= 0.8 ? s.c : 0.2, 650]; }, layer: function (x) { return bandH(x, 600, 700) + x.lab(1.1, 715, '600–700 °C, 4–5 h'); } };
+  function hintForge(id, c, t) {
+    if (id === 'L' || id === 'Lg' || id === 'Lc') return 'Olvadék vagy kétfázisú (olvadék + szilárd) állapot: itt alakítani nem lehet. A kovácsolás felső határa a jegyzet szerint kb. 200 °C-kal a szolidusz alatt van.';
+    if (c > 2.06) return 'Öntöttvas-tartomány: a ledeburit rideg, a vasöntvény nem kovácsolható — alakját öntéssel kapja.';
+    if (id === 'g' && t > sol(c) - 200) return 'Túl magas hőmérséklet: szemcsedurvulás, szénkiégés, felületi olvadás („elégés”) veszélye — a kovácsolást kb. 200 °C-kal a szolidusz alatt kell kezdeni.';
+    if (id === 'g') return t >= 900 ? 'A kovácsolás tartománya (γ-mező): kicsi az alakítási ellenállás, a keményedést az újrakristályosodás folyamatosan követi — nincs felkeményedés (melegalakítás).' : 'A kovácsolás alsó, befejező hőköze: nagy alakítás esetén itt finom szemcse, finom szövet érhető el (magasabb hőmérsékleten befejezve a szemcse durvul).';
+    if (id === 'ga' || id === 'gc') return 'Kétfázisú mező (A1 és A3/Acm között): a jegyzet szerint a kovácsolást a GOS vonal fölött kell befejezni; hidegebben alakítva veszélyes alakítási feszültségek maradnak vissza. Hipereutektoidos acélnál a szekunder cementit ridegít — ezért csak korlátozottan kovácsolható.';
+    if (t >= 550) return 'Az A1 alatt nincs átalakulás: itt dolgoznak a hidegen alakított acél hőkezelései — feszültségcsökkentés (550–650 °C, 1–2 h), lágyítás (600–700 °C, 4–5 h), újrakristályosító izzítás.';
+    if (t >= 400) return 'A patentírozás ólomfürdőjének tartománya (400–520 °C): a hidegen húzott huzal húzási fokozatai között tovább húzhatóvá teszik.';
+    return 'Alacsony hőmérséklet: az itt végzett alakítás hidegalakítás — a keményedés, a textúra és az alakítási feszültség megmarad.';
+  }
+  HINTS.a10 = ['Alakítás szempontjából', hintForge];
+
+  // Eljáráskészletek tételenként
+  var SETS = {
+    a10: {
+      procs: ['none', 'kovt', 'kfesz', 'hlagy', 'kujra', 'kpat'],
+      view: 'forge', sv: 'forge', c0: 0.45, t0: 1100,
+      lead: 'Hol kovácsolunk, és hol kezeljük a hidegen alakított acélt? <b>Válassz eljárást</b>: a kovácsolás a γ-mezőben, a szolidusz alatt kb. 200 °C-tól a GOS vonalig tart (Gyártás I. jegyzet ábrája), a hidegalakítás utáni hőkezelések az A1 alatt dolgoznak. A kártya az alakítás szempontjából értelmezi a pontot.',
+    },
+    a5: {
+      procs: ['none', 'kfesz', 'kujra', 'klagy', 'knorml', 'kizo', 'kaus', 'kdurv', 'kpat', 'hnorm'],
+      c0: 0.45, t0: 700,
+      lead: 'A megmunkálhatóságot segítő hőkezelések a Fe–C ábrán. <b>Válassz eljárást</b>: a sáv a hevítési (és ha van, a hőntartási) hőmérsékletet mutatja az A1 és A3 vonalhoz képest — itt látszik a lényeg: <b>Ac1 alatt vagy fölött</b> dolgozik-e.',
+    },
+    a4: {
+      procs: ['none', 'helo', 'hhidr', 'hfesz', 'hmeg', 'hnorm'],
+      view: 'steelw', sv: 'steelw', c0: 0.2, t0: 650,
+      lead: 'Hol vannak a hegesztés előtti és utáni hőkezelések az állapotábrán? <b>Válassz eljárást</b>: a sáv megmutatja a hőmérséklet-tartományt az A1 (723 °C) és az A3 vonalhoz képest. A kártya a hegesztett kötés szempontjából értelmezi a pontot.',
+    },
+    a3: {
+      procs: ['none'],
+      view: 'full',
+      lead: 'Az acél tulajdonsága azért változik a hőmérséklettel, mert változik a szövetszerkezete. <b>Koppints az ábrára vagy húzd a jelölőt</b>: a kártya megmutatja a fázisokat, arányukat és a mechanikai tulajdonságot. Játszd le a lassú hűlést is.',
+    },
+    a1: {
+      procs: ['none', 'edzes', 'feluleti', 'cement', 'betet', 'nitrid', 'nitrocem'],
+      lead: 'Az állapotábra a felületkeményítés „térképe”: megmutatja, milyen hőmérsékletre kell hevíteni (edzés, cementálás), és mi van egyensúlyban a kéregben és a magban. <b>Koppints az ábrára vagy húzd a jelölőt</b>, válassz eljárást, vagy játszd le a lassú hűlést.',
     },
   };
 
@@ -204,7 +332,9 @@
 
   var VIEWS = {
     steel: { c0: 0, c1: 2.2, t0: 300, t1: 1200, xt: [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2], yt: [300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200], snap: 0.035 },
+    steelw: { c0: 0, c1: 1.2, t0: 0, t1: 1200, xt: [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2], yt: [0, 200, 400, 600, 800, 1000, 1200], snap: 0.03 },
     full: { c0: 0, c1: CM, t0: 0, t1: 1700, xt: [0, 1, 2, 3, 4, 5, 6], yt: [0, 200, 400, 600, 800, 1000, 1200, 1400, 1600], snap: 0.1 },
+    forge: { c0: 0, c1: 2.2, t0: 500, t1: 1600, xt: [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2], yt: [500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600], snap: 0.035 },
   };
 
   var TOP = 1800, BOT = -60;
@@ -233,6 +363,8 @@
   // Mezőfeliratok helye nézetenként [C, T]
   var LABELS = {
     steel: { g: [0.55, 1060], ga: [0.3, 770], gc: [1.62, 820], ap: [0.4, 520], pc: [1.45, 520] },
+    steelw: { g: [0.45, 1080], ga: [0.26, 780], gc: [1.04, 790], ap: [0.4, 420], pc: [1.02, 420] },
+    forge: { L: [1.2, 1540], Lg: [1.75, 1330], g: [0.5, 1010], ga: [0.3, 760], gc: [1.62, 950], ap: [0.4, 580], pc: [1.45, 580] },
     full: { L: [3.4, 1520], Lg: [1.85, 1265], Lc: [5.85, 1290], g: [0.62, 1010], gc: [1.72, 840], glc: [3.18, 935], cle: [5.5, 935], ap: [0.42, 380], pc: [1.43, 380], plc: [3.18, 380], cle2: [5.5, 380] },
   };
   // Keskeny teljes ábrán a dokumentum saját ábrájának rövidítései (f+p, p+IIc, Ic+Le …)
@@ -258,7 +390,7 @@
   /* ------------------------------------------------------------------ */
 
   var CSS = [
-    '.fec{margin:18px 0 0;padding:18px 16px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);color:var(--ink);font-family:var(--disp);--fec-fo:.2;--fec-fo-on:.46}',
+    '.fec{color:var(--ink);font-family:var(--disp);--fec-fo:.2;--fec-fo-on:.46}',
     '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fec{--fec-fo:.26;--fec-fo-on:.55}}',
     ':root[data-theme="dark"] .fec{--fec-fo:.26;--fec-fo-on:.55}',
     '.fec-lead{margin:0 0 14px;font-family:var(--serif);font-size:16px;line-height:1.55;color:var(--ink-2)}',
@@ -342,21 +474,19 @@
   /* Felület                                                             */
   /* ------------------------------------------------------------------ */
 
-  function sectionHTML() {
-    var chips = Object.keys(PROC).map(function (k) {
+  function sectionHTML(set) {
+    var chips = set.procs.map(function (k) {
       return '<button type="button" class="fec-chip" data-proc="' + k + '">' + esc(PROC[k].label) + '</button>';
     }).join('');
     return (
-      '<p class="fec-lead">Az állapotábra a felületkeményítés „térképe”: megmutatja, milyen hőmérsékletre kell hevíteni ' +
-      '(edzés, cementálás), és mi van egyensúlyban a kéregben és a magban. <b>Koppints az ábrára vagy húzd a jelölőt</b>, ' +
-      'válassz eljárást, vagy játszd le a lassú hűlést.</p>' +
+      '<p class="fec-lead">' + set.lead + '</p>' +
       '<div class="fec-row">' +
         '<div class="fec-seg" role="group" aria-label="Nézet">' +
-          '<button type="button" data-view="steel">Acél-rész</button><button type="button" data-view="full">Teljes ábra</button>' +
+          '<button type="button" data-view="' + (set.sv || 'steel') + '">Acél-rész</button><button type="button" data-view="full">Teljes ábra</button>' +
         '</div>' +
         '<button type="button" class="fec-btn" data-fec="cool">▶ Lassú hűlés</button>' +
       '</div>' +
-      '<div class="fec-chips" role="group" aria-label="Eljárás az ábrán">' + chips + '</div>' +
+      (set.procs.length > 1 ? '<div class="fec-chips" role="group" aria-label="Eljárás az ábrán">' + chips + '</div>' : '') +
       '<div class="fec-plot"><svg class="fec-svg" role="img" aria-label="Vas–szén állapotábra. Koppints vagy húzd a jelölőt."></svg></div>' +
       '<div class="fec-sl">' +
         '<span>C-tartalom</span><input type="range" data-fec="c" aria-label="Karbontartalom (%)"><output data-fec="co"></output>' +
@@ -369,13 +499,16 @@
     );
   }
 
-  function mountInto(root) {
+  function mountInto(root, setName) {
+    var set = SETS[setName] || SETS.a1;
+    var hintDef = HINTS[setName] || HINTS.a1;
+    var storeKey = 'tanulas.fec' + (setName && setName !== 'a1' ? '.' + setName : '');
     var saved = {};
-    try { saved = JSON.parse(localStorage.getItem('tanulas.fec')) || {}; } catch (e) { /* nem kritikus */ }
+    try { saved = JSON.parse(localStorage.getItem(storeKey)) || {}; } catch (e) { /* nem kritikus */ }
     var S = {
-      view: VIEWS[saved.view] ? saved.view : 'steel',
-      proc: PROC[saved.proc] ? saved.proc : 'none',
-      c: 0.45, t: 800,
+      view: VIEWS[saved.view] ? saved.view : (set.view || 'steel'),
+      proc: set.procs.indexOf(saved.proc) >= 0 ? saved.proc : 'none',
+      c: set.c0 != null ? set.c0 : 0.45, t: set.t0 != null ? set.t0 : 800,
       quiz: null, score: [0, 0], anim: 0,
     };
     var q = function (sel) { return root.querySelector('[data-fec="' + sel + '"]'); };
@@ -385,7 +518,7 @@
     var G = null; // geometria (méret, skálák)
 
     function save() {
-      try { localStorage.setItem('tanulas.fec', JSON.stringify({ view: S.view, proc: S.proc })); } catch (e) { /* nem kritikus */ }
+      try { localStorage.setItem(storeKey, JSON.stringify({ view: S.view, proc: S.proc })); } catch (e) { /* nem kritikus */ }
     }
 
     /* ---- skálák ---- */
@@ -455,16 +588,18 @@
           o += lab(0.17, 360, 'mag') + lab(0.82, 360, 'kéreg');
         }
       } else if (p === 'nitrid') {
-        o += band([[0, 500], [2.06, 500], [2.06, 580], [0, 580]]);
-        o += band([[0.25, 500], [0.4, 500], [0.4, 580], [0.25, 580]], 'band2');
-        o += lab(0.9, 598, 'nitridálás 500–580 °C · A1 alatt');
+        o += band([[0, 500], [2.06, 500], [2.06, 550], [0, 550]]);
+        o += band([[0.25, 500], [0.4, 500], [0.4, 550], [0.25, 550]], 'band2');
+        o += band([[0, 520], [2.06, 520], [2.06, 570], [0, 570]], 'band2');
+        o += lab(0.9, 590, 'nitridálás 500–550 °C · A1 alatt');
         o += lab(0.325, 470, 'C 0,25–0,4%', 'middle');
       } else if (p === 'nitrocem') {
-        o += band([[0, 750], [1.2, 750], [1.2, 880], [0, 880]]);
-        o += band([[0, 540], [1.2, 540], [1.2, 580], [0, 580]]);
-        o += lab(1.25, 818, 'nitrocementálás 750–880 °C');
-        o += lab(1.25, 555, 'karbonitridálás 540–580 °C');
+        o += band([[0, 800], [1.2, 800], [1.2, 830], [0, 830]]);
+        o += band([[0, 540], [1.2, 540], [1.2, 580], [0, 580]], 'band2');
+        o += lab(1.25, 808, 'nitrocementálás 800–830 °C');
+        o += lab(1.25, 555, 'karbonitrálás (kisebb T)');
       }
+      if (PROC[p] && PROC[p].layer) o += PROC[p].layer({ P: P, path: path, band: band, lab: lab, vdash: vdash, G: G, S: S });
       return o;
     }
 
@@ -523,10 +658,10 @@
         o += '<text class="rl" x="' + G.x(L[id][0]).toFixed(1) + '" y="' + G.y(L[id][1]).toFixed(1) + '" text-anchor="middle">' + esc(narrow ? SHORT[id] : R[id].s) + '</text>';
       });
       // vonalnevek
-      if (S.view === 'steel') {
+      if (S.view === 'steel' || S.view === 'steelw' || S.view === 'forge') {
         o += '<text class="lt" x="' + G.x(0.44) + '" y="' + (G.y(a3(0.44)) - 6) + '">A3 (GS)</text>';
-        o += '<text class="lt" x="' + G.x(1.36) + '" y="' + (G.y(acm(1.36)) - 6) + '" text-anchor="end">Acm (SE)</text>';
-        o += '<text class="lt" x="' + G.x(1.95) + '" y="' + (G.y(723) - 6) + '" text-anchor="end">A1 (PSK) 723 °C</text>';
+        var cm = S.view === 'steelw' ? 1.12 : 1.36; o += '<text class="lt" x="' + G.x(cm) + '" y="' + (G.y(acm(cm)) - 6) + '" text-anchor="end">Acm (SE)</text>';
+        o += '<text class="lt" x="' + G.x(S.view === 'steelw' ? 1.17 : 1.95) + '" y="' + (G.y(723) - 6) + '" text-anchor="end">A1 (PSK) 723 °C</text>';
       }
       o += '</g>';
       // nevezetes pontok (a vágáson kívül, hogy a szélen lévő felirat is látsszon; az O csak széles ábrán)
@@ -599,7 +734,7 @@
           ? 'Fázisarány az emelőszabállyal: a vízszintes kötővonal két végén lévő összetételekből (az ábrán fekete vonal).'
           : 'Szövetelem-arány az emelőszabállyal (egyensúlyi, lassú hűlésnél).') + '</p>';
       }
-      h += '<p class="fec-hint"><b>Edzés szempontjából: </b>' + esc(hint(id, S.c, S.t)) + '</p>';
+      h += '<p class="fec-hint"><b>' + esc(hintDef[0]) + ': </b>' + esc(hintDef[1](id, S.c, S.t)) + '</p>';
       h += '<ul class="fec-defs">' + rg.k.map(function (k) { return '<li><b>' + esc(K[k].n) + ':</b> ' + esc(K[k].d) + '</li>'; }).join('') + '</ul>';
       box.innerHTML = h;
     }
@@ -698,7 +833,7 @@
     }
 
     /* ---- kvíz ---- */
-    var QUIZ_POOL = { steel: ['g', 'ga', 'gc', 'ap', 'pc', 'Lg'], full: ['L', 'Lg', 'Lc', 'g', 'ga', 'gc', 'glc', 'cle', 'ap', 'pc', 'plc', 'cle2'] };
+    var QUIZ_POOL = { forge: ['g', 'ga', 'gc', 'ap', 'pc', 'Lg'], steel: ['g', 'ga', 'gc', 'ap', 'pc', 'Lg'], steelw: ['g', 'ga', 'gc', 'ap', 'pc'], full: ['L', 'Lg', 'Lc', 'g', 'ga', 'gc', 'glc', 'cle', 'ap', 'pc', 'plc', 'cle2'] };
     function newQuestion() {
       var V = VIEWS[S.view], pool = QUIZ_POOL[S.view], c, t, id, tries = 0;
       do {
@@ -791,7 +926,7 @@
         else if (a === 'go') {
           var p = PROC[S.proc], g = p.go(S);
           endQuiz();
-          if (S.view === 'full' && g[0] < 2.2) { S.view = 'steel'; save(); redraw(); }
+          if (S.view === 'full' && g[0] < 2.2) { S.view = set.sv || 'steel'; save(); redraw(); }
           animateTo(g[0], g[1], 700, p.anim ? function () { setTimeout(function () { animateTo(p.anim[0], p.anim[1], 1600); }, 350); } : null);
         }
       }
@@ -811,7 +946,7 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* Beillesztés a tételtárba (az A/01 tétel megjelenítésekor)           */
+  /* Bejelentkezés az AVIX kerethez                                     */
   /* ------------------------------------------------------------------ */
 
   function injectCSS() {
@@ -822,34 +957,15 @@
     document.head.appendChild(st);
   }
 
-  function mount() {
-    var doc = document.getElementById('doc');
-    var code = document.getElementById('ccode');
-    if (!doc || !code || code.textContent.trim() !== TARGET || doc.querySelector('.fec')) return;
-    var before = null;
-    Array.prototype.forEach.call(doc.children, function (el) {
-      if (!before && el.classList.contains('secrule') && /Teljes kidolgozás/i.test(el.textContent)) before = el;
-    });
-    var rule = document.createElement('div');
-    rule.className = 'secrule fec-rule';
-    rule.innerHTML = '<span>Interaktív · vas–szén állapotábra</span>';
-    var sec = document.createElement('section');
-    sec.className = 'fec';
-    sec.setAttribute('aria-label', 'Interaktív vas–szén állapotábra');
-    sec.innerHTML = sectionHTML();
-    doc.insertBefore(rule, before);
-    doc.insertBefore(sec, before);
-    mountInto(sec);
-  }
-
-  function start() {
-    var doc = document.getElementById('doc');
-    if (!doc) return;
-    injectCSS();
-    new MutationObserver(mount).observe(doc, { childList: true });
-    mount();
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-  else start();
+  window.AVIX.def('fec', {
+    title: 'Vas–szén állapotábra',
+    sub: 'Koppints az ábrára, válassz eljárást, játszd le a lassú hűlést',
+    mount: function (el, opt) {
+      injectCSS();
+      var set = SETS[opt.set] ? opt.set : 'a1';
+      el.classList.add('fec');
+      el.innerHTML = sectionHTML(SETS[set]);
+      mountInto(el, set);
+    },
+  });
 })();
