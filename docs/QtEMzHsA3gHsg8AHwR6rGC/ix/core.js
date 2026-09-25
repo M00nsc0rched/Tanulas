@@ -61,6 +61,13 @@
     B11: [['hatraeszt'], ['uregelo']],
     B12: [['hatpont'], ['prizma'], ['ketlyuk']],
     B13: [['szorelv'], ['szorito'], ['gepiszor']],
+    B14: [['termekfa'], ['gyarszer'], ['koltseg']],
+    B15: [['illesztes'], ['meretlanc'], ['valogat']],
+    B16: [['mozgas'], ['utemsor'], ['puffer']],
+    B17: [['szervforma'], ['csaladfa']],
+    B18: [['bevezet'], ['dfa'], ['adagolo']],
+    B19: [['vezeto'], ['csapmeleg'], ['kupos'], ['xo']],
+    B20: [['elofesz'], ['meghuz'], ['zsugor'], ['kotesek']],
   };
 
   /* ------------------------------------------------------------------ */
@@ -332,6 +339,8 @@
     '.ix-out{margin:12px 0 0;padding:14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--rule)}',
     '.ix-out h4{margin:0 0 8px;font:700 17px/1.3 var(--disp);color:var(--ink)}',
     '.ix-out h4 small{display:block;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:3px}',
+    // képletet, mértékegységet, tűrésjelet (k6 ≠ K6) tartalmazó felirat: kisbetűs marad
+    '.ix-out h4 small.nc{text-transform:none;letter-spacing:.02em}',
     '.ix-out p{margin:6px 0 0;font-family:var(--serif);font-size:15px;line-height:1.55;color:var(--ink-2)}',
     '.ix-out p b{font-family:var(--disp);color:var(--ink)}',
     '.ix-kv{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:0 14px;margin:6px 0 0}',

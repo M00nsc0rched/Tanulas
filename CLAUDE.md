@@ -52,7 +52,8 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 - A tételtár része (a claude.ai-os eredetiben is benne van), az `index.html` tölti be a `data-b.js` után:
   `ix/core.js`, `fec.js`, `a-anyag.js`, `a-hegesztes.js`, `a-alakitas.js`, `a-forgacsolas.js`, `a-nc.js`,
   `b-tervezes.js` (B/03–B/05), `b-rendszer.js` (B/01, B/02, B/06–B/08), `b-szerszam.js` (B/09–B/11),
-  `b-keszulek.js` (B/12–B/13); a `show()` végén `AVIX.show(r, doc)` hívódik.
+  `b-keszulek.js` (B/12–B/13), `b-szereles.js` (B/14, B/16–B/18), `b-illesztes.js` (B/15, B/19–B/20; benne az ISO 286
+  tűréstáblázat 1–250 mm: `ISO.shaft`, `ISO.hole`, K/M/N/P a Δ-szabállyal); a `show()` végén `AVIX.show(r, doc)` hívódik.
   **Szinkronkor ezek a módosítások a claude.ai-os oldalon is megvannak** — ha mégis eltérne, az `index.html` két
   kiegészítését (script tagek + `AVIX.show`) vissza kell tenni.
 - `core.js`: `REG` (tétel id → `[[widget, opts], …]`), `AVIX.def(név, {title, sub, mount(el, opt, U, r)})`, segédek `U`-ban
@@ -65,10 +66,10 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 - Telefon (≈ 375 px): az összetett, fix elrendezésű ábrák vagy keskeny változatot rajzolnak (`gyrhier`, `cimy`), vagy
   vízszintesen görgethetők (`scrollWrap` + `min-width`); az `.ix-sec>*{min-width:0}` szabály tartja a kártyát a lap szélességén.
   Görgetést blokkoló húzást (`U.plot().drag`) csak ott használj, ahol a húzás a lényeg; kijelöléshez `click` kell.
-- Feliratok: a `.ix-sl span` és az `.ix-out h4 small` nagybetűs — képletet, mértékegységet ne tegyél bele (a csúszkafelirat
-  görög jelét a `core.js` `span.gk`-ba teszi, az kisbetűs marad). Alsó index: HTML-ben `<sub>`, SVG-ben `<tspan dy="3">`.
+- Feliratok: a `.ix-sl span` és az `.ix-out h4 small` nagybetűs — képletet, mértékegységet, tűrésjelet (k6 ≠ K6!) csak
+  `<small class="nc">`-be tegyél (az kisbetűs marad); a csúszkafelirat görög jelét a `core.js` `span.gk`-ba teszi. Alsó index: HTML-ben `<sub>`, SVG-ben `<tspan dy="3">`.
   Az SVG-szöveg ne lógjon ki a rajzból (az `.ix-plot` levágja): hosszú címkét `text-anchor="end"`-del vagy `U.clamp`-pel tarts bent.
-- Készülékméret-teszt (2026-09-25, mind a 90 kártya): 430×932, 932×430, 768×1024, 1024×768 — az olvasó iframe-jében minden
+- Készülékméret-teszt (2026-09-25, mind a 112 kártya): 430×932, 932×430, 768×1024, 1024×768 — az olvasó iframe-jében minden
   kártyát lenyitva, a választógombokat végigkattintva, a csúszkákat min/max értékre állítva; ellenőrizve: `.ix-err`, JS-hiba,
   NaN, vízszintes görgetés, az SVG-ből kilógó `text`.
 - Tesztelés: a tételtár betöltés után visszaállítja a görgetést, ezért képernyőképhez érdemes a widgetet külön oldalon
@@ -96,6 +97,16 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
   Javított hibák: B/09 a κr hatása fordítva (90°-nál nincs radiális erő); B/10 elsődleges/másodlagos profiltorzulás felcserélve,
   rossz kritikus pont, rossz körkés-képlet (h = R·sin α); B/11 duplikált blokk; B/13 szétesett 13.1 (F_sz = k·F_v/(2μ)).
   Közben az A sor és a B/01–B/08 néhány ábrájának kilógó feliratát is javítottuk (készülékméret-teszt).
+- 2026-09-25: B/14–B/20 (szereléstervezés) átnézve, javítva, bővítve, 22 interaktív ábrával (claude.ai Version 10). Fő forrás a
+  *Szereléstechnológia* előadássorozat (Adatbázis: „--- Összes egyben ---.pdf”, részben szkennelt diák; a gépen nincs
+  pdftoppm, a képes oldalakat egy pdf.js-es segédoldallal — cdnjs `pdf.min.js`, `getDocument` + canvas — lehet megnézni), mellette Dudás *Gyártórendszerek* (szerelési folyamatok,
+  184–192. o.) és Szigeti *Gyártás 2* (gyártmány és elemei). Javított hibák: B/15 a 15.9. ábra valójában a 15.4. duplikátuma volt,
+  hiányzott a H/h alaplyuk/alapcsap; B/17 elveszett „Válogatott elem” pont; B/19 és B/20 második fele nyers duplikátum volt
+  (törölve), B/19 „legfelső” → **legalsó** görgő alatti hézagmérés; B/20 „Fm erő hatására” → Fe, forrasztási szilárdság
+  mértékegység-hibája (5–7 és 50 kp/mm², nem N/mm²). Pótolva a forrásból: szerelvényfajták, rang/rend, bázisalkatrész-választás,
+  VDI 3239 jelképek, szervezésiforma-táblázat, kúpgörgős hézagbeállítás, tengely–agy kötések, csavarbiztosítás hatáselv szerint.
+  Kiegészítésként jelölve (nem a jegyzetből): valószínűségi tűrés √ΣTi², kötésdiagram Φ-vel, VDI 2230 meghúzónyomaték,
+  DIN 7190 sajtolt kötés, Boothroyd–Dewhurst DFA.
 - A repó iCloud Drive-ban van: gyors egymás utáni átírásnál az iCloud „fájl 2.ext” névre tehet át fájlt (404-es script).
   Commit előtt: `find . -name "* 2.*" -not -path "./.git/*"`.
 - A gyökérben lévő `zarovizsga-teteltar.html` a felhasználó saját fájlja, nem része az appnak — ne commitold.
