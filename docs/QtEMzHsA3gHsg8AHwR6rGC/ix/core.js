@@ -56,6 +56,11 @@
     B6: [['fmsrend'], ['paletta'], ['gyrfajta']],
     B7: [['keszlet'], ['utemez'], ['sorrend']],
     B8: [['cimy'], ['pushpull'], ['leanjp']],
+    B9: [['elszogsik'], ['kappar'], ['mukodo']],
+    B10: [['alakoskes'], ['tangkes']],
+    B11: [['hatraeszt'], ['uregelo']],
+    B12: [['hatpont'], ['prizma'], ['ketlyuk']],
+    B13: [['szorelv'], ['szorito'], ['gepiszor']],
   };
 
   /* ------------------------------------------------------------------ */
@@ -94,7 +99,7 @@
   /* Csúszka: {label, min, max, step, value, unit, dec, fmt(v), onInput(v)} */
   U.slider = function (parent, o) {
     var row = U.h('div', 'ix-sl');
-    row.innerHTML = '<span>' + U.esc(o.label) + '</span><input type="range"><output></output>';
+    row.innerHTML = '<span>' + U.esc(o.label).replace(/([Ͱ-Ͽ][A-Za-z0-9]*)/g, '<span class="gk">$1</span>') + '</span><input type="range"><output></output>';
     var inp = row.querySelector('input'), out = row.querySelector('output');
     inp.min = o.min; inp.max = o.max; inp.step = o.step || 1; inp.value = o.value;
     inp.setAttribute('aria-label', o.label);
@@ -206,8 +211,9 @@
       o += '<text class="tk" x="' + x + '" y="' + (a.y1 + 15) + '" text-anchor="middle">' + (a.xf ? a.xf(t) : U.fmt(t)) + '</text>';
     });
     o += '<rect class="ax" x="' + a.x0 + '" y="' + a.y0 + '" width="' + (a.x1 - a.x0) + '" height="' + (a.y1 - a.y0) + '" fill="none"/>';
-    if (a.xl) o += '<text class="tk" x="' + a.x1 + '" y="' + (a.y1 + 30) + '" text-anchor="end">' + U.esc(a.xl) + '</text>';
-    if (a.yl) o += '<text class="tk" x="' + (a.x0 - 6) + '" y="' + (a.y0 - 8) + '" text-anchor="end">' + U.esc(a.yl) + '</text>';
+    if (a.xl) o += '<text class="tk" x="' + a.x1 + '" y="' + (a.y1 + 27) + '" text-anchor="end">' + U.esc(a.xl) + '</text>';
+    // a tengelycím ne lógjon ki a rajzból (keskeny kijelzőn a bal margó kicsi)
+    if (a.yl) o += '<text class="tk" x="' + Math.max(a.x0 - 6, a.yl.length * 6.4 + 4).toFixed(1) + '" y="' + Math.max(a.y0 - 8, 11) + '" text-anchor="end">' + U.esc(a.yl) + '</text>';
     return o;
   };
 
@@ -320,6 +326,7 @@
     '.ix-sls{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 10px;margin:12px 0 4px}',
     '.ix-sl{display:contents}',
     '.ix-sl span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}',
+    '.ix-sl span.gk{text-transform:none;letter-spacing:0;font-size:12px}',
     '.ix-sl input{width:100%;min-width:0;height:30px;margin:0;accent-color:var(--acc)}',
     '.ix-sl output{min-width:72px;text-align:right;font:600 14.5px var(--mono);color:var(--ink)}',
     '.ix-out{margin:12px 0 0;padding:14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--rule)}',

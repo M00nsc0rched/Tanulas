@@ -573,7 +573,7 @@
           o += '<rect x="' + a.toFixed(1) + '" y="' + y + '" width="' + (b - a - 1).toFixed(1) + '" height="' + bh + '" rx="4" style="fill:var(--ix-' + (j.i + 1) + ');fill-opacity:.65;stroke:' + (lateJ ? 'var(--ix-5)' : 'none') + ';stroke-width:2.5"/><text class="lb" x="' + ((a + b) / 2).toFixed(1) + '" y="' + (y + 16) + '" text-anchor="middle">' + j.n + '</text><text class="tk" x="' + ((a + b) / 2).toFixed(1) + '" y="' + (y + 30) + '" text-anchor="middle" style="fill:var(--ink)">h:' + j.d + '</text>';
           o += '<line x1="' + sx(j.d).toFixed(1) + '" x2="' + sx(j.d).toFixed(1) + '" y1="' + (y + bh + 3) + '" y2="' + (y + bh + 12) + '" style="stroke:var(--ix-' + (j.i + 1) + ');stroke-width:2.5"/>';
         });
-        o += '<text class="tk" x="' + x0 + '" y="12">gép · a rendelések alatti jelek: határidők (piros keret: késik)</text>';
+        o += '<text class="tk" x="' + x0 + '" y="12">' + (w < 520 ? 'jelek: határidők · piros keret: késik' : 'gép · a rendelések alatti jelek: határidők (piros keret: késik)') + '</text>';
         P.svg.innerHTML = o;
         var all = Object.keys(SR_RULES).map(function (k) { var q = run(k); return '<tr' + (k === S.r ? ' class="on"' : '') + '><td>' + SR_RULES[k][0] + '</td><td>' + fmt(q.fl, 1) + '</td><td>' + q.late + '</td><td>' + q.mx + '</td><td>' + q.cap + '</td></tr>'; }).join('');
         out.innerHTML = '<h4><small>' + SR_RULES[S.r][0] + '</small>Sorrend: ' + R.J.map(function (j) { return j.n; }).join(' → ') + '</h4><p>' + SR_RULES[S.r][1] + '</p>' +

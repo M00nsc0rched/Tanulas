@@ -323,7 +323,7 @@
         [1, -1].forEach(function (sg) { o += '<path d="M' + part.map(function (p) { return X(p[0] * sg).toFixed(1) + ',' + Y(p[1]).toFixed(1); }).join('L') + '" style="fill:var(--ix-8);fill-opacity:.18;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3"/>'; });
         o += '<path d="M' + cx + ',' + (Y(yT + PT.cp) - 8) + 'V' + (Y(yB - PT.cp) + 8) + '" style="stroke:var(--muted);stroke-dasharray:10 3 2 3"/>';
         o += '<text class="lb sm" x="' + X(rC + 4) + '" y="' + Y(yT + PT.cp / 2) + '">magfészek</text>';
-        o += '<text class="lb sm" x="' + X(rF + 4) + '" y="' + Y(yF / 2) + '">' + (S.m === 'ac' ? 'nyers acél' : 'nyers öntvény') + '</text>';
+        o += '<text class="lb sm" x="' + Math.min(X(rF + 4), w - 90) + '" y="' + Y(yF / 2) + '">' + (S.m === 'ac' ? 'nyers acél' : 'nyers öntvény') + '</text>';
         if (mach) o += '<text class="lb sm" x="' + X(-rF) + '" y="' + (Y(yB) + 16) + '" style="fill:#B8860B">megmunkált talp (sárga)</text>';
         o += '<text class="tk" x="' + (w - 8) + '" y="' + (h - 6) + '" text-anchor="end">szaggatott: alkatrész · színes: minta</text>';
         P.svg.innerHTML = o;

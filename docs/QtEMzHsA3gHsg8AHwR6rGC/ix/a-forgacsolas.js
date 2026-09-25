@@ -100,7 +100,7 @@
         if (!de) o += '<circle cx="' + cx + '" cy="' + tipY + '" r="4" style="fill:var(--ix-1)"/><text class="lb sm" x="' + (cx + 8) + '" y="' + (tipY + 4) + '" style="fill:var(--ix-1)">keresztél</text>';
         o += '<text class="la sm" x="' + cx + '" y="' + (tipY + 18) + '" text-anchor="middle">2κ_r = ' + ang + '°</text>';
         // méretek
-        var xr = w * 0.62;
+        var xr = w < 520 ? w * 0.5 : w * 0.62;
         o += '<text class="lb sm" x="' + xr + '" y="30">a_p = ' + fmt(de ? (d - de) / 2 : d / 2, 2) + ' mm</text>';
         o += '<text class="lb sm" x="' + xr + '" y="50">f_z = f/2 = ' + fmt(S.f / 2, 3) + ' mm</text>';
         o += '<text class="lb sm" x="' + xr + '" y="70">h = f_z·sin κ_r = ' + fmt(S.f / 2 * Math.sin(kr), 3) + ' mm</text>';
@@ -195,7 +195,7 @@
         o += '<rect x="' + (gx0 - 6) + '" y="' + (gy1 - 16) + '" width="' + (gx1 - gx0 + 12) + '" height="' + (gy0 - gy1 + 32) + '" rx="6" style="fill:var(--surface);fill-opacity:.92;stroke:var(--rule)"/>';
         o += '<path d="M' + gx0 + ',' + gy1 + 'V' + gy0 + 'H' + gx1 + '" class="ax" style="fill:none"/><path d="M' + pts.map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join('L') + '" class="ln acc"/>';
         var hm = (1 - Math.cos(pe)) / (pe * Math.sin(pe));
-        o += '<line x1="' + gx0 + '" x2="' + gx1 + '" y1="' + hy(hm) + '" y2="' + hy(hm) + '" class="ln th dash"/><text class="tk" x="' + gx0 + '" y="' + (gy1 - 4) + '">h a fogásív mentén</text><text class="tk" x="' + gx1 + '" y="' + (hy(hm) - 3) + '" text-anchor="end">közepes</text>';
+        o += '<line x1="' + gx0 + '" x2="' + gx1 + '" y1="' + hy(hm) + '" y2="' + hy(hm) + '" class="ln th dash"/><text class="tk" x="' + Math.min(gx0, w - 122) + '" y="' + (gy1 - 4) + '">h a fogásív mentén</text><text class="tk" x="' + gx1 + '" y="' + (hy(hm) - 3) + '" text-anchor="end">közepes</text>';
         o += '<text class="tk" x="' + gx0 + '" y="' + (gy0 + 12) + '">' + (up ? 'belépés' : 'belépés') + '</text><text class="tk" x="' + gx1 + '" y="' + (gy0 + 12) + '" text-anchor="end">kilépés</text>';
         P.svg.innerHTML = o;
       }
@@ -425,7 +425,7 @@
         PCL.forEach(function (p, i) {
           var y = 14 + i * rh, x0 = sx(i < PCL.length - 1 ? PCL[i + 1].ra : 0.003), x1 = sx(p.ra), cur = cls(S.ra) === i;
           o += '<rect x="' + x0.toFixed(1) + '" y="' + y + '" width="' + (x1 - x0).toFixed(1) + '" height="' + (rh - 6) + '" rx="4" style="fill:var(' + p.c + ');fill-opacity:' + (cur ? '.7' : '.3') + ';stroke:var(--ink);stroke-width:' + (cur ? 1.5 : .5) + '"/>';
-          o += '<text class="lb sm" x="' + (x1 + 6).toFixed(1) + '" y="' + (y + rh / 2).toFixed(1) + '">' + p.n + '</text>';
+          var inT = x1 + 10 + p.n.length * 6.6 > w; o += '<text class="lb sm" x="' + (inT ? x1 - 6 : x1 + 6).toFixed(1) + '" y="' + (y + rh / 2).toFixed(1) + '"' + (inT ? ' text-anchor="end"' : '') + '>' + p.n + '</text>';
         });
         [0.01, 0.1, 1].forEach(function (t) { o += '<line x1="' + sx(t) + '" x2="' + sx(t) + '" y1="10" y2="' + (h - 40) + '" class="grid"/><text class="tk" x="' + sx(t) + '" y="' + (h - 26) + '" text-anchor="middle">' + fmt(t, t < 0.1 ? 2 : t < 1 ? 1 : 0) + '</text>'; });
         o += '<text class="tk" x="' + (w - 20) + '" y="' + (h - 10) + '" text-anchor="end">R_a, µm (log) — a finomabb balra</text>';
@@ -457,7 +457,7 @@
           dev = Math.max(dev, Math.sqrt(r * r + z1 * z1) - R); // a lépcső csúcsának távolsága a gömbfelülettől
         }
         o += steps + '<path d="M' + (cx - R * k) + ',' + yb + 'A' + (R * k) + ',' + (R * k) + ' 0 0 1 ' + (cx + R * k) + ',' + yb + '" style="fill:none;stroke:var(--ix-2);stroke-width:2;stroke-dasharray:5 3"/>';
-        o += '<line x1="' + (cx - R * k - 10) + '" x2="' + (cx + R * k + 10) + '" y1="' + yb + '" y2="' + yb + '" style="stroke:var(--ink)"/><text class="tk" x="' + (cx + R * k + 6) + '" y="' + (yb - 6) + '">tárgyasztal</text><text class="lb sm" x="' + (cx - R * k) + '" y="16" style="fill:var(--ix-2)">szaggatott: CAD-modell</text>';
+        o += '<line x1="' + (cx - R * k - 10) + '" x2="' + (cx + R * k + 10) + '" y1="' + yb + '" y2="' + yb + '" style="stroke:var(--ink)"/><text class="tk" x="' + Math.min(cx + R * k + 6, w - 76) + '" y="' + (yb - 6) + '">tárgyasztal</text><text class="lb sm" x="' + (cx - R * k) + '" y="16" style="fill:var(--ix-2)">szaggatott: CAD-modell</text>';
         P.svg.innerHTML = o;
         out.innerHTML = '<h4><small>' + n + ' réteg · rétegvastagság ' + fmt(t, 2) + ' mm</small>Legnagyobb eltérés a felülettől ≈ ' + fmt(dev, 2) + ' mm</h4>' +
           U.kv([['Építési idő (relatív)', '∝ rétegszám = ' + n, 'kétszer vékonyabb réteg ≈ kétszer hosszabb építés'], ['Lépcső a lejtőn', 'a réteg vastagságával arányos', 'a vízszintes tetőn és a függőleges oldalon nincs, a lapos lejtőn a legnagyobb'], ['STL', 'háromszögháló', 'a felületet síklapokkal közelíti — ez is eltérést okoz']]) +
@@ -614,8 +614,8 @@
         // síkkerék: az alkotóra merőleges síkban, a közös alkotó körül (90°-os osztókúp) — nyomvonala
         o += '<path d="M' + ox + ',' + oy + 'L' + G[0].toFixed(1) + ',' + G[1].toFixed(1) + '" style="stroke:var(--ink);stroke-width:2.5"/>';
         o += '<circle cx="' + ox + '" cy="' + oy + '" r="4" style="fill:var(--ink)"/><text class="lb sm" x="' + (ox - 6) + '" y="' + (oy - 8) + '" text-anchor="end">O</text>';
-        var L1 = pt(-d1a * 0.45, Re * 0.6), L2 = pt(Sg + d2a * 0.45, Re * 0.6); o += '<text class="lb sm" x="' + L1[0].toFixed(1) + '" y="' + (L1[1] + 4).toFixed(1) + '" text-anchor="middle" style="fill:var(--ix-2)">1. kerék, δ₁ = ' + fmt(d1a * 180 / Math.PI, 1) + '°</text>';
-        o += '<text class="lb sm" x="' + L2[0].toFixed(1) + '" y="' + (L2[1] + 4).toFixed(1) + '" text-anchor="middle" style="fill:var(--ix-1)">2. kerék, δ₂ = ' + fmt(d2a * 180 / Math.PI, 1) + '°</text>';
+        var L1 = pt(-d1a * 0.45, Re * 0.6), L2 = pt(Sg + d2a * 0.45, Re * 0.6); o += '<text class="lb sm" x="' + L1[0].toFixed(1) + '" y="' + Math.max(L1[1] + 4, 12).toFixed(1) + '" text-anchor="middle" style="fill:var(--ix-2)">1. kerék, δ₁ = ' + fmt(d1a * 180 / Math.PI, 1) + '°</text>';
+        o += '<text class="lb sm" x="' + L2[0].toFixed(1) + '" y="' + Math.max(L2[1] + 4, 12).toFixed(1) + '" text-anchor="middle" style="fill:var(--ix-1)">2. kerék, δ₂ = ' + fmt(d2a * 180 / Math.PI, 1) + '°</text>';
         o += '<text class="lb sm" x="' + ((ox + G[0]) / 2 + 8).toFixed(1) + '" y="' + ((oy + G[1]) / 2).toFixed(1) + '">közös alkotó, R_e</text>';
         P.svg.innerHTML = o;
         var zp = S.z1 / Math.sin(d1a), zv1 = S.z1 / Math.cos(d1a), zv2 = S.z2 / Math.cos(d2a);
@@ -654,9 +654,9 @@
         for (var x = x0 - 3 * p * S.z1 - dx, j = 0; x < x1 + p; x += p, j++) {
           o += '<path d="M' + x.toFixed(1) + ',' + (top + H) + 'L' + (x + dx).toFixed(1) + ',' + top + '" style="stroke:var(' + cols[j % S.z1] + ');stroke-width:5;stroke-linecap:round;stroke-opacity:.85"/>';
         }
-        o += '</g><text class="tk" x="' + x0 + '" y="' + (top + H + 14) + '">csiga oldalnézete — egy szín = egy bekezdés (a dőlés nagyítva)</text>';
+        o += '</g><text class="tk" x="' + x0 + '" y="' + (top + H + 14) + '">' + (w < 520 ? 'egy szín = egy bekezdés (a dőlés nagyítva)' : 'csiga oldalnézete — egy szín = egy bekezdés (a dőlés nagyítva)') + '</text>';
         // hatásfok–emelkedési szög görbe
-        var gy0 = h - 26, gy1 = top + H + 34, gx0 = 44, gx1 = w - 16, sx = U.scale(0, 45, gx0, gx1), sy = U.scale(0, 1, gy0, gy1), pts = [];
+        var gy0 = h - 32, gy1 = top + H + 34, gx0 = 44, gx1 = w - 16, sx = U.scale(0, 45, gx0, gx1), sy = U.scale(0, 1, gy0, gy1), pts = [];
         for (var d = 0.2; d <= 45; d += 0.5) { var gg = d * Math.PI / 180; pts.push([d, Math.max(0, Math.tan(gg) / Math.tan(gg + rho))]); }
         o += U.axes({ x0: gx0, x1: gx1, y0: gy1, y1: gy0, sx: sx, sy: sy, yt: [0, 0.5, 1], xt: [0, 10, 20, 30, 40], xl: 'emelkedési szög γ, °', yl: 'η' });
         o += '<rect x="' + gx0 + '" y="' + gy1 + '" width="' + (sx(rho * 180 / Math.PI) - gx0).toFixed(1) + '" height="' + (gy0 - gy1) + '" style="fill:var(--ix-5);fill-opacity:.12"/><text class="lb sm" x="' + (gx0 + 4) + '" y="' + (gy1 + 14) + '" style="fill:var(--ix-5)">önzáró</text>';

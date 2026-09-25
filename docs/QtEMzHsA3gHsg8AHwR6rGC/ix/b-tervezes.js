@@ -734,7 +734,7 @@
         var sx = U.scale(0, 120, cx0, cx1), sy = U.scale(0, vmax * 1.05, cy1, cy0);
         o += '<rect class="ax" x="' + cx0 + '" y="' + cy0 + '" width="' + (cx1 - cx0) + '" height="' + (cy1 - cy0) + '" fill="none"/>';
         [0, 100, 200, 300].forEach(function (v) { if (v <= vmax) o += '<line class="grid" x1="' + cx0 + '" x2="' + cx1 + '" y1="' + sy(v).toFixed(1) + '" y2="' + sy(v).toFixed(1) + '"/><text class="tk" x="' + (cx0 - 5) + '" y="' + (sy(v) + 3.5).toFixed(1) + '" text-anchor="end">' + v + '</text>'; });
-        o += '<text class="tk" x="' + (cx0 - 5) + '" y="' + (cy0 - 4) + '" text-anchor="end">v_eff, m/min</text>';
+        o += '<text class="tk" x="4" y="' + (cy0 - 4) + '">v<tspan dy="3" style="font-size:.8em">eff</tspan><tspan dy="-3">, m/min</tspan></text>';
         ['3d', '5d'].forEach(function (m) {
           var q = [];
           for (var x2 = 0; x2 <= 120; x2 += 1) q.push([sx(x2), sy(edState(x2, m, S.b).v)]);

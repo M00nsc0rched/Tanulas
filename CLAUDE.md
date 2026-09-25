@@ -51,7 +51,8 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 ## Tételtár interaktív ábrái (`docs/QtEMzHsA3gHsg8AHwR6rGC/ix/`)
 - A tételtár része (a claude.ai-os eredetiben is benne van), az `index.html` tölti be a `data-b.js` után:
   `ix/core.js`, `fec.js`, `a-anyag.js`, `a-hegesztes.js`, `a-alakitas.js`, `a-forgacsolas.js`, `a-nc.js`,
-  `b-tervezes.js` (B/03–B/05), `b-rendszer.js` (B/01, B/02, B/06–B/08); a `show()` végén `AVIX.show(r, doc)` hívódik.
+  `b-tervezes.js` (B/03–B/05), `b-rendszer.js` (B/01, B/02, B/06–B/08), `b-szerszam.js` (B/09–B/11),
+  `b-keszulek.js` (B/12–B/13); a `show()` végén `AVIX.show(r, doc)` hívódik.
   **Szinkronkor ezek a módosítások a claude.ai-os oldalon is megvannak** — ha mégis eltérne, az `index.html` két
   kiegészítését (script tagek + `AVIX.show`) vissza kell tenni.
 - `core.js`: `REG` (tétel id → `[[widget, opts], …]`), `AVIX.def(név, {title, sub, mount(el, opt, U, r)})`, segédek `U`-ban
@@ -64,6 +65,12 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 - Telefon (≈ 375 px): az összetett, fix elrendezésű ábrák vagy keskeny változatot rajzolnak (`gyrhier`, `cimy`), vagy
   vízszintesen görgethetők (`scrollWrap` + `min-width`); az `.ix-sec>*{min-width:0}` szabály tartja a kártyát a lap szélességén.
   Görgetést blokkoló húzást (`U.plot().drag`) csak ott használj, ahol a húzás a lényeg; kijelöléshez `click` kell.
+- Feliratok: a `.ix-sl span` és az `.ix-out h4 small` nagybetűs — képletet, mértékegységet ne tegyél bele (a csúszkafelirat
+  görög jelét a `core.js` `span.gk`-ba teszi, az kisbetűs marad). Alsó index: HTML-ben `<sub>`, SVG-ben `<tspan dy="3">`.
+  Az SVG-szöveg ne lógjon ki a rajzból (az `.ix-plot` levágja): hosszú címkét `text-anchor="end"`-del vagy `U.clamp`-pel tarts bent.
+- Készülékméret-teszt (2026-09-25, mind a 90 kártya): 430×932, 932×430, 768×1024, 1024×768 — az olvasó iframe-jében minden
+  kártyát lenyitva, a választógombokat végigkattintva, a csúszkákat min/max értékre állítva; ellenőrizve: `.ix-err`, JS-hiba,
+  NaN, vízszintes görgetés, az SVG-ből kilógó `text`.
 - Tesztelés: a tételtár betöltés után visszaállítja a görgetést, ezért képernyőképhez érdemes a widgetet külön oldalon
   mountolni (`AVIX` + `data-a.js` betöltése, majd `AVIX.show` egy `#doc` elemre).
 
@@ -83,6 +90,12 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 - 2026-09-25: B/01–B/08 interaktív ábrák (23 kártya, 21 widget) a Gyártórendszerek jegyzet alapján; B/03 új „5/b Algoritmus és
   optimálás” szakasza (1.3, 9–10. fejezet), B/05 5D-gépkonstrukció-ábra, B/04 kódlista-pontosítás (claude.ai Version 8).
   A jegyzet 7.4. ábrájának példakódja a „hőkezelés nincs” jegyet 0-val írja, a lista 1-gyel — a tételben jelezve.
+- 2026-09-25: B/09–B/13 átnézve, javítva, bővítve, 13 interaktív ábrával (claude.ai Version 9). Források: ravai „all-in-one”
+  jegyzetgyűjtemény (szerszámgeometria, alakos kések/marók, üregelő, készülékek), Dudás *Megmunkálási eljárások* (alakos kések),
+  Kun–Líska–Nagy *Készüléktervezés* (központosítás), Stampfer *Gépipari technológiák II – Készülékek* (szorítás).
+  Javított hibák: B/09 a κr hatása fordítva (90°-nál nincs radiális erő); B/10 elsődleges/másodlagos profiltorzulás felcserélve,
+  rossz kritikus pont, rossz körkés-képlet (h = R·sin α); B/11 duplikált blokk; B/13 szétesett 13.1 (F_sz = k·F_v/(2μ)).
+  Közben az A sor és a B/01–B/08 néhány ábrájának kilógó feliratát is javítottuk (készülékméret-teszt).
 - A repó iCloud Drive-ban van: gyors egymás utáni átírásnál az iCloud „fájl 2.ext” névre tehet át fájlt (404-es script).
   Commit előtt: `find . -name "* 2.*" -not -path "./.git/*"`.
 - A gyökérben lévő `zarovizsga-teteltar.html` a felhasználó saját fájlja, nem része az appnak — ne commitold.
