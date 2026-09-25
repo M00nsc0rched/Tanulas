@@ -50,15 +50,20 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 
 ## Tételtár interaktív ábrái (`docs/QtEMzHsA3gHsg8AHwR6rGC/ix/`)
 - A tételtár része (a claude.ai-os eredetiben is benne van), az `index.html` tölti be a `data-b.js` után:
-  `ix/core.js`, `fec.js`, `a-anyag.js`, `a-hegesztes.js`, `a-alakitas.js`, `a-forgacsolas.js`, `a-nc.js`;
-  a `show()` végén `AVIX.show(r, doc)` hívódik. **Szinkronkor ezek a módosítások a claude.ai-os oldalon is megvannak** —
-  ha mégis eltérne, az `index.html` két kiegészítését (script tagek + `AVIX.show`) vissza kell tenni.
+  `ix/core.js`, `fec.js`, `a-anyag.js`, `a-hegesztes.js`, `a-alakitas.js`, `a-forgacsolas.js`, `a-nc.js`,
+  `b-tervezes.js` (B/03–B/05), `b-rendszer.js` (B/01, B/02, B/06–B/08); a `show()` végén `AVIX.show(r, doc)` hívódik.
+  **Szinkronkor ezek a módosítások a claude.ai-os oldalon is megvannak** — ha mégis eltérne, az `index.html` két
+  kiegészítését (script tagek + `AVIX.show`) vissza kell tenni.
 - `core.js`: `REG` (tétel id → `[[widget, opts], …]`), `AVIX.def(név, {title, sub, mount(el, opt, U, r)})`, segédek `U`-ban
   (`slider`, `seg`, `chips`, `plot`, `scale`, `axes`, `kv`, `quiz`, `store` → localStorage `avix.*`). ES5 stílus (Safari 16).
   Színek a tételtár CSS-változóiból (`--ix-1..8`, `--surface`, `--ink`, `--acc`), így követik a világos/sötét témát.
 - `fec.js`: vas–szén állapotábra (nézetek `steel`, `steelw`, `full`, `forge`; `PROC` eljárássávok, `SETS.a1/a3/a4/a5/a10/a13`).
   Értékei a dokumentum saját Fe–C ábráit követik (S 0,8%/723 °C, E 2,06%/1147 °C, C 4,3%, G 911 °C, P 0,025%, A 1536 °C).
-- Az ábrák saját rajzok (a jegyzetek ábráit nem másoljuk). A statikus SVG-k a `data-a.js`-ben `figure.ixfig` elemek.
+- Az ábrák saját rajzok (a jegyzetek ábráit nem másoljuk). A statikus SVG-k a `data-a.js` / `data-b.js` törzsében
+  `figure.ixfig` elemek (SVG-azonosítók legyenek egyediek, pl. `b3opt-clip`, `b5-ar`).
+- Telefon (≈ 375 px): az összetett, fix elrendezésű ábrák vagy keskeny változatot rajzolnak (`gyrhier`, `cimy`), vagy
+  vízszintesen görgethetők (`scrollWrap` + `min-width`); az `.ix-sec>*{min-width:0}` szabály tartja a kártyát a lap szélességén.
+  Görgetést blokkoló húzást (`U.plot().drag`) csak ott használj, ahol a húzás a lényeg; kijelöléshez `click` kell.
 - Tesztelés: a tételtár betöltés után visszaállítja a görgetést, ezért képernyőképhez érdemes a widgetet külön oldalon
   mountolni (`AVIX` + `data-a.js` betöltése, majd `AVIX.show` egy `#doc` elemre).
 
@@ -75,6 +80,9 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 - 2026-09-24: A/01–A/30 átnézve az *EA – Anyagismeret*, *Gyártás 1*, *Gyártás 2* és *Megmunkálási eljárások* jegyzetek
   alapján, javítva, bővítve, interaktív ábrákkal (claude.ai Version 7). Az A/26–A/30 (NC) témának nincs forrása ebben a
   négy jegyzetben, ott csak belső következetességet ellenőriztünk.
+- 2026-09-25: B/01–B/08 interaktív ábrák (23 kártya, 21 widget) a Gyártórendszerek jegyzet alapján; B/03 új „5/b Algoritmus és
+  optimálás” szakasza (1.3, 9–10. fejezet), B/05 5D-gépkonstrukció-ábra, B/04 kódlista-pontosítás (claude.ai Version 8).
+  A jegyzet 7.4. ábrájának példakódja a „hőkezelés nincs” jegyet 0-val írja, a lista 1-gyel — a tételben jelezve.
 - A repó iCloud Drive-ban van: gyors egymás utáni átírásnál az iCloud „fájl 2.ext” névre tehet át fájlt (404-es script).
   Commit előtt: `find . -name "* 2.*" -not -path "./.git/*"`.
 - A gyökérben lévő `zarovizsga-teteltar.html` a felhasználó saját fájlja, nem része az appnak — ne commitold.

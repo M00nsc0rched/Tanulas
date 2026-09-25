@@ -48,6 +48,14 @@
     A29: [['ncsim', { prog: 'hibas', title: 'Programellenőrzés grafikus szimulációval', sub: 'A szimulátor jelzi a hibás körívet és a hiányzó előtolást — javítsd ki a programot' }]],
     A30: [['ncsim', { prog: 'kontur', title: 'Egyenes és körív menti mondatok', sub: 'G00 pontvezérlés · G01 egyenes · G02/G03 körív végponttal és I, J középponttal vagy R sugárral' }]],
     A4: [['acjel'], ['ce'], ['fec', { set: 'a4', title: 'Hegesztés előtti és utáni hőkezelések az állapotábrán', sub: 'Előmelegítés, hidrogénmentesítés, feszültségcsökkentés, megeresztés, normalizálás' }]],
+    B1: [['gyrfajta'], ['gyrhier'], ['fmsrend']],
+    B2: [['kapacitas'], ['muvkapcs'], ['valasztek']],
+    B3: [['optim'], ['furatalg']],
+    B4: [['tkod'], ['reprez'], ['gtcsop']],
+    B5: [['vezmozg'], ['eloredontes'], ['barazda']],
+    B6: [['fmsrend'], ['paletta'], ['gyrfajta']],
+    B7: [['keszlet'], ['utemez'], ['sorrend']],
+    B8: [['cimy'], ['pushpull'], ['leanjp']],
   };
 
   /* ------------------------------------------------------------------ */
@@ -266,6 +274,7 @@
     '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ix-1:#E9A35A;--ix-2:#6FA8DC;--ix-3:#6DBB86;--ix-4:#B29BDB;--ix-5:#E07A76;--ix-6:#5CC3B6;--ix-7:#D98BAE;--ix-8:#9FB0BD}}',
     ':root[data-theme="dark"]{--ix-1:#E9A35A;--ix-2:#6FA8DC;--ix-3:#6DBB86;--ix-4:#B29BDB;--ix-5:#E07A76;--ix-6:#5CC3B6;--ix-7:#D98BAE;--ix-8:#9FB0BD}',
     '.ix-sec{display:grid;gap:10px;margin-top:16px}',
+    '.ix-sec>*{min-width:0}',
     'details.ix-card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);color:var(--ink);font-family:var(--disp)}',
     'details.ix-card>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:52px}',
     'details.ix-card>summary::-webkit-details-marker{display:none}',
