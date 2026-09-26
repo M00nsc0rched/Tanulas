@@ -1,6 +1,6 @@
 // Tanulás — egyszerű, build nélküli PWA. Safari 16 (iPad 5. gen) kompatibilis.
 
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.3.1';
 const DATA_URL = 'data/artifacts.json';
 const REPO_URL = 'https://github.com/M00nsc0rched/Tanulas';
 
@@ -601,6 +601,7 @@ async function sync() {
   if (state.loading) return;
   document.querySelectorAll('[data-action="sync"].icon-btn').forEach((b) => b.classList.add('is-busy'));
   try {
+    updateWorker();
     const added = await loadRemote({ force: true });
     toast(added ? `${added} új dokumentum érkezett` : 'A lista naprakész');
   } catch {
@@ -767,7 +768,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 
 const AUTO_SYNC_MS = 10 * 60 * 1000;
 
+// Az új kiadás service workerét is kérjük le (különben az iOS ritkán ellenőrzi).
+function updateWorker() {
+  navigator.serviceWorker?.getRegistration?.().then((r) => r?.update()).catch(() => { /* nem kritikus */ });
+}
+
 function backgroundSync() {
+  updateWorker();
   if (state.loading) return;
   loadRemote()
     .catch(() => { /* offline: a mentett lista marad */ })

@@ -1,6 +1,6 @@
 // Tanulás service worker — hálózat először, offline esetén a gyorsítótárból.
 // Kiadáskor emeld a verziót (és a js/app.js APP_VERSION értékét).
-const CACHE = 'tanulas-v1.3.0';
+const CACHE = 'tanulas-v1.3.1';
 // A dokumentumok és a betűkészletek verzióváltáskor is megmaradnak (nem kell újra letölteni a ~50 MB-ot).
 const DOCS_CACHE = 'tanulas-docs';
 const CDN_CACHE = 'tanulas-cdn';
@@ -38,6 +38,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// A GitHub Pages 10 percig engedi a böngésző HTTP-gyorsítótárát (max-age=600), ezért a sima fetch() kiadás után
+// percekig a régi fájlt adhatja. Mindig újraérvényesítünk (ETag → 304, olcsó), így az új változat azonnal megjön.
+// Navigációnál a kérést URL-ből építjük újra (navigate módú kérés nem másolható init-tel), az átirányítást
+// pedig nem követjük (opaqueredirect), mert navigációra követett átirányítással nem szabad válaszolni.
+function fresh(req) {
+  if (req.mode === 'navigate') return fetch(req.url, { cache: 'no-cache', credentials: 'same-origin', redirect: 'manual' });
+  return fetch(req, { cache: 'no-cache' });
+}
+
 async function cacheFirst(req) {
   const cache = await caches.open(CDN_CACHE);
   const hit = await cache.match(req);
@@ -64,7 +73,7 @@ self.addEventListener('fetch', (event) => {
   const isDoc = url.pathname.includes('/docs/');
 
   event.respondWith(
-    fetch(req)
+    fresh(req)
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();
