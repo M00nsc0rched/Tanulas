@@ -42,6 +42,9 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
   hagyja ki a keret körül, és a dokumentum szélének színével tölti ki (`layoutReader`). Nincs kék status bar csík.
 - `sw.js`: az app shell verziózott cache-ben van; a `docs/` fájlok (`tanulas-docs`) és a Google Fonts / CDN
   (`tanulas-cdn`) külön cache-ben, verzióváltáskor is megmaradnak. Egy dokumentum az első online megnyitás után offline is olvasható.
+- A GitHub Pages `Cache-Control: max-age=600`-at küld, ezért a `sw.js` minden saját kérést `cache: 'no-cache'`-sel kér
+  (ETag → 304; navigációnál URL-ből, `redirect: 'manual'`), különben kiadás után ~10 percig a régi fájl jönne (v1.3.1-től).
+  A szinkron és a háttérfrissítés `registration.update()`-et is hív.
 
 ## Bővítmények (saját kiegészítések a dokumentumokhoz)
 - A `js/app.js` `EXTENSIONS` táblája (jelenleg üres) az `ext/` mappából `<script>`-ként illeszthet be kódot egy
