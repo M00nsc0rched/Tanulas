@@ -58,8 +58,19 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
 - `jegyzet.js` (`window.TTN`): a ✎ gombbal egy szövegrészhez (p, li, h3/h4, ábra, táblázat, kérdés…) rajz vagy kézírás
   fűzhető (Apple Pencil nyomásérzékenyen, tenyérkiszűréssel; toll, színek, kiemelő, radír, visszavonás). Tárolás csak az
   eszközön: IndexedDB `tt-jegyzet` / `notes` (tartalék: localStorage `tt-jegyzet.<tétel>`). Horgony: zóna (`s` = összefoglaló,
-  `b0…` = a `.bodyhtml` részek) + sorszám + szövegujjlenyomat; ha a szöveg megváltozik, a jegyzet a tétel végére kerül.
-  A `show()` az `AVIX.show` után `TTN.render(r, doc)`-ot hív. **Szinkronkor ezek a módosítások is a claude.ai-os oldalon vannak.**
+  `b0…` = a `.bodyhtml` részek) + sorszám + szövegujjlenyomat; ha a szöveg megváltozik, a leghasonlóbb elemhez kerül
+  (bigram-Dice ≥ 0,6, a horgony frissül), különben a tétel végére. A `show()` az `AVIX.show` után `TTN.render(r, doc)`-ot hív.
+- `szerkeszt.js` (`window.TTE`, a felhasználó kérésére, 2026-09-26): az „Aa” gombbal a felhasználó a **claude.ai-on** maga
+  szerkesztheti a tétel címét, kérdését, összefoglalóját, kidolgozását és kiegészítését (contenteditable; F/D/alsó/felső index;
+  Ctrl/Cmd+S). Az artifact az `artifact` képességet deklarálja (`capabilities: {artifact: {}}` — újrapublikáláskor a
+  `capabilities` mezőt hagyd el, úgy megmarad); mentéskor `claude.use('artifact').publish({"data-b.js": {content, contentType}})`
+  új verziót készít. Az „Aa” gomb csak akkor látszik, ha `claude.use('artifact')` nem `null` — a Tanulás webappban
+  (GitHub Pages) nincs `window.claude`, ott nem jelenik meg. Mentéskor a változatlan felső szintű blokkok a tárolt
+  forrásszövegükkel maradnak (`minimal`: blokkbontás + LCS; a DOM-szerializálás `&lt;`, `<rect></rect>` zaját csak a
+  szerkesztett blokk kapja). Ütközéskor (`conflict`) a lap újratölt, a szerkesztés a `sessionStorage` `tte-pending`-ből
+  visszaállítható. Tesztelés: `window.claude` mock (`use → {publish}`), majd `TTE.probe()`; `TTE._min(src, html)`.
+  A webappba a felhasználó kérésére, a szokásos szinkronnal kerülnek át a claude.ai-on mentett javítások.
+- **Szinkronkor ezek a módosítások (jegyzet.js, szerkeszt.js, index.html) is a claude.ai-os oldalon vannak.**
 
 ## Tételtár interaktív ábrái (`docs/QtEMzHsA3gHsg8AHwR6rGC/ix/`)
 - A tételtár része (a claude.ai-os eredetiben is benne van), az `index.html` tölti be a `data-b.js` után:
@@ -97,6 +108,9 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
   keresés–csere, JSON-ellenőrzéssel). A patch-szkriptet a PowerShell tool-lal futtasd (Bash-ből az execution policy
   megakasztja). A patchfájl sorait trimeli és elválasztó nélkül fűzi össze, ezért minden bekezdés / SVG-elem egy sorba kerüljön.
   A/B publikálásnál a módosított `ix/*.js` fájlokat is add át a `files`-ban.
+- **A felhasználó 2026-09-26 óta maga is szerkeszti a claude.ai-os eredetit** (`szerkeszt.js`). Mielőtt bármit publikálsz
+  vagy patchelsz, olvasd le a claude.ai-os `data-a.js` / `data-b.js`-t (`action: "read"`, `paths`), és ha eltér a repótól,
+  előbb hozd át és commitold, csak utána dolgozz rajta — különben felülírod a javításait.
 - 2026-09-23: B/01–B/08 átnézve Dudás Illés *Gyártási folyamatok és rendszerek* jegyzete alapján (claude.ai Version 6).
 - 2026-09-24: A/01–A/30 átnézve az *EA – Anyagismeret*, *Gyártás 1*, *Gyártás 2* és *Megmunkálási eljárások* jegyzetek
   alapján, javítva, bővítve, interaktív ábrákkal (claude.ai Version 7). Az A/26–A/30 (NC) témának nincs forrása ebben a

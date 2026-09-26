@@ -173,6 +173,19 @@ figure.figs+p,figure.figs+p em{text-align:center}
 .tt-live{touch-action:none;cursor:crosshair}
 .tt-hint{position:absolute;left:0;right:0;top:40%;text-align:center;font:13px var(--disp);color:var(--muted);pointer-events:none}
 
+/* ---------- szövegszerkesztés a claude.ai-on (szerkeszt.js) ---------- */
+.tte-bar{position:fixed;left:0;right:0;top:calc(50px + env(safe-area-inset-top,0px));z-index:65;display:flex;flex-wrap:wrap;
+  align-items:center;gap:6px 8px;padding:7px 12px;background:var(--surface);border-bottom:1px solid var(--acc-line);box-shadow:var(--shadow)}
+.tte-bar button{min-height:34px;padding:0 11px;border:1px solid var(--rule-2);border-radius:8px;background:var(--bg);font:600 13px var(--disp);color:var(--ink)}
+.tte-bar button.pri{background:var(--acc);border-color:var(--acc);color:var(--surface)}
+.tte-lab{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.tte-st{flex:1 1 160px;font:12.5px var(--disp);color:var(--muted)}
+.tte-st.warn{color:#b4451f;font-weight:600}
+body.tt-editmode .doc{padding-top:60px}
+body.tt-editmode [contenteditable="true"]{outline:2px dashed var(--acc-line);outline-offset:4px;border-radius:4px}
+body.tt-editmode [contenteditable="true"]:focus{outline-color:var(--acc)}
+.tt-banner button{margin-left:6px}
+
 /* ---------- head of a tétel ---------- */
 .hd{padding-block:34px 0}
 .eyebrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
@@ -371,6 +384,7 @@ kbd{font-family:var(--mono);font-size:11.5px;background:var(--surface);
       <button class="menu" id="menu" aria-label="Oldalsáv (tétellista) ki/be" title="Oldalsáv ki/be — vagy húzd a képernyő bal szélétől jobbra"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg></button>
       <div class="crumb"><span class="code" id="ccode"></span><span class="name" id="cname"></span></div>
       <div class="topbtns">
+        <button class="ib" id="editbtn" hidden aria-label="A tétel szövegének szerkesztése" title="Szöveg szerkesztése (a claude.ai-on menthető)" style="font:700 12.5px var(--disp)">Aa</button>
         <button class="ib" id="notebtn" aria-label="Rajz vagy kézírás beszúrása" title="Rajz vagy kézírás beszúrása egy szövegrészhez"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.2l2.8 2.8-7.6 7.6-3.4.6.6-3.4z"/><path d="M9.4 3.8l2.8 2.8"/></svg></button>
         <button class="donebtn" id="done" aria-pressed="false"><span class="tick"></span><span class="lab">Kész</span></button>
         <button class="ib" id="prev" aria-label="Előző tétel" title="Előző tétel ( [ )"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 4.5 8l5.5 5.5"/></svg></button>
@@ -397,6 +411,7 @@ kbd{font-family:var(--mono);font-size:11.5px;background:var(--surface);
 <script defer src="ix/b-szereles.js"></script>
 <script defer src="ix/b-illesztes.js"></script>
 <script defer src="jegyzet.js"></script>
+<script defer src="szerkeszt.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   var ALL = [].concat(window.AV_A||[], window.AV_B||[]);
@@ -451,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function(){
   /* ---- reading pane ---- */
   function show(id, push){
     var r = BY[id]; if(!r) return;
+    if(window.TTE && !TTE.canLeave()) return; // nem mentett szerkesztés
     cur = id;
     if(r.g!==group && !filter){ group=r.g; syncTabs(); }
     document.documentElement.style.setProperty('--acc', 'var(--acc-'+r.g.toLowerCase()+')');
@@ -603,6 +619,13 @@ document.addEventListener('DOMContentLoaded', function(){
     else if(dx < -60 && s.side) hideSide();
   }, { passive: true });
   $('#notebtn').addEventListener('click', function(){ if(window.TTN) TTN.pick(); });
+  $('#editbtn').addEventListener('click', function(){ if(window.TTE) TTE.start(); });
+  if(window.TTE) TTE.init({
+    record: function(){ return BY[cur]; },
+    doc: function(){ return doc; },
+    rerender: function(){ show(cur, false); },
+    go: function(id){ if(!BY[id]) return false; show(id); return cur === id; }
+  });
 
   /* theme toggle */
   $('#theme').addEventListener('click', function(){

@@ -85,7 +85,20 @@
     var a = anchors(z[1]);
     if (a[n.i] && fp(a[n.i]) === n.fp) return a[n.i];
     for (var k = 0; k < a.length; k++) if (n.fp && fp(a[k]) === n.fp) return a[k];
+    // a szövegrészt azóta szerkesztették (pl. elírás javítása): a leghasonlóbb szövegrész, ha elég közeli
+    var best = null, bs = 0;
+    if (n.fp) for (k = 0; k < a.length; k++) { var sc = sim(fp(a[k]), n.fp) - Math.min(0.1, Math.abs(k - n.i) * 0.01); if (sc > bs) { bs = sc; best = a[k]; } }
+    if (best && bs >= 0.6) { n.fp = fp(best); n.i = a.indexOf(best); store(n, function () { /* a horgony frissítve */ }); return best; }
     return null;
+  }
+  // Dice-együttható a karakterpárokon (0…1)
+  function sim(x, y) {
+    if (x === y) return 1;
+    if (x.length < 2 || y.length < 2) return 0;
+    var m = {}, i, hit = 0;
+    for (i = 0; i < x.length - 1; i++) { var p = x.substr(i, 2); m[p] = (m[p] || 0) + 1; }
+    for (i = 0; i < y.length - 1; i++) { var q = y.substr(i, 2); if (m[q] > 0) { m[q]--; hit++; } }
+    return 2 * hit / (x.length + y.length - 2);
   }
   function place(el, box) {
     if (el.tagName === 'DT' && el.nextElementSibling && el.nextElementSibling.tagName === 'DD') el = el.nextElementSibling;
