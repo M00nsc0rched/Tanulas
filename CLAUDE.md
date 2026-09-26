@@ -48,6 +48,16 @@ Ha a felhasználó azt kéri, hogy „frissítsd / szinkronizáld a Tanulás app
   dokumentum iframe-jébe, ha valamit csak az appban akarunk mutatni. A korábbi `ext/fe-c/fe-c.js` a tételtárba költözött
   (`ix/fec.js`), az `ext/` mappa megszűnt.
 
+## Tételtár olvasófelülete (`docs/QtEMzHsA3gHsg8AHwR6rGC/index.html`, a felhasználó kérésére, 2026-09-26)
+- Oldalsáv: a ☰ gomb széles kijelzőn (≥ 861 px) be-/kicsukja (`body.noside`, `st.noside` az `av.v1` localStorage-ban),
+  keskenyen rácsúsztatja; a bal széltől (x < 30 px) jobbra húzás előhozza, az oldalsávon balra húzás elrejti.
+- Folyószöveg sorkizárt, `hyphens:auto` (`<html lang="hu">`); a `.doc` legfeljebb 1240 px széles, kis margóval (22 / 12 px).
+- `jegyzet.js` (`window.TTN`): a ✎ gombbal egy szövegrészhez (p, li, h3/h4, ábra, táblázat, kérdés…) rajz vagy kézírás
+  fűzhető (Apple Pencil nyomásérzékenyen, tenyérkiszűréssel; toll, színek, kiemelő, radír, visszavonás). Tárolás csak az
+  eszközön: IndexedDB `tt-jegyzet` / `notes` (tartalék: localStorage `tt-jegyzet.<tétel>`). Horgony: zóna (`s` = összefoglaló,
+  `b0…` = a `.bodyhtml` részek) + sorszám + szövegujjlenyomat; ha a szöveg megváltozik, a jegyzet a tétel végére kerül.
+  A `show()` az `AVIX.show` után `TTN.render(r, doc)`-ot hív. **Szinkronkor ezek a módosítások is a claude.ai-os oldalon vannak.**
+
 ## Tételtár interaktív ábrái (`docs/QtEMzHsA3gHsg8AHwR6rGC/ix/`)
 - A tételtár része (a claude.ai-os eredetiben is benne van), az `index.html` tölti be a `data-b.js` után:
   `ix/core.js`, `fec.js`, `a-anyag.js`, `a-hegesztes.js`, `a-alakitas.js`, `a-forgacsolas.js`, `a-nc.js`,

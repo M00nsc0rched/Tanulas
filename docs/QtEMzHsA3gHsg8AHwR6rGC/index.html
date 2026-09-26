@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="hu"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Gépész záróvizsga tételtár</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -106,7 +106,7 @@ a{color:var(--acc)}
   border-bottom:1px solid var(--rule);background:var(--surface);
   padding-top:env(safe-area-inset-top,0px);height:calc(50px + env(safe-area-inset-top,0px));
   flex-basis:calc(50px + env(safe-area-inset-top,0px))}
-.menu{display:none;width:32px;height:32px;border:1px solid var(--rule-2);border-radius:6px;
+.menu{display:flex;width:32px;height:32px;border:1px solid var(--rule-2);border-radius:6px;
   align-items:center;justify-content:center}
 .menu svg{width:15px;height:15px}
 .crumb{flex:1;min-width:0;display:flex;align-items:baseline;gap:9px;overflow:hidden}
@@ -131,7 +131,47 @@ a{color:var(--acc)}
 
 .scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){.scroll{scroll-behavior:auto}}
-.doc{max-width:812px;margin:0 auto;padding:0 24px 96px}
+.doc{max-width:1240px;margin:0 auto;padding:0 22px 96px}
+
+/* ---------- sorkizárt folyószöveg (magyar elválasztással) ---------- */
+.one,.lead,.qbox p,.bodyhtml p,.bodyhtml li,.defbox,.defbox p,details.ask>div,dl.keys dd,ol.skel li span,.ix-lead{
+  text-align:justify;-webkit-hyphens:auto;hyphens:auto}
+figure.figs+p,figure.figs+p em{text-align:center}
+
+/* ---------- oldalsáv becsukása széles kijelzőn ---------- */
+.side{transition:margin-left .22s ease}
+@media (min-width:861px){ body.noside .side{margin-left:-306px} }
+
+/* ---------- saját rajz / kézírás (jegyzet.js) ---------- */
+.tt-note{margin:10px 0 14px;padding:6px 8px 8px;border:1px dashed var(--acc-line);border-radius:9px;
+  background:var(--surface);color:var(--ink);grid-column:1/-1;text-align:left}
+.tt-nh{display:flex;align-items:center;gap:6px;font:600 10.5px var(--mono);letter-spacing:.06em;color:var(--acc);text-transform:uppercase}
+.tt-nh span{flex:1}
+.tt-nh button{font:600 11.5px var(--disp);color:var(--muted);border:1px solid var(--rule-2);border-radius:6px;
+  padding:4px 9px;text-transform:none;letter-spacing:0;background:var(--bg)}
+.tt-nh button.warn{color:#fff;background:#b4451f;border-color:#b4451f}
+.tt-svg{display:block;width:100%;height:auto;margin-top:4px;color:var(--ink)}
+.tt-picking .sum :is(p,li,h4,dt,dd,details.ask,.one,.lead,table.nums):hover,
+.tt-picking .bodyhtml :is(p,li,h3,h4,figure,.tscroll,.defbox):hover{outline:2px dashed var(--acc);outline-offset:3px;border-radius:4px;cursor:copy}
+.tt-banner{position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:70;width:max-content;max-width:min(92vw,560px);
+  display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--ink);color:var(--surface);
+  border-radius:10px;font:13px/1.4 var(--disp);box-shadow:var(--shadow)}
+.tt-banner button{flex:none;padding:6px 12px;border-radius:7px;background:var(--surface);color:var(--ink);font-weight:600}
+.tt-ed{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column}
+.tt-bar{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--rule)}
+.tt-ctx{flex:1 1 100%;font:12px var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tt-tools,.tt-act{display:flex;flex-wrap:wrap;gap:6px}
+.tt-act{margin-left:auto}
+.tt-ed button{min-height:36px;padding:0 11px;border:1px solid var(--rule-2);border-radius:8px;background:var(--bg);
+  font:600 13px var(--disp);color:var(--ink)}
+.tt-ed button[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+.tt-ed button.pri{background:var(--acc);border-color:var(--acc);color:var(--surface)}
+.tt-ed .sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.tt-pad{flex:1;min-height:0;display:flex;align-items:flex-start;justify-content:center;padding:10px;overflow:hidden}
+.tt-sheet{position:relative;flex:none;background-color:var(--surface);border:1px solid var(--rule);border-radius:8px;box-shadow:var(--shadow)}
+.tt-sheet canvas{position:absolute;left:0;top:0}
+.tt-live{touch-action:none;cursor:crosshair}
+.tt-hint{position:absolute;left:0;right:0;top:40%;text-align:center;font:13px var(--disp);color:var(--muted);pointer-events:none}
 
 /* ---------- head of a tétel ---------- */
 .hd{padding-block:34px 0}
@@ -288,8 +328,7 @@ kbd{font-family:var(--mono);font-size:11.5px;background:var(--surface);
   .scrim{display:block;position:fixed;inset:0;z-index:45;background:rgba(10,11,12,.4);
     opacity:0;pointer-events:none;transition:opacity .2s}
   .scrim.on{opacity:1;pointer-events:auto}
-  .menu{display:flex}
-  .doc{padding:0 16px 80px}
+  .doc{padding:0 12px 80px}
   .zero{padding:44px 16px}
   .donebtn span.lab{display:none}
   .donebtn{padding:0 9px}
@@ -329,9 +368,10 @@ kbd{font-family:var(--mono);font-size:11.5px;background:var(--surface);
 
   <main class="main">
     <header class="top">
-      <button class="menu" id="menu" aria-label="Tétellista"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg></button>
+      <button class="menu" id="menu" aria-label="Oldalsáv (tétellista) ki/be" title="Oldalsáv ki/be — vagy húzd a képernyő bal szélétől jobbra"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg></button>
       <div class="crumb"><span class="code" id="ccode"></span><span class="name" id="cname"></span></div>
       <div class="topbtns">
+        <button class="ib" id="notebtn" aria-label="Rajz vagy kézírás beszúrása" title="Rajz vagy kézírás beszúrása egy szövegrészhez"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.2l2.8 2.8-7.6 7.6-3.4.6.6-3.4z"/><path d="M9.4 3.8l2.8 2.8"/></svg></button>
         <button class="donebtn" id="done" aria-pressed="false"><span class="tick"></span><span class="lab">Kész</span></button>
         <button class="ib" id="prev" aria-label="Előző tétel" title="Előző tétel ( [ )"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 4.5 8l5.5 5.5"/></svg></button>
         <button class="ib" id="next" aria-label="Következő tétel" title="Következő tétel ( ] )"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5 11.5 8 6 13.5"/></svg></button>
@@ -356,6 +396,7 @@ kbd{font-family:var(--mono);font-size:11.5px;background:var(--surface);
 <script defer src="ix/b-keszulek.js"></script>
 <script defer src="ix/b-szereles.js"></script>
 <script defer src="ix/b-illesztes.js"></script>
+<script defer src="jegyzet.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   var ALL = [].concat(window.AV_A||[], window.AV_B||[]);
@@ -451,6 +492,7 @@ document.addEventListener('DOMContentLoaded', function(){
     });
     observeLazy(doc);
     if(window.AVIX){ try{ AVIX.show(r, doc); }catch(e){} }
+    if(window.TTN){ try{ TTN.render(r, doc); }catch(e){} }
     var d=$('#done'); d.setAttribute('aria-pressed', st.done[id]?'true':'false');
     var i=ALL.indexOf(r);
     $('#prev').disabled = i<=0; $('#next').disabled = i>=ALL.length-1;
@@ -536,8 +578,31 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function open_(){ $('#side').classList.add('open'); $('#scrim').classList.add('on'); }
   function close(){ $('#side').classList.remove('open'); $('#scrim').classList.remove('on'); }
-  $('#menu').addEventListener('click', open_);
+  /* oldalsáv: széles kijelzőn be-/kicsukható (a hely a szövegé), keskenyen rácsúszik a lapra */
+  var WIDE = window.matchMedia ? matchMedia('(min-width: 861px)') : { matches: true };
+  function setDocked(on){ document.body.classList.toggle('noside', !on); st.noside = !on; save(st); }
+  function showSide(){ if(WIDE.matches) setDocked(true); else open_(); }
+  function hideSide(){ if(WIDE.matches) setDocked(false); else close(); }
+  if(st.noside) document.body.classList.add('noside');
+  $('#menu').addEventListener('click', function(){
+    if(WIDE.matches) setDocked(document.body.classList.contains('noside'));
+    else if($('#side').classList.contains('open')) close(); else open_();
+  });
   $('#scrim').addEventListener('click', close);
+  /* húzás: a bal széltől jobbra → előjön; az oldalsávon balra → eltűnik */
+  var sw = null;
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1 || document.body.classList.contains('tt-editing')){ sw = null; return; }
+    var t = e.touches[0]; sw = { x: t.clientX, y: t.clientY, side: !!(e.target.closest && e.target.closest('#side')) };
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    if(!sw) return;
+    var t = e.changedTouches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y, s = sw; sw = null;
+    if(Math.abs(dy) > Math.abs(dx) * 0.6) return;
+    if(dx > 60 && s.x < 30) showSide();
+    else if(dx < -60 && s.side) hideSide();
+  }, { passive: true });
+  $('#notebtn').addEventListener('click', function(){ if(window.TTN) TTN.pick(); });
 
   /* theme toggle */
   $('#theme').addEventListener('click', function(){
